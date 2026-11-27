@@ -2,9 +2,12 @@
 <html lang="vi">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
   <title>Web POS Chuyên Dụng</title>
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js" type="text/javascript"></script>
   <style>
     * { box-sizing: border-box; font-family: Arial, sans-serif; }
     body { margin: 0; background: #f3f4f6; display: flex; flex-direction: row; min-height: 100vh; }
@@ -15,18 +18,24 @@
     input, select, button { padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; }
     button { cursor: pointer; background: #2563eb; color: #fff; border: none; font-weight: 500; }
     button:hover { opacity: 0.92; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
     .btn-gray { background: #4b5563; }
     .btn-orange { background: #d97706; }
     .btn-teal { background: #0d9488; }
+    .btn-light { background: #e5e7eb; color: #111; }
     .btn-green { background: #16a34a; font-weight: bold; font-size: 15px; padding: 12px; width: 100%; }
     .btn-red { background: #dc2626; padding: 5px 9px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; }
-    .card { background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb; cursor: pointer; transition: 0.15s; }
+    .card { position: relative; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb; cursor: pointer; transition: 0.15s; }
     .card:hover { border-color: #2563eb; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
-    .card h4 { margin: 0 0 4px; font-size: 14px; color: #111827; }
+    .card.out { opacity: 0.55; }
+    .card h4 { margin: 0 0 4px; font-size: 14px; color: #111827; padding-right: 30px; }
     .card .price { color: #2563eb; font-weight: bold; }
     .card .meta { font-size: 11px; color: #6b7280; margin-top: 4px; line-height: 1.4; }
+    .card .btn-edit { position: absolute; top: 6px; right: 6px; background: #f3f4f6; color: #374151; padding: 4px 7px; font-size: 13px; border: 1px solid #e5e7eb; }
+    .card .btn-edit:hover { background: #dbeafe; }
     .badge { background: #fef3c7; color: #92400e; font-size: 10px; padding: 2px 5px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+    .badge-red { background: #fee2e2; color: #991b1b; }
     .cart { flex: 1; overflow-y: auto; border-top: 1px solid #eee; border-bottom: 1px solid #eee; margin: 8px 0; min-height: 180px; }
     .cart-item { padding: 8px 0; border-bottom: 1px dashed #e5e7eb; font-size: 13px; }
     .cart-top { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
@@ -38,9 +47,44 @@
     .profit-box { background: #ecfdf5; color: #065f46; padding: 6px 10px; border-radius: 6px; font-size: 12px; display: flex; justify-content: space-between; }
     .quick-cash { display: flex; gap: 5px; flex-wrap: wrap; }
     .quick-cash button { background: #e5e7eb; color: #111; font-size: 12px; padding: 5px 8px; }
-    #scannerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 999; align-items: center; justify-content: center; }
-    .scanner-box { background: #fff; padding: 16px; border-radius: 10px; width: 92%; max-width: 420px; text-align: center; }
-    #reader { width: 100%; margin: 10px 0; }
+
+    /* Modal chung */
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 900; align-items: center; justify-content: center; padding: 10px; }
+    .modal.show { display: flex; }
+    .modal-box { background: #fff; padding: 16px; border-radius: 10px; width: 100%; max-width: 440px; max-height: 94vh; overflow-y: auto; }
+    .modal-box h3 { margin: 0 0 12px; }
+    #scannerModal { z-index: 1000; background: rgba(0,0,0,0.8); }
+    .scanner-box { text-align: center; }
+    #reader { width: 100%; margin: 10px 0; border-radius: 8px; overflow: hidden; background: #111; min-height: 0; }
+    #reader video { border-radius: 8px; }
+    #readerFile { display: none; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .form-grid .full { grid-column: 1 / -1; }
+    .field label { display: block; font-size: 12px; color: #374151; margin-bottom: 3px; font-weight: bold; }
+    .field input, .field select { width: 100%; }
+    .field .hint { font-size: 11px; color: #6b7280; margin-top: 3px; }
+    .inline { display: flex; gap: 5px; }
+    .inline input { flex: 1; min-width: 0; }
+    .inline button { white-space: nowrap; padding: 8px; }
+    .form-error { color: #dc2626; font-size: 12px; min-height: 16px; margin-top: 8px; }
+    .preview-box { background: #eff6ff; color: #1e40af; font-size: 12px; padding: 7px 10px; border-radius: 6px; margin-top: 10px; }
+    .modal-actions { display: flex; gap: 6px; margin-top: 12px; }
+    .modal-actions .spacer { flex: 1; }
+
+    .perm-panel { text-align: left; background: #fffbeb; border: 1px solid #fde68a; color: #78350f; border-radius: 8px; padding: 10px 12px; font-size: 13px; line-height: 1.5; margin: 8px 0; }
+    .perm-panel.info { background: #eff6ff; border-color: #bfdbfe; color: #1e3a8a; }
+    .perm-panel.error { background: #fef2f2; border-color: #fecaca; color: #7f1d1d; }
+    .perm-panel ol, .perm-panel ul { margin: 6px 0; padding-left: 18px; }
+    .perm-panel b { color: inherit; }
+    .perm-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+    .cam-tools { display: none; gap: 6px; margin-bottom: 8px; }
+    .cam-tools select { flex: 1; min-width: 0; }
+    .scan-status { font-size: 13px; color: #16a34a; margin-bottom: 8px; min-height: 18px; }
+    .scan-status.warn { color: #b45309; }
+    .photo-btn { display: inline-block; background: #0d9488; color: #fff; padding: 8px 10px; border-radius: 6px; font-size: 13px; cursor: pointer; }
+    .photo-btn input { display: none; }
+
     @media print {
       body * { visibility: hidden; }
       #receipt, #receipt * { visibility: visible; }
@@ -129,17 +173,103 @@
     </div>
   </div>
 
+  <!-- Modal Thêm / Sửa sản phẩm -->
+  <div id="productModal" class="modal">
+    <div class="modal-box">
+      <h3 id="pfTitle">Thêm sản phẩm</h3>
+      <div class="form-grid">
+        <div class="field full">
+          <label for="pfName">Tên sản phẩm *</label>
+          <input id="pfName" placeholder="VD: Cà phê sữa đá" />
+        </div>
+        <div class="field full">
+          <label for="pfBarcode">Mã vạch / QR</label>
+          <div class="inline">
+            <input id="pfBarcode" placeholder="Để trống sẽ tự tạo" />
+            <button type="button" id="pfScanBarcode" class="btn-orange" title="Quét mã bằng camera">📷</button>
+            <button type="button" id="pfGenBarcode" class="btn-light" title="Tạo mã ngẫu nhiên">Tạo mã</button>
+          </div>
+        </div>
+        <div class="field">
+          <label for="pfUnit">Đơn vị tính</label>
+          <input id="pfUnit" placeholder="ly, cái, kg..." list="unitList" />
+          <datalist id="unitList">
+            <option value="cái"></option><option value="ly"></option><option value="chai"></option>
+            <option value="hộp"></option><option value="gói"></option><option value="kg"></option><option value="lít"></option>
+          </datalist>
+        </div>
+        <div class="field">
+          <label for="pfCategory">Nhóm hàng</label>
+          <input id="pfCategory" placeholder="Đồ uống, Đồ ăn..." list="categoryList" />
+          <datalist id="categoryList"></datalist>
+        </div>
+        <div class="field">
+          <label for="pfCost">Giá vốn (VNĐ)</label>
+          <input id="pfCost" type="number" min="0" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label for="pfPrice">Giá bán lẻ (VNĐ) *</label>
+          <input id="pfPrice" type="number" min="0" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label for="pfWholesaleQty">Mốc SL mua sỉ</label>
+          <input id="pfWholesaleQty" type="number" min="0" step="any" inputmode="decimal" />
+          <div class="hint">0 = không áp dụng giá sỉ</div>
+        </div>
+        <div class="field">
+          <label for="pfWholesalePrice">Đơn giá sỉ (VNĐ)</label>
+          <input id="pfWholesalePrice" type="number" min="0" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label for="pfStock">Tồn kho hiện tại</label>
+          <input id="pfStock" type="number" min="0" step="any" inputmode="decimal" />
+        </div>
+        <div class="field">
+          <label for="pfStockAdd">Nhập thêm hàng</label>
+          <input id="pfStockAdd" type="number" step="any" inputmode="decimal" placeholder="+ số lượng" />
+          <div class="hint">Cộng dồn vào tồn kho (số âm để trừ)</div>
+        </div>
+      </div>
+      <div id="pfPreview" class="preview-box"></div>
+      <div id="pfError" class="form-error"></div>
+      <div class="modal-actions">
+        <button type="button" id="pfDelete" class="btn-red" style="padding:8px 10px">🗑 Xóa SP</button>
+        <span class="spacer"></span>
+        <button type="button" id="pfCancel" class="btn-light">Hủy</button>
+        <button type="button" id="pfSave">💾 Lưu</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Modal Quét Camera -->
-  <div id="scannerModal">
-    <div class="scanner-box">
-      <h4 style="margin:0 0 8px">Đưa mã vạch / QR vào khung hình</h4>
+  <div id="scannerModal" class="modal">
+    <div class="modal-box scanner-box">
+      <h4 id="scanTitle" style="margin:0 0 8px">Đưa mã vạch / QR vào khung hình</h4>
+
+      <div id="permPanel" class="perm-panel info" style="display:none"></div>
+
+      <div id="camTools" class="cam-tools">
+        <select id="cameraSelect" title="Chọn camera"></select>
+        <button type="button" id="btnSwitchCam" class="btn-light" title="Đổi camera">🔄</button>
+      </div>
+
       <div id="reader"></div>
+      <div id="readerFile"></div>
+
+      <div id="scanStatus" class="scan-status"></div>
+
       <div style="display:flex; gap:6px; margin-bottom:8px;">
-        <input id="manualBarcodeInput" placeholder="Hoặc nhập mã thủ công..." style="flex:1" />
+        <input id="manualBarcodeInput" placeholder="Hoặc nhập mã thủ công..." style="flex:1; min-width:0" />
         <button type="button" id="btnManualAdd">Thêm</button>
       </div>
-      <div id="scanStatus" style="font-size:12px; color:#16a34a; margin-bottom:8px"></div>
-      <button type="button" id="btnCloseScan" class="btn-red">Đóng Camera</button>
+
+      <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap">
+        <label class="photo-btn" title="Chụp ảnh mã vạch – dùng được cả khi không có HTTPS">
+          🖼 Chụp ảnh mã
+          <input type="file" id="photoScanInput" accept="image/*" capture="environment" />
+        </label>
+        <button type="button" id="btnCloseScan" class="btn-red" style="padding:8px 10px">Đóng Camera</button>
+      </div>
     </div>
   </div>
 
@@ -148,10 +278,10 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       const defaultProducts = [
-        { id: 1, barcode: "893001", name: "Cà phê sữa đá", cost: 12000, price: 29000, wholesaleQty: 5, wholesalePrice: 25000, stock: 50 },
-        { id: 2, barcode: "893002", name: "Trà đào cam sả", cost: 15000, price: 35000, wholesaleQty: 5, wholesalePrice: 30000, stock: 40 },
-        { id: 3, barcode: "893003", name: "Bánh mì thịt", cost: 11000, price: 25000, wholesaleQty: 10, wholesalePrice: 22000, stock: 30 },
-        { id: 4, barcode: "893004", name: "Nước suối", cost: 4000, price: 10000, wholesaleQty: 12, wholesalePrice: 8000, stock: 100 }
+        { id: 1, barcode: "893001", name: "Cà phê sữa đá", unit: "ly", category: "Đồ uống", cost: 12000, price: 29000, wholesaleQty: 5, wholesalePrice: 25000, stock: 50 },
+        { id: 2, barcode: "893002", name: "Trà đào cam sả", unit: "ly", category: "Đồ uống", cost: 15000, price: 35000, wholesaleQty: 5, wholesalePrice: 30000, stock: 40 },
+        { id: 3, barcode: "893003", name: "Bánh mì thịt", unit: "ổ", category: "Đồ ăn", cost: 11000, price: 25000, wholesaleQty: 10, wholesalePrice: 22000, stock: 30 },
+        { id: 4, barcode: "893004", name: "Nước suối", unit: "chai", category: "Đồ uống", cost: 4000, price: 10000, wholesaleQty: 12, wholesalePrice: 8000, stock: 100 }
       ];
 
       let products = JSON.parse(localStorage.getItem("pos_products_v3")) || defaultProducts;
@@ -159,9 +289,12 @@
       let cart = [];
       let currentFinalTotal = 0;
       let currentProfit = 0;
-      let html5QrCode = null;
 
+      const $ = (id) => document.getElementById(id);
       const formatMoney = (n) => Math.round(n).toLocaleString("vi-VN") + " đ";
+      const esc = (s) => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+      const num = (v, d = 0) => { const n = parseFloat(v); return isNaN(n) ? d : n; };
+      const findProd = (id) => products.find(p => p.id === id);
 
       function saveStorage() {
         localStorage.setItem("pos_products_v3", JSON.stringify(products));
@@ -175,36 +308,47 @@
         return prod.price;
       }
 
+      /* ====================== DANH SÁCH SẢN PHẨM ====================== */
       function renderProducts() {
-        const searchEl = document.getElementById("search");
+        const searchEl = $("search");
         const q = searchEl.value.trim().toLowerCase();
-        const exactBarcode = products.find(p => p.barcode.toLowerCase() === q && q !== "");
+        const exactBarcode = products.find(p => String(p.barcode).toLowerCase() === q && q !== "");
         if (exactBarcode) {
           addToCart(exactBarcode.id);
           searchEl.value = "";
           return renderProducts();
         }
 
-        const grid = document.getElementById("productGrid");
-        const filtered = products.filter(p => p.name.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q));
+        const grid = $("productGrid");
+        const filtered = products.filter(p =>
+          p.name.toLowerCase().includes(q) ||
+          String(p.barcode).toLowerCase().includes(q) ||
+          (p.category || "").toLowerCase().includes(q)
+        );
         grid.innerHTML = filtered.map(p => `
-          <div class="card" data-id="${p.id}">
-            <h4>${p.name}</h4>
-            <div class="price">${formatMoney(p.price)}</div>
-            <div class="meta">Kho: ${p.stock} | Mã: ${p.barcode}</div>
+          <div class="card ${p.stock <= 0 ? "out" : ""}" data-id="${p.id}">
+            <button type="button" class="btn-edit" title="Sửa sản phẩm">✏️</button>
+            <h4>${esc(p.name)}</h4>
+            <div class="price">${formatMoney(p.price)}${p.unit ? ` <span style="font-weight:normal;color:#6b7280;font-size:12px">/ ${esc(p.unit)}</span>` : ""}</div>
+            <div class="meta">Kho: ${p.stock}${p.unit ? " " + esc(p.unit) : ""} | Mã: ${esc(p.barcode)}${p.category ? `<br>Nhóm: ${esc(p.category)}` : ""}</div>
+            ${p.stock <= 0 ? `<div class="badge badge-red">Hết hàng</div>` : ""}
             ${p.wholesaleQty ? `<div class="badge">Mua ≥${p.wholesaleQty}: ${formatMoney(p.wholesalePrice)}</div>` : ""}
           </div>
-        `).join("");
+        `).join("") || `<div style="color:#6b7280;font-size:13px">Không tìm thấy sản phẩm.</div>`;
 
         grid.querySelectorAll(".card").forEach(card => {
-          card.addEventListener("click", () => {
-            addToCart(Number(card.getAttribute("data-id")));
+          const id = Number(card.getAttribute("data-id"));
+          card.addEventListener("click", () => addToCart(id));
+          card.querySelector(".btn-edit").addEventListener("click", (e) => {
+            e.stopPropagation();
+            openProductForm(id);
           });
         });
       }
 
+      /* ====================== GIỎ HÀNG ====================== */
       function addToCart(id) {
-        const prod = products.find(p => p.id === id);
+        const prod = findProd(id);
         if (!prod || prod.stock <= 0) {
           alert("Sản phẩm đã hết hàng!");
           return;
@@ -217,15 +361,15 @@
           }
           existing.qty = +(existing.qty + 1).toFixed(2);
         } else {
-          cart.push({ id: prod.id, name: prod.name, cost: prod.cost || 0, qty: 1, itemDiscountPercent: 0 });
+          cart.push({ id: prod.id, qty: 1, itemDiscountPercent: 0 });
         }
         renderCart();
       }
 
       function updateQty(id, val) {
         const qty = parseFloat(val);
-        const prod = products.find(p => p.id === id);
-        if (isNaN(qty) || qty <= 0) {
+        const prod = findProd(id);
+        if (isNaN(qty) || qty <= 0 || !prod) {
           cart = cart.filter(c => c.id !== id);
         } else if (qty > prod.stock) {
           alert("Vượt quá tồn kho!");
@@ -245,9 +389,12 @@
       }
 
       function renderCart() {
-        const list = document.getElementById("cartList");
+        // Bỏ các dòng có sản phẩm đã bị xóa
+        cart = cart.filter(item => findProd(item.id));
+
+        const list = $("cartList");
         list.innerHTML = cart.map(item => {
-          const prod = products.find(p => p.id === item.id);
+          const prod = findProd(item.id);
           const unitPrice = getEffectiveUnitPrice(prod, item.qty);
           const isWholesale = unitPrice < prod.price;
           const lineTotal = unitPrice * item.qty * (1 - item.itemDiscountPercent / 100);
@@ -256,7 +403,7 @@
             <div class="cart-item" data-id="${item.id}">
               <div class="cart-top">
                 <div style="flex:1">
-                  <strong>${item.name}</strong>
+                  <strong>${esc(prod.name)}</strong>
                   ${isWholesale ? `<span class="badge">Giá sỉ</span>` : ""}
                 </div>
                 <input type="number" step="0.1" class="qty-input" value="${item.qty}" title="Số lượng" />
@@ -264,7 +411,7 @@
                 <button type="button" class="btn-red btn-remove">×</button>
               </div>
               <div class="cart-sub">
-                <span>Đơn giá: ${formatMoney(unitPrice)}</span>
+                <span>Đơn giá: ${formatMoney(unitPrice)}${prod.unit ? " / " + esc(prod.unit) : ""}</span>
                 <span>CK dòng (%): <input type="number" min="0" max="100" class="disc-input" value="${item.itemDiscountPercent}" style="width:48px; padding:2px" /></span>
               </div>
             </div>
@@ -286,24 +433,24 @@
         let totalCost = 0;
 
         cart.forEach(item => {
-          const prod = products.find(p => p.id === item.id);
+          const prod = findProd(item.id);
           const unitPrice = getEffectiveUnitPrice(prod, item.qty);
           const lineTotal = unitPrice * item.qty * (1 - item.itemDiscountPercent / 100);
           subTotal += lineTotal;
-          totalCost += (item.cost || 0) * item.qty;
+          totalCost += (prod.cost || 0) * item.qty;
         });
 
-        const discountVal = parseFloat(document.getElementById("discountVal").value) || 0;
-        const discountType = document.getElementById("discountType").value;
+        const discountVal = parseFloat($("discountVal").value) || 0;
+        const discountType = $("discountType").value;
         const orderDiscount = discountType === "percent" ? subTotal * (discountVal / 100) : discountVal;
 
         let afterDiscount = Math.max(0, subTotal - orderDiscount);
-        const vatEnabled = document.getElementById("vatToggle").checked;
-        const vatRate = parseFloat(document.getElementById("vatRate").value) || 0;
+        const vatEnabled = $("vatToggle").checked;
+        const vatRate = parseFloat($("vatRate").value) || 0;
         const vatAmount = vatEnabled ? afterDiscount * (vatRate / 100) : 0;
 
         let total = afterDiscount + vatAmount;
-        if (document.getElementById("roundToggle").checked) {
+        if ($("roundToggle").checked) {
           total = Math.round(total / 1000) * 1000;
         }
 
@@ -311,24 +458,24 @@
         const margin = afterDiscount > 0 ? ((currentProfit / afterDiscount) * 100).toFixed(1) : 0;
 
         currentFinalTotal = total;
-        document.getElementById("subTotal").innerText = formatMoney(subTotal);
-        document.getElementById("finalTotal").innerText = formatMoney(total);
-        document.getElementById("grossProfit").innerText = `${formatMoney(currentProfit)} (${margin}%)`;
+        $("subTotal").innerText = formatMoney(subTotal);
+        $("finalTotal").innerText = formatMoney(total);
+        $("grossProfit").innerText = `${formatMoney(currentProfit)} (${margin}%)`;
         calculateChange();
       }
 
       function calculateChange() {
-        const cash = parseFloat(document.getElementById("customerCash").value) || 0;
+        const cash = parseFloat($("customerCash").value) || 0;
         const change = cash - currentFinalTotal;
-        document.getElementById("changeAmount").innerText = change >= 0
+        $("changeAmount").innerText = change >= 0
           ? formatMoney(change)
           : "Thiếu " + formatMoney(Math.abs(change));
       }
 
       function clearCart() {
         cart = [];
-        document.getElementById("discountVal").value = 0;
-        document.getElementById("customerCash").value = 0;
+        $("discountVal").value = 0;
+        $("customerCash").value = 0;
         renderCart();
       }
 
@@ -337,18 +484,18 @@
           alert("Giỏ hàng đang trống!");
           return;
         }
-        const cash = parseFloat(document.getElementById("customerCash").value) || 0;
+        const cash = parseFloat($("customerCash").value) || 0;
         if (cash < currentFinalTotal) {
           alert("Tiền khách đưa chưa đủ!");
           return;
         }
 
         const orderItems = cart.map(item => {
-          const prod = products.find(p => p.id === item.id);
+          const prod = findProd(item.id);
           const unitPrice = getEffectiveUnitPrice(prod, item.qty);
           const lineTotal = unitPrice * item.qty * (1 - item.itemDiscountPercent / 100);
-          if (prod) prod.stock = Math.max(0, +(prod.stock - item.qty).toFixed(2));
-          return { name: item.name, qty: item.qty, unitPrice, discount: item.itemDiscountPercent, lineTotal };
+          prod.stock = Math.max(0, +(prod.stock - item.qty).toFixed(2));
+          return { name: prod.name, unit: prod.unit || "", qty: item.qty, unitPrice, discount: item.itemDiscountPercent, lineTotal };
         });
 
         const order = {
@@ -363,12 +510,12 @@
         orders.push(order);
         saveStorage();
 
-        const receipt = document.getElementById("receipt");
+        const receipt = $("receipt");
         receipt.style.display = "block";
         receipt.innerHTML = `
           <h3 style="text-align:center;margin:0">HÓA ĐƠN BÁN HÀNG</h3>
           <p style="text-align:center;margin:4px 0">Mã: ${order.id} - ${order.time}</p><hr/>
-          ${order.items.map(i => `<div>${i.name} x${i.qty} (${formatMoney(i.unitPrice)}) = ${formatMoney(i.lineTotal)}</div>`).join("")}
+          ${order.items.map(i => `<div>${esc(i.name)} x${i.qty}${i.unit ? " " + esc(i.unit) : ""} (${formatMoney(i.unitPrice)}) = ${formatMoney(i.lineTotal)}</div>`).join("")}
           <hr/>
           <div><strong>Tổng cộng: ${formatMoney(order.total)}</strong></div>
           <div>Khách đưa: ${formatMoney(order.cash)}</div>
@@ -381,72 +528,412 @@
         renderProducts();
       }
 
-      function addNewProduct() {
-        const name = prompt("Tên sản phẩm:");
-        if (!name) return;
-        const cost = parseFloat(prompt("Giá vốn (VNĐ):") || "0");
-        const price = parseFloat(prompt("Giá bán lẻ (VNĐ):") || "0");
-        const wholesaleQty = parseFloat(prompt("Mốc số lượng mua sỉ (nhập 0 nếu không áp dụng):") || "0");
-        const wholesalePrice = wholesaleQty > 0 ? parseFloat(prompt("Đơn giá sỉ (VNĐ):") || price) : 0;
-        const stock = parseFloat(prompt("Số lượng tồn kho:") || "0");
-        const barcode = prompt("Mã vạch / QR (để trống tự tạo):") || Date.now().toString().slice(-6);
+      /* ====================== THÊM / SỬA SẢN PHẨM ====================== */
+      let editingId = null;
 
-        products.push({ id: Date.now(), name, cost, price, wholesaleQty, wholesalePrice, stock, barcode });
-        saveStorage();
-        renderProducts();
+      function genBarcode() {
+        let code;
+        do { code = "2" + String(Date.now()).slice(-7) + Math.floor(Math.random() * 10); }
+        while (products.some(p => String(p.barcode) === code));
+        return code;
       }
 
+      function refreshCategoryList() {
+        const cats = [...new Set(products.map(p => p.category).filter(Boolean))];
+        $("categoryList").innerHTML = cats.map(c => `<option value="${esc(c)}"></option>`).join("");
+      }
+
+      function openProductForm(id = null, presetBarcode = "") {
+        editingId = id;
+        const p = id != null ? findProd(id) : null;
+        $("pfTitle").innerText = p ? "Sửa sản phẩm" : "Thêm sản phẩm mới";
+        $("pfName").value = p ? p.name : "";
+        $("pfBarcode").value = p ? p.barcode : presetBarcode;
+        $("pfUnit").value = p ? (p.unit || "") : "";
+        $("pfCategory").value = p ? (p.category || "") : "";
+        $("pfCost").value = p ? (p.cost || 0) : "";
+        $("pfPrice").value = p ? p.price : "";
+        $("pfWholesaleQty").value = p ? (p.wholesaleQty || 0) : 0;
+        $("pfWholesalePrice").value = p ? (p.wholesalePrice || 0) : 0;
+        $("pfStock").value = p ? p.stock : 0;
+        $("pfStockAdd").value = "";
+        $("pfDelete").style.display = p ? "inline-block" : "none";
+        $("pfError").innerText = "";
+        refreshCategoryList();
+        updateFormPreview();
+        $("productModal").classList.add("show");
+        setTimeout(() => $("pfName").focus(), 50);
+      }
+
+      function closeProductForm() {
+        $("productModal").classList.remove("show");
+        editingId = null;
+      }
+
+      function updateFormPreview() {
+        const cost = num($("pfCost").value);
+        const price = num($("pfPrice").value);
+        const wQty = num($("pfWholesaleQty").value);
+        const wPrice = num($("pfWholesalePrice").value);
+        const stock = num($("pfStock").value) + num($("pfStockAdd").value);
+        $("pfWholesalePrice").disabled = wQty <= 0;
+
+        const margin = price > 0 ? ((price - cost) / price * 100).toFixed(1) : 0;
+        let html = `Lãi bán lẻ: <b>${formatMoney(price - cost)}</b> (${margin}%)`;
+        if (wQty > 0 && wPrice > 0) {
+          const wMargin = ((wPrice - cost) / wPrice * 100).toFixed(1);
+          html += ` · Lãi giá sỉ: <b>${formatMoney(wPrice - cost)}</b> (${wMargin}%)`;
+        }
+        html += `<br>Tồn kho sau lưu: <b>${Math.max(0, +stock.toFixed(2))}</b> · Giá trị tồn: <b>${formatMoney(cost * Math.max(0, stock))}</b>`;
+        $("pfPreview").innerHTML = html;
+      }
+
+      function saveProductForm() {
+        const err = $("pfError");
+        const name = $("pfName").value.trim();
+        let barcode = $("pfBarcode").value.trim();
+        const cost = num($("pfCost").value);
+        const price = num($("pfPrice").value, NaN);
+        const wholesaleQty = Math.max(0, num($("pfWholesaleQty").value));
+        const wholesalePrice = wholesaleQty > 0 ? num($("pfWholesalePrice").value) : 0;
+        const stock = Math.max(0, +(num($("pfStock").value) + num($("pfStockAdd").value)).toFixed(2));
+
+        if (!name) { err.innerText = "Vui lòng nhập tên sản phẩm."; $("pfName").focus(); return; }
+        if (isNaN(price) || price < 0) { err.innerText = "Giá bán lẻ không hợp lệ."; $("pfPrice").focus(); return; }
+        if (cost < 0) { err.innerText = "Giá vốn không được âm."; return; }
+        if (wholesaleQty > 0 && wholesalePrice <= 0) { err.innerText = "Đã đặt mốc sỉ thì cần nhập đơn giá sỉ."; $("pfWholesalePrice").focus(); return; }
+        if (!barcode) barcode = genBarcode();
+        const dup = products.find(p => String(p.barcode).toLowerCase() === barcode.toLowerCase() && p.id !== editingId);
+        if (dup) { err.innerText = `Mã "${barcode}" đã được dùng cho "${dup.name}".`; $("pfBarcode").focus(); return; }
+
+        if (price > 0 && cost > price && !confirm("Giá vốn đang cao hơn giá bán (bán lỗ). Vẫn lưu?")) return;
+
+        const data = {
+          name, barcode,
+          unit: $("pfUnit").value.trim(),
+          category: $("pfCategory").value.trim(),
+          cost, price, wholesaleQty, wholesalePrice, stock
+        };
+
+        if (editingId != null) {
+          Object.assign(findProd(editingId), data);
+          // Giảm SL trong giỏ nếu tồn kho mới thấp hơn
+          const item = cart.find(c => c.id === editingId);
+          if (item && item.qty > stock) {
+            if (stock <= 0) cart = cart.filter(c => c.id !== editingId);
+            else item.qty = stock;
+          }
+        } else {
+          products.push({ id: Date.now(), ...data });
+        }
+        saveStorage();
+        closeProductForm();
+        renderProducts();
+        renderCart();
+      }
+
+      function deleteProduct() {
+        if (editingId == null) return;
+        const p = findProd(editingId);
+        if (!confirm(`Xóa sản phẩm "${p.name}"? Thao tác này không hoàn tác được.\n(Các đơn hàng cũ vẫn được giữ nguyên.)`)) return;
+        products = products.filter(x => x.id !== editingId);
+        cart = cart.filter(c => c.id !== editingId);
+        saveStorage();
+        closeProductForm();
+        renderProducts();
+        renderCart();
+      }
+
+      /* ====================== BÁO CÁO ====================== */
       function showDailyReport() {
         const today = new Date().toLocaleDateString("vi-VN");
         const todayOrders = orders.filter(o => o.time.includes(today));
         const revenue = todayOrders.reduce((s, o) => s + o.total, 0);
         const profit = todayOrders.reduce((s, o) => s + (o.profit || 0), 0);
-        alert("Báo cáo hôm nay (" + today + "):\n- Số đơn: " + todayOrders.length + "\n- Doanh thu: " + formatMoney(revenue) + "\n- Lãi gộp ước tính: " + formatMoney(profit));
+        const lowStock = products.filter(p => p.stock <= 5).map(p => `  • ${p.name}: ${p.stock}`).join("\n");
+        alert("Báo cáo hôm nay (" + today + "):\n- Số đơn: " + todayOrders.length + "\n- Doanh thu: " + formatMoney(revenue) + "\n- Lãi gộp ước tính: " + formatMoney(profit) + (lowStock ? "\n\nSắp hết hàng (≤5):\n" + lowStock : ""));
+      }
+
+      /* ====================== CAMERA & QUYỀN TRUY CẬP ====================== */
+      let html5QrCode = null;
+      let scanTarget = "cart";       // "cart" = thêm vào giỏ, "form" = điền mã vào form SP
+      let cameras = [];
+      let lastScan = { code: "", t: 0 };
+
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      const isInAppBrowser = /FBAN|FBAV|Instagram|Zalo|Line\/|TikTok|MicroMessenger/i.test(navigator.userAgent);
+
+      function setStatus(text, warn = false) {
+        const el = $("scanStatus");
+        el.innerHTML = text;
+        el.classList.toggle("warn", warn);
+      }
+
+      function showPanel(html, type = "info") {
+        const el = $("permPanel");
+        el.className = "perm-panel " + type;
+        el.innerHTML = html;
+        el.style.display = "block";
+      }
+      function hidePanel() { $("permPanel").style.display = "none"; }
+
+      function denyGuide() {
+        const ios = `<b>iPhone / iPad (Safari):</b>
+          <ol>
+            <li>Chạm biểu tượng <b>aA</b> trên thanh địa chỉ → <b>Cài đặt trang web</b> → <b>Camera</b> → chọn <b>Cho phép</b>.</li>
+            <li>Hoặc vào <b>Cài đặt</b> → <b>Safari</b> → <b>Camera</b> → <b>Cho phép</b>.</li>
+            <li>Nếu dùng Chrome trên iPhone: <b>Cài đặt</b> → <b>Chrome</b> → bật <b>Camera</b>.</li>
+          </ol>`;
+        const android = `<b>Android (Chrome):</b>
+          <ol>
+            <li>Chạm biểu tượng <b>ổ khóa / cài đặt</b> bên trái địa chỉ web → <b>Quyền</b> → <b>Camera</b> → <b>Cho phép</b>.</li>
+            <li>Nếu vẫn bị chặn: <b>Cài đặt máy</b> → <b>Ứng dụng</b> → <b>Chrome</b> → <b>Quyền</b> → <b>Camera</b> → Cho phép.</li>
+          </ol>`;
+        return (isIOS ? ios : android) + `Sau đó tải lại trang hoặc bấm <b>Thử lại</b>.`;
+      }
+
+      function checkCameraEnvironment() {
+        if (location.protocol === "file:") return "file";
+        if (!window.isSecureContext) return "insecure";
+        if (isInAppBrowser) return "inapp";
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) return "unsupported";
+        if (typeof Html5Qrcode === "undefined") return "nolib";
+        return "ok";
+      }
+
+      function showEnvProblem(reason) {
+        const photoNote = `<br>👉 Trong lúc chờ, bạn vẫn có thể bấm <b>🖼 Chụp ảnh mã</b> bên dưới hoặc nhập mã thủ công.`;
+        const msgs = {
+          file: `<b>Đang mở file trực tiếp (file://).</b> Trình duyệt điện thoại không cho dùng camera ở chế độ này.<br>Hãy đưa file lên hosting có <b>HTTPS</b> rồi mở bằng địa chỉ https://…`,
+          insecure: `<b>Camera bị chặn vì trang đang chạy qua HTTP.</b><br>Trình duyệt chỉ cho dùng camera trên <b>HTTPS</b> (hoặc localhost).
+            <ul>
+              <li>Plesk: <b>Websites & Domains</b> → <b>SSL/TLS Certificates</b> → cài <b>Let's Encrypt</b> → bật chuyển hướng HTTP → HTTPS.</li>
+              <li>Sau đó mở lại bằng: <b>https://${esc(location.host)}${esc(location.pathname)}</b></li>
+            </ul>`,
+          inapp: `<b>Bạn đang mở trong trình duyệt của ứng dụng (Zalo / Facebook...).</b> Trình duyệt này thường chặn camera.<br>Bấm menu <b>⋯</b> → <b>Mở bằng trình duyệt</b> (Safari / Chrome) rồi thử lại.
+            <div class="perm-actions"><button type="button" id="btnForceTry" class="btn-light">Vẫn thử bật camera</button></div>`,
+          unsupported: `<b>Trình duyệt này không hỗ trợ camera.</b> Hãy dùng Chrome (Android) hoặc Safari (iPhone) bản mới.`,
+          nolib: `<b>Không tải được thư viện quét mã.</b> Kiểm tra kết nối mạng rồi tải lại trang.`
+        };
+        showPanel(msgs[reason] + photoNote, reason === "inapp" ? "info" : "error");
+        setStatus("");
+        const forceBtn = $("btnForceTry");
+        if (forceBtn) forceBtn.addEventListener("click", () => { hidePanel(); requestCameraPermission(); });
+      }
+
+      async function getPermissionState() {
+        try {
+          if (navigator.permissions && navigator.permissions.query) {
+            const r = await navigator.permissions.query({ name: "camera" });
+            return r.state; // granted | denied | prompt
+          }
+        } catch (e) {}
+        return localStorage.getItem("pos_cam_granted") === "1" ? "granted" : "prompt";
+      }
+
+      function showPermissionPrompt() {
+        showPanel(`
+          📷 <b>Ứng dụng cần quyền dùng camera</b> để quét mã vạch / QR.<br>
+          Bấm nút bên dưới, khi trình duyệt hỏi hãy chọn <b>Cho phép</b>${isIOS ? " (Allow)" : ""}.
+          <div class="perm-actions">
+            <button type="button" id="btnGrantCam" class="btn-orange">✅ Cho phép dùng camera</button>
+          </div>
+          <div style="font-size:11px;margin-top:6px;opacity:.8">Hình ảnh chỉ xử lý trên máy bạn, không gửi đi đâu.</div>
+        `, "info");
+        setStatus("");
+        $("btnGrantCam").addEventListener("click", requestCameraPermission);
+      }
+
+      async function openScanner(target = "cart") {
+        scanTarget = target;
+        $("scanTitle").innerText = target === "form" ? "Quét mã cho sản phẩm" : "Đưa mã vạch / QR vào khung hình";
+        $("scannerModal").classList.add("show");
+        $("manualBarcodeInput").value = "";
+        $("camTools").style.display = "none";
+        hidePanel();
+
+        const env = checkCameraEnvironment();
+        if (env !== "ok") { showEnvProblem(env); return; }
+
+        const state = await getPermissionState();
+        if (state === "granted") {
+          startCamera();
+        } else if (state === "denied") {
+          showPanel(`<b>Camera đang bị chặn cho trang này.</b><br>` + denyGuide() +
+            `<div class="perm-actions"><button type="button" id="btnRetryCam" class="btn-orange">Thử lại</button></div>`, "error");
+          $("btnRetryCam").addEventListener("click", requestCameraPermission);
+        } else {
+          showPermissionPrompt();   // Cần thao tác bấm của người dùng (bắt buộc trên iOS)
+        }
+      }
+
+      async function requestCameraPermission() {
+        setStatus("Đang xin quyền camera...");
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: "environment" } }, audio: false });
+          stream.getTracks().forEach(t => t.stop());
+          localStorage.setItem("pos_cam_granted", "1");
+          hidePanel();
+          await startCamera();
+        } catch (err) {
+          handleCameraError(err);
+        }
+      }
+
+      function pickBackCamera(list) {
+        const saved = localStorage.getItem("pos_cam_id");
+        if (saved && list.some(c => c.id === saved)) return saved;
+        const back = list.find(c => /back|rear|environment|sau|后|後/i.test(c.label));
+        return back ? back.id : (list.length ? list[list.length - 1].id : null);
+      }
+
+      async function loadCameras() {
+        try {
+          cameras = await Html5Qrcode.getCameras();
+        } catch (e) { cameras = []; }
+        const sel = $("cameraSelect");
+        sel.innerHTML = cameras.map((c, i) => `<option value="${esc(c.id)}">${esc(c.label || "Camera " + (i + 1))}</option>`).join("");
+        $("camTools").style.display = cameras.length > 1 ? "flex" : "none";
+      }
+
+      async function startCamera(cameraId = null) {
+        hidePanel();
+        setStatus("Đang khởi động camera...");
+        await stopCamera();
+
+        if (!cameras.length) await loadCameras();
+        const chosen = cameraId || pickBackCamera(cameras);
+        if (chosen) $("cameraSelect").value = chosen;
+
+        html5QrCode = new Html5Qrcode("reader", {
+          verbose: false,
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+        });
+        const config = {
+          fps: 10,
+          qrbox: (w, h) => ({
+            width: Math.max(120, Math.floor(Math.min(w * 0.85, 320))),
+            height: Math.max(80, Math.floor(Math.min(h * 0.5, 180)))
+          })
+        };
+        try {
+          await html5QrCode.start(chosen ? { deviceId: { exact: chosen } } : { facingMode: "environment" }, config, onScanSuccess, () => {});
+          setStatus("✓ Camera sẵn sàng – đưa mã vào khung");
+        } catch (err) {
+          // Thử lại với camera sau mặc định nếu deviceId không dùng được
+          if (chosen) {
+            try {
+              await html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess, () => {});
+              setStatus("✓ Camera sẵn sàng – đưa mã vào khung");
+              return;
+            } catch (err2) { err = err2; }
+          }
+          handleCameraError(err);
+        }
+      }
+
+      async function stopCamera() {
+        if (html5QrCode) {
+          try {
+            if (html5QrCode.isScanning) await html5QrCode.stop();
+            html5QrCode.clear();
+          } catch (e) {}
+          html5QrCode = null;
+        }
+      }
+
+      function handleCameraError(err) {
+        const msg = (err && (err.name || err.message)) ? `${err.name || ""} ${err.message || ""}` : String(err);
+        const retryBtn = `<div class="perm-actions"><button type="button" id="btnRetryCam" class="btn-orange">Thử lại</button></div>`;
+        setStatus("");
+        if (/NotAllowed|Permission|denied/i.test(msg)) {
+          localStorage.removeItem("pos_cam_granted");
+          showPanel(`<b>Bạn đã từ chối quyền camera.</b><br>` + denyGuide() + retryBtn, "error");
+        } else if (/NotFound|DevicesNotFound|no camera|Requested device not found/i.test(msg)) {
+          showPanel(`<b>Không tìm thấy camera</b> trên thiết bị này. Hãy dùng <b>nhập mã thủ công</b> hoặc máy quét mã vạch USB.` + retryBtn, "error");
+        } else if (/NotReadable|TrackStart|Could not start|in use/i.test(msg)) {
+          showPanel(`<b>Camera đang bị ứng dụng khác sử dụng</b> (Zalo, Camera, cuộc gọi video...). Hãy đóng ứng dụng đó rồi thử lại.` + retryBtn, "error");
+        } else if (/Overconstrained/i.test(msg)) {
+          localStorage.removeItem("pos_cam_id");
+          showPanel(`<b>Camera đã chọn không khả dụng.</b> Thử lại với camera mặc định.` + retryBtn, "error");
+        } else {
+          showPanel(`<b>Không mở được camera.</b><br><span style="font-size:11px">${esc(msg)}</span>` + retryBtn, "error");
+        }
+        const btn = $("btnRetryCam");
+        if (btn) btn.addEventListener("click", requestCameraPermission);
+      }
+
+      function onScanSuccess(decodedText) {
+        const now = Date.now();
+        if (decodedText === lastScan.code && now - lastScan.t < 1500) return; // chống quét trùng liên tục
+        lastScan = { code: decodedText, t: now };
+        if (navigator.vibrate) navigator.vibrate(100);
+
+        if (scanTarget === "form") {
+          $("pfBarcode").value = decodedText.trim();
+          closeScanner();
+          $("pfError").innerText = "";
+          return;
+        }
+        processBarcode(decodedText);
       }
 
       function processBarcode(code) {
-        const clean = code.trim().toLowerCase();
+        const raw = String(code).trim();
+        const clean = raw.toLowerCase();
         if (!clean) return;
-        const prod = products.find(p => p.barcode.toLowerCase() === clean);
+        if (scanTarget === "form") { onScanSuccess(raw); return; }
+
+        const prod = products.find(p => String(p.barcode).toLowerCase() === clean);
         if (prod) {
           addToCart(prod.id);
-          document.getElementById("scanStatus").innerText = "✓ Đã thêm: " + prod.name;
-          if (navigator.vibrate) navigator.vibrate(100);
+          setStatus("✓ Đã thêm: " + esc(prod.name));
         } else {
-          document.getElementById("scanStatus").innerText = "Mã '" + code + "' chưa có trong danh mục!";
+          setStatus(`Mã '<b>${esc(raw)}</b>' chưa có trong danh mục. <button type="button" id="btnCreateFromScan" class="btn-gray" style="padding:4px 8px;font-size:12px;margin-top:4px">+ Tạo SP với mã này</button>`, true);
+          $("btnCreateFromScan").addEventListener("click", () => {
+            closeScanner();
+            openProductForm(null, raw);
+          });
         }
       }
 
-      function openScanner() {
-        document.getElementById("scannerModal").style.display = "flex";
-        document.getElementById("scanStatus").innerText = "Đang khởi động camera...";
-
-        if (typeof Html5Qrcode === "undefined") {
-          document.getElementById("scanStatus").innerText = "Không tải được thư viện camera. Vui lòng nhập mã thủ công bên trên.";
-          return;
+      async function scanFromPhoto(file) {
+        if (!file) return;
+        if (typeof Html5Qrcode === "undefined") { setStatus("Không tải được thư viện quét mã.", true); return; }
+        setStatus("Đang đọc mã từ ảnh...");
+        const fileScanner = new Html5Qrcode("readerFile", { verbose: false });
+        try {
+          const text = await fileScanner.scanFile(file, false);
+          lastScan = { code: "", t: 0 };
+          onScanSuccess(text);
+        } catch (e) {
+          setStatus("Không đọc được mã trong ảnh. Hãy chụp gần, rõ nét, đủ sáng và để mã nằm ngang.", true);
+        } finally {
+          try { fileScanner.clear(); } catch (e) {}
+          $("photoScanInput").value = "";
         }
-
-        html5QrCode = new Html5Qrcode("reader");
-        html5QrCode.start(
-          { facingMode: "environment" },
-          { fps: 10, qrbox: { width: 250, height: 150 } },
-          (decodedText) => processBarcode(decodedText),
-          () => {}
-        ).catch(err => {
-          document.getElementById("scanStatus").innerText = "Không mở được camera (Cần HTTPS hoặc cấp quyền camera): " + err;
-        });
       }
 
-      function closeScanner() {
-        if (html5QrCode) {
-          html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
-          html5QrCode = null;
-        }
-        document.getElementById("scannerModal").style.display = "none";
+      async function closeScanner() {
+        await stopCamera();
+        $("scannerModal").classList.remove("show");
+        hidePanel();
+        setStatus("");
       }
 
+      // Tự tắt camera khi chuyển tab / khóa màn hình để giải phóng camera
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden && html5QrCode) {
+          stopCamera();
+          setStatus("Camera đã tạm dừng. <button type='button' id='btnResumeCam' style='padding:4px 8px;font-size:12px'>Bật lại</button>", true);
+          const b = $("btnResumeCam");
+          if (b) b.addEventListener("click", () => startCamera($("cameraSelect").value || null));
+        }
+      });
+
+      /* ====================== XUẤT CSV ====================== */
       function downloadCSV(filename, rows) {
-        const csvContent = "\uFEFF" + rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+        const csvContent = "﻿" + rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
         const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
         const link = document.createElement("a");
         link.href = URL.createObjectURL(blob);
@@ -473,45 +960,74 @@
 
       function exportStockCSV() {
         const rows = [
-          ["Mã vạch/QR", "Tên sản phẩm", "Giá vốn", "Giá bán lẻ", "Mốc SL sỉ", "Giá sỉ", "Tồn kho hiện tại", "Giá trị tồn kho"]
+          ["Mã vạch/QR", "Tên sản phẩm", "Nhóm hàng", "Đơn vị", "Giá vốn", "Giá bán lẻ", "Mốc SL sỉ", "Giá sỉ", "Tồn kho hiện tại", "Giá trị tồn kho"]
         ];
         products.forEach(p => {
-          rows.push([p.barcode, p.name, p.cost || 0, p.price, p.wholesaleQty || 0, p.wholesalePrice || 0, p.stock, (p.cost || 0) * p.stock]);
+          rows.push([p.barcode, p.name, p.category || "", p.unit || "", p.cost || 0, p.price, p.wholesaleQty || 0, p.wholesalePrice || 0, p.stock, (p.cost || 0) * p.stock]);
         });
         downloadCSV("Bao_cao_ton_kho_" + new Date().toISOString().slice(0, 10) + ".csv", rows);
       }
 
-      // Gắn sự kiện cho toàn bộ nút và ô nhập
-      document.getElementById("search").addEventListener("input", renderProducts);
-      document.getElementById("btnScan").addEventListener("click", openScanner);
-      document.getElementById("btnCloseScan").addEventListener("click", closeScanner);
-      document.getElementById("btnManualAdd").addEventListener("click", () => {
-        const input = document.getElementById("manualBarcodeInput");
+      /* ====================== GẮN SỰ KIỆN ====================== */
+      $("search").addEventListener("input", renderProducts);
+      $("btnScan").addEventListener("click", () => openScanner("cart"));
+      $("btnCloseScan").addEventListener("click", closeScanner);
+      $("btnManualAdd").addEventListener("click", () => {
+        const input = $("manualBarcodeInput");
         processBarcode(input.value);
         input.value = "";
       });
-      document.getElementById("btnAddProd").addEventListener("click", addNewProduct);
-      document.getElementById("btnExportOrders").addEventListener("click", exportOrdersCSV);
-      document.getElementById("btnExportStock").addEventListener("click", exportStockCSV);
-      document.getElementById("btnReport").addEventListener("click", showDailyReport);
-      document.getElementById("btnClearCart").addEventListener("click", clearCart);
-      document.getElementById("discountVal").addEventListener("input", calculate);
-      document.getElementById("discountType").addEventListener("change", calculate);
-      document.getElementById("vatToggle").addEventListener("change", calculate);
-      document.getElementById("vatRate").addEventListener("input", calculate);
-      document.getElementById("roundToggle").addEventListener("change", calculate);
-      document.getElementById("customerCash").addEventListener("input", calculateChange);
-      document.getElementById("btnExactCash").addEventListener("click", () => {
-        document.getElementById("customerCash").value = currentFinalTotal;
+      $("manualBarcodeInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { $("btnManualAdd").click(); }
+      });
+      $("photoScanInput").addEventListener("change", (e) => scanFromPhoto(e.target.files[0]));
+      $("cameraSelect").addEventListener("change", (e) => {
+        localStorage.setItem("pos_cam_id", e.target.value);
+        startCamera(e.target.value);
+      });
+      $("btnSwitchCam").addEventListener("click", () => {
+        if (cameras.length < 2) return;
+        const idx = cameras.findIndex(c => c.id === $("cameraSelect").value);
+        const next = cameras[(idx + 1) % cameras.length].id;
+        localStorage.setItem("pos_cam_id", next);
+        startCamera(next);
+      });
+
+      $("btnAddProd").addEventListener("click", () => openProductForm(null));
+      $("pfCancel").addEventListener("click", closeProductForm);
+      $("pfSave").addEventListener("click", saveProductForm);
+      $("pfDelete").addEventListener("click", deleteProduct);
+      $("pfGenBarcode").addEventListener("click", () => { $("pfBarcode").value = genBarcode(); });
+      $("pfScanBarcode").addEventListener("click", () => openScanner("form"));
+      ["pfCost", "pfPrice", "pfWholesaleQty", "pfWholesalePrice", "pfStock", "pfStockAdd"].forEach(id =>
+        $(id).addEventListener("input", updateFormPreview)
+      );
+      $("productModal").addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && e.target.tagName === "INPUT") saveProductForm();
+        if (e.key === "Escape") closeProductForm();
+      });
+
+      $("btnExportOrders").addEventListener("click", exportOrdersCSV);
+      $("btnExportStock").addEventListener("click", exportStockCSV);
+      $("btnReport").addEventListener("click", showDailyReport);
+      $("btnClearCart").addEventListener("click", clearCart);
+      $("discountVal").addEventListener("input", calculate);
+      $("discountType").addEventListener("change", calculate);
+      $("vatToggle").addEventListener("change", calculate);
+      $("vatRate").addEventListener("input", calculate);
+      $("roundToggle").addEventListener("change", calculate);
+      $("customerCash").addEventListener("input", calculateChange);
+      $("btnExactCash").addEventListener("click", () => {
+        $("customerCash").value = currentFinalTotal;
         calculateChange();
       });
       document.querySelectorAll(".cash-preset").forEach(btn => {
         btn.addEventListener("click", () => {
-          document.getElementById("customerCash").value = Number(btn.getAttribute("data-amount"));
+          $("customerCash").value = Number(btn.getAttribute("data-amount"));
           calculateChange();
         });
       });
-      document.getElementById("btnCheckout").addEventListener("click", checkout);
+      $("btnCheckout").addEventListener("click", checkout);
 
       renderProducts();
       renderCart();
