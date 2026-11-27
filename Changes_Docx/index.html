@@ -1,1 +1,787 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyển Đổi Đa Định Dạng Sang Word (.DOCX)</title>
+    <!-- Thư viện đọc PDF, Excel, Markdown, DOCX và tạo DOCX trực tiếp trên trình duyệt -->
+    <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --word-blue: #185abd;
+            --word-blue-dark: #103f91;
+            --danger: #ef4444;
+            --bg-gradient: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 740px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px -15px rgba(24, 90, 189, 0.15), 0 0 1px 1px rgba(0, 0, 0, 0.03);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        /* Vùng chọn & kéo thả file */
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #93c5fd;
+            border-radius: 16px;
+            padding: 45px 25px;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            background-color: #eff6ff;
+            border-color: var(--word-blue);
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            font-size: 38px;
+            margin-bottom: 12px;
+        }
+
+        .upload-area strong {
+            font-size: 16px;
+            color: var(--word-blue);
+            margin-bottom: 6px;
+        }
+
+        .upload-area small {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Danh sách file đã chọn */
+        #file-list-wrapper {
+            display: none;
+            margin-top: 24px;
+            text-align: left;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .list-header strong {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .clear-all {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .clear-all:hover {
+            text-decoration: underline;
+        }
+
+        #file-list {
+            list-style: none;
+        }
+
+        #file-list li {
+            font-size: 14px;
+            padding: 10px 14px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-main);
+            font-weight: 500;
+            gap: 10px;
+        }
+
+        #file-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .file-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 360px;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+            flex-shrink: 0;
+        }
+
+        /* Nhóm nút hành động cho từng file */
+        .file-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .action-btn {
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .move-btn {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .move-btn:hover:not(:disabled) {
+            background: #cbd5e1;
+        }
+
+        .move-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .remove-btn {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .remove-btn:hover {
+            background: #fecaca;
+        }
+
+        /* Thanh tùy chọn tên file & hướng giấy */
+        .options-bar {
+            display: none;
+            margin-top: 18px;
+            text-align: left;
+            grid-template-columns: 2fr 1fr;
+            gap: 14px;
+        }
+
+        .option-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .option-group input,
+        .option-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            background: #fff;
+            color: var(--text-main);
+        }
+
+        .option-group input:focus,
+        .option-group select:focus {
+            border-color: var(--word-blue);
+        }
+
+        /* Nút bấm xuất DOCX */
+        .btn {
+            display: none;
+            width: 100%;
+            background: linear-gradient(135deg, #2b7cd3 0%, #185abd 100%);
+            color: white;
+            border: none;
+            padding: 15px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(24, 90, 189, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(24, 90, 189, 0.4);
+        }
+
+        .btn:disabled {
+            background: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Hộp ghi chú */
+        .note {
+            margin-top: 28px;
+            font-size: 13px;
+            color: #475569;
+            text-align: left;
+            background: #f0f9ff;
+            padding: 16px 20px;
+            border: 1px solid #bae6fd;
+            border-left: 4px solid #0284c7;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+        .note strong {
+            color: #0369a1;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 25px 18px; }
+            h1 { font-size: 22px; }
+            .file-name { max-width: 150px; }
+            .options-bar { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Chuyển Đổi File Sang Word (.DOCX)</h1>
+    <p class="subtitle">Chạy 100% trên trình duyệt • Gộp nhiều file thành 1 tài liệu Word • Bảo mật tuyệt đối</p>
+
+    <label for="file-input" class="upload-area" id="drop-zone">
+        <div class="upload-icon">📝</div>
+        <strong>Nhấn để chọn file hoặc kéo thả vào đây</strong>
+        <small>Hỗ trợ gộp nhiều file: PDF (.pdf), Ảnh (.png, .jpg, .webp), Excel (.xlsx), Văn bản (.txt, .md, .html), Word (.docx)</small>
+    </label>
+    <input type="file" id="file-input" multiple accept=".pdf,.png,.jpg,.jpeg,.webp,.xlsx,.xls,.txt,.md,.html,.docx">
+
+    <div id="file-list-wrapper">
+        <div class="list-header">
+            <strong>Danh sách file sẽ gộp (<span id="file-count">0</span>)</strong>
+            <button type="button" class="clear-all" id="clear-all-btn">Xóa tất cả</button>
+        </div>
+        <ul id="file-list"></ul>
+    </div>
+
+    <div class="options-bar" id="options-bar">
+        <div class="option-group">
+            <label for="docx-filename">Tên file Word (.docx) khi tải về:</label>
+            <input type="text" id="docx-filename" value="tai_lieu_chuyen_doi" placeholder="Nhập tên file...">
+        </div>
+        <div class="option-group">
+            <label for="page-orientation">Khổ giấy Word:</label>
+            <select id="page-orientation">
+                <option value="portrait">Khổ dọc (Portrait)</option>
+                <option value="landscape">Khổ ngang (Landscape)</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn" id="convert-btn">Chuyển sang Word (.DOCX) & Tải về</button>
+
+    <div class="note">
+        <strong>Thông tin chuyển đổi:</strong>
+        Toàn bộ dữ liệu (văn bản, bảng biểu Excel, nội dung PDF, hình ảnh) được đóng gói trực tiếp thành tệp chuẩn <strong>Microsoft Word (.docx)</strong> ngay trên trình duyệt của bạn và tự động tải xuống máy.
+    </div>
+</div>
+
+<script>
+    // Cấu hình worker cho PDF.js
+    if (typeof pdfjsLib !== 'undefined') {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
+    }
+
+    const fileInput = document.getElementById('file-input');
+    const dropZone = document.getElementById('drop-zone');
+    const fileListWrapper = document.getElementById('file-list-wrapper');
+    const fileList = document.getElementById('file-list');
+    const fileCount = document.getElementById('file-count');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    const optionsBar = document.getElementById('options-bar');
+    const docxFilenameInput = document.getElementById('docx-filename');
+    const pageOrientationSelect = document.getElementById('page-orientation');
+    const convertBtn = document.getElementById('convert-btn');
+
+    let selectedFiles = [];
+
+    fileInput.addEventListener('change', (e) => {
+        addFiles(Array.from(e.target.files));
+        fileInput.value = '';
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            addFiles(Array.from(e.dataTransfer.files));
+        }
+    });
+
+    function addFiles(files) {
+        const validExts = ['pdf', 'png', 'jpg', 'jpeg', 'webp', 'xlsx', 'xls', 'txt', 'md', 'html', 'docx'];
+        const filtered = files.filter(f => {
+            const ext = f.name.split('.').pop().toLowerCase();
+            return validExts.includes(ext);
+        });
+
+        if (filtered.length < files.length) {
+            alert('Một số file không đúng định dạng hỗ trợ đã được bỏ qua.');
+        }
+
+        selectedFiles = selectedFiles.concat(filtered);
+        renderFileList();
+    }
+
+    function moveFile(index, direction) {
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= selectedFiles.length) return;
+
+        const temp = selectedFiles[index];
+        selectedFiles[index] = selectedFiles[targetIndex];
+        selectedFiles[targetIndex] = temp;
+        renderFileList();
+    }
+
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        renderFileList();
+    }
+
+    clearAllBtn.addEventListener('click', () => {
+        selectedFiles = [];
+        renderFileList();
+    });
+
+    function renderFileList() {
+        fileCount.textContent = selectedFiles.length;
+
+        if (selectedFiles.length === 0) {
+            fileListWrapper.style.display = 'none';
+            optionsBar.style.display = 'none';
+            convertBtn.style.display = 'none';
+            return;
+        }
+
+        fileListWrapper.style.display = 'block';
+        optionsBar.style.display = 'grid';
+        convertBtn.style.display = 'inline-block';
+
+        fileList.innerHTML = selectedFiles.map((f, index) => `
+            <li>
+                <div class="file-info">
+                    <span class="file-name" title="${f.name}">${index + 1}. ${f.name}</span>
+                    <span class="file-size">(${(f.size / 1024).toFixed(1)} KB)</span>
+                </div>
+                <div class="file-actions">
+                    <button type="button" class="action-btn move-btn" onclick="moveFile(${index}, -1)" ${index === 0 ? 'disabled' : ''} title="Di chuyển lên">↑</button>
+                    <button type="button" class="action-btn move-btn" onclick="moveFile(${index}, 1)" ${index === selectedFiles.length - 1 ? 'disabled' : ''} title="Di chuyển xuống">↓</button>
+                    <button type="button" class="action-btn remove-btn" onclick="removeFile(${index})" title="Xóa file này">✕</button>
+                </div>
+            </li>
+        `).join('');
+    }
+
+    // Xử lý chuyển đổi & tạo file DOCX
+    convertBtn.addEventListener('click', async () => {
+        if (selectedFiles.length === 0) return;
+
+        if (typeof window.docx === 'undefined') {
+            alert('Không tải được thư viện tạo Word (docx.js). Vui lòng kiểm tra kết nối Internet.');
+            return;
+        }
+
+        convertBtn.textContent = 'Đang tạo tài liệu Word (.docx)...';
+        convertBtn.disabled = true;
+
+        const {
+            Document, Packer, Paragraph, TextRun, ImageRun,
+            Table, TableRow, TableCell, WidthType, HeadingLevel,
+            PageBreak, PageOrientation, BorderStyle
+        } = window.docx;
+
+        const isLandscape = pageOrientationSelect.value === 'landscape';
+        const maxImgWidth = isLandscape ? 780 : 560;
+        const maxImgHeight = isLandscape ? 500 : 750;
+
+        const docChildren = [];
+
+        try {
+            for (let fIdx = 0; fIdx < selectedFiles.length; fIdx++) {
+                const file = selectedFiles[fIdx];
+                const ext = file.name.split('.').pop().toLowerCase();
+
+                if (fIdx > 0) {
+                    docChildren.push(new Paragraph({ children: [new PageBreak()] }));
+                }
+
+                if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                    const imgData = await getImageBufferAndDimensions(file, maxImgWidth, maxImgHeight);
+                    docChildren.push(
+                        new Paragraph({
+                            children: [
+                                new ImageRun({
+                                    data: imgData.buffer,
+                                    transformation: {
+                                        width: imgData.width,
+                                        height: imgData.height
+                                    }
+                                })
+                            ]
+                        })
+                    );
+                } 
+                else if (ext === 'pdf') {
+                    if (typeof pdfjsLib === 'undefined') {
+                        throw new Error('Không tải được thư viện đọc PDF.');
+                    }
+                    const arrayBuffer = await readAsArrayBuffer(file);
+                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+                    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                        if (pageNum > 1) {
+                            docChildren.push(new Paragraph({ children: [new PageBreak()] }));
+                        }
+                        const page = await pdf.getPage(pageNum);
+                        const textContent = await page.getTextContent();
+                        const lines = groupPdfItemsToLines(textContent.items);
+                        lines.forEach(lineText => {
+                            docChildren.push(
+                                new Paragraph({
+                                    children: [new TextRun({ text: lineText, font: "Calibri", size: 22 })],
+                                    spacing: { after: 100 }
+                                })
+                            );
+                        });
+                    }
+                }
+                else if (['xlsx', 'xls'].includes(ext)) {
+                    if (typeof XLSX === 'undefined') {
+                        throw new Error('Không tải được thư viện đọc Excel.');
+                    }
+                    const arrayBuffer = await readAsArrayBuffer(file);
+                    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                    workbook.SheetNames.forEach((sheetName, sIdx) => {
+                        if (sIdx > 0) {
+                            docChildren.push(new Paragraph({ children: [new PageBreak()] }));
+                        }
+                        docChildren.push(
+                            new Paragraph({
+                                text: `Sheet: ${sheetName}`,
+                                heading: HeadingLevel.HEADING_2,
+                                spacing: { before: 120, after: 120 }
+                            })
+                        );
+                        const rowsData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: "" });
+                        if (rowsData.length > 0) {
+                            const maxCols = Math.max(...rowsData.map(r => r.length));
+                            const tableRows = rowsData.map((row, rIdx) => {
+                                const cells = [];
+                                for (let c = 0; c < maxCols; c++) {
+                                    const val = row[c] !== undefined && row[c] !== null ? String(row[c]) : "";
+                                    cells.push(
+                                        new TableCell({
+                                            children: [
+                                                new Paragraph({
+                                                    children: [
+                                                        new TextRun({
+                                                            text: val,
+                                                            bold: rIdx === 0,
+                                                            font: "Calibri",
+                                                            size: 20
+                                                        })
+                                                    ]
+                                                })
+                                            ],
+                                            borders: {
+                                                top: { style: BorderStyle.SINGLE, size: 1, color: "999999" },
+                                                bottom: { style: BorderStyle.SINGLE, size: 1, color: "999999" },
+                                                left: { style: BorderStyle.SINGLE, size: 1, color: "999999" },
+                                                right: { style: BorderStyle.SINGLE, size: 1, color: "999999" }
+                                            }
+                                        })
+                                    );
+                                }
+                                return new TableRow({ children: cells });
+                            });
+                            docChildren.push(
+                                new Table({
+                                    rows: tableRows,
+                                    width: { size: 100, type: WidthType.PERCENTAGE }
+                                })
+                            );
+                        }
+                    });
+                }
+                else if (ext === 'docx') {
+                    if (typeof mammoth === 'undefined') {
+                        throw new Error('Không tải được thư viện đọc Word.');
+                    }
+                    const arrayBuffer = await readAsArrayBuffer(file);
+                    const result = await mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+                    const lines = result.value.split(/\r?\n/);
+                    lines.forEach(line => {
+                        docChildren.push(
+                            new Paragraph({
+                                children: [new TextRun({ text: line, font: "Calibri", size: 22 })],
+                                spacing: { after: 100 }
+                            })
+                        );
+                    });
+                }
+                else if (ext === 'txt') {
+                    const text = await readAsText(file);
+                    const lines = text.split(/\r?\n/);
+                    lines.forEach(line => {
+                        docChildren.push(
+                            new Paragraph({
+                                children: [new TextRun({ text: line, font: "Calibri", size: 22 })],
+                                spacing: { after: 80 }
+                            })
+                        );
+                    });
+                }
+                else if (ext === 'md') {
+                    const text = await readAsText(file);
+                    const lines = text.split(/\r?\n/);
+                    lines.forEach(line => {
+                        if (line.startsWith('### ')) {
+                            docChildren.push(new Paragraph({ text: line.replace(/^###\s+/, ''), heading: HeadingLevel.HEADING_3 }));
+                        } else if (line.startsWith('## ')) {
+                            docChildren.push(new Paragraph({ text: line.replace(/^##\s+/, ''), heading: HeadingLevel.HEADING_2 }));
+                        } else if (line.startsWith('# ')) {
+                            docChildren.push(new Paragraph({ text: line.replace(/^#\s+/, ''), heading: HeadingLevel.HEADING_1 }));
+                        } else {
+                            docChildren.push(
+                                new Paragraph({
+                                    children: [new TextRun({ text: line.replace(/[*_`]/g, ''), font: "Calibri", size: 22 })],
+                                    spacing: { after: 80 }
+                                })
+                            );
+                        }
+                    });
+                }
+                else if (ext === 'html') {
+                    const htmlText = await readAsText(file);
+                    const parser = new DOMParser();
+                    const parsedDoc = parser.parseFromString(htmlText, 'text/html');
+                    const plainText = parsedDoc.body.innerText || "";
+                    plainText.split(/\r?\n/).forEach(line => {
+                        docChildren.push(
+                            new Paragraph({
+                                children: [new TextRun({ text: line, font: "Calibri", size: 22 })],
+                                spacing: { after: 80 }
+                            })
+                        );
+                    });
+                }
+            }
+
+            const doc = new Document({
+                sections: [{
+                    properties: {
+                        page: {
+                            size: {
+                                orientation: isLandscape ? PageOrientation.LANDSCAPE : PageOrientation.PORTRAIT
+                            }
+                        }
+                    },
+                    children: docChildren.length > 0 ? docChildren : [new Paragraph("")]
+                }]
+            });
+
+            const blob = await Packer.toBlob(doc);
+            let outName = docxFilenameInput.value.trim() || 'tai_lieu_chuyen_doi';
+            if (!outName.toLowerCase().endsWith('.docx')) {
+                outName += '.docx';
+            }
+
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = outName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(link.href);
+
+        } catch (err) {
+            alert('Lỗi khi tạo file DOCX: ' + err.message);
+        } finally {
+            convertBtn.textContent = 'Chuyển sang Word (.DOCX) & Tải về';
+            convertBtn.disabled = false;
+        }
+    });
+
+    // Gom các mảnh text PDF theo tọa độ Y thành từng dòng hoàn chỉnh
+    function groupPdfItemsToLines(items) {
+        if (!items || items.length === 0) return [];
+        const linesMap = [];
+        items.forEach(item => {
+            const y = Math.round(item.transform[5]);
+            let foundLine = linesMap.find(l => Math.abs(l.y - y) <= 4);
+            if (!foundLine) {
+                foundLine = { y: y, parts: [] };
+                linesMap.push(foundLine);
+            }
+            foundLine.parts.push({ x: item.transform[4], str: item.str });
+        });
+        linesMap.sort((a, b) => b.y - a.y);
+        return linesMap.map(line => {
+            line.parts.sort((a, b) => a.x - b.x);
+            return line.parts.map(p => p.str).join(' ').replace(/\s+/g, ' ').trim();
+        }).filter(t => t.length > 0);
+    }
+
+    // Chuyển ảnh sang PNG ArrayBuffer chuẩn để docx.js hỗ trợ cả WEBP/JPG/PNG
+    function getImageBufferAndDimensions(file, maxW, maxH) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > maxW) {
+                        h = Math.round((h * maxW) / w);
+                        w = maxW;
+                    }
+                    if (h > maxH) {
+                        w = Math.round((w * maxH) / h);
+                        h = maxH;
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+                    canvas.toBlob(async (blob) => {
+                        const buf = await blob.arrayBuffer();
+                        resolve({ buffer: buf, width: w, height: h });
+                    }, 'image/png');
+                };
+                img.onerror = reject;
+                img.src = e.target.result;
+            };
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function readAsArrayBuffer(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    function readAsText(file) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.onerror = reject;
+            reader.readAsText(file);
+        });
+    }
+</script>
+
+</body>
+</html>
