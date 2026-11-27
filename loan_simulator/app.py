@@ -9,7 +9,6 @@ def calculate_loan_schedule(principal, months, rate_initial, promo_months, rate_
     schedule = []
 
     for m in range(1, months + 1):
-        # Xác định lãi suất áp dụng cho tháng m
         current_rate = rate_initial if m <= promo_months else rate_floating
         monthly_interest = remaining_balance * (current_rate / 100 / 12)
         total_payment = monthly_principal + monthly_interest
@@ -44,7 +43,6 @@ def calculate():
     principal = float(data.get("principal", 1000000000))
     months = int(data.get("months", 120))
 
-    # 1. Cố định (mặc định 9.5% suốt kỳ hạn)
     fixed = calculate_loan_schedule(
         principal, months,
         float(data.get("fixed_rate", 9.5)),
@@ -52,7 +50,6 @@ def calculate():
         float(data.get("fixed_rate", 9.5))
     )
 
-    # 2. Hỗn hợp (mặc định ưu đãi 7.5% trong 24 tháng, sau đó 11.5%)
     hybrid = calculate_loan_schedule(
         principal, months,
         float(data.get("hybrid_promo_rate", 7.5)),
@@ -60,7 +57,6 @@ def calculate():
         float(data.get("hybrid_float_rate", 11.5))
     )
 
-    # 3. Thả nổi (mặc định 10.5% trong 24 tháng đầu, sau đó 12%)
     floating = calculate_loan_schedule(
         principal, months,
         float(data.get("float_init_rate", 10.5)),
