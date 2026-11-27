@@ -3,107 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chuyển Đổi File Sang PDF Đa Năng</title>
-    <!-- Thư viện tạo PDF và đọc Markdown -->
+    <title>Chuyển Đổi Đa Định Dạng Sang PDF (Client-Side)</title>
+    <!-- Các thư viện xử lý trực tiếp trên trình duyệt -->
+    <script src="https://cloudflare.com"></script>
+    <script src="https://cloudflare.com"></script>
     <script src="https://cloudflare.com"></script>
     <script src="https://cloudflare.com"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f6;
-            color: #333;
-            max-width: 800px;
+            background-color: #f0f2f5;
+            color: #1c1e21;
+            max-width: 850px;
             margin: 40px auto;
             padding: 20px;
         }
         .container {
             background: #fff;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            padding: 35px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             text-align: center;
         }
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        p.subtitle {
-            color: #7f8c8d;
-            margin-bottom: 25px;
-        }
+        h1 { color: #2c3e50; margin-bottom: 8px; }
+        p.subtitle { color: #606770; margin-bottom: 25px; font-size: 15px; }
         .upload-area {
-            border: 2px dashed #3498db;
-            border-radius: 8px;
-            padding: 40px 20px;
+            border: 2px dashed #0066cc;
+            border-radius: 10px;
+            padding: 45px 20px;
             cursor: pointer;
-            transition: background 0.3s;
-            margin-bottom: 20px;
+            transition: all 0.2s;
+            background: #f8fbff;
         }
-        .upload-area:hover {
-            background-color: #ebf5fb;
-        }
-        input[type="file"] {
-            display: none;
-        }
+        .upload-area:hover { background: #ebf3ff; border-color: #004c99; }
+        input[type="file"] { display: none; }
         .btn {
-            background-color: #e74c3c;
+            background-color: #d93025;
             color: white;
             border: none;
-            padding: 12px 25px;
+            padding: 14px 28px;
             font-size: 16px;
+            font-weight: bold;
             border-radius: 6px;
             cursor: pointer;
             display: none;
-            margin-top: 15px;
+            margin-top: 20px;
         }
-        .btn:hover {
-            background-color: #c0392b;
-        }
+        .btn:hover { background-color: #b3241b; }
+        .btn:disabled { background-color: #999; cursor: not-allowed; }
         #file-list {
             text-align: left;
-            margin: 15px 0;
-            font-size: 14px;
-            color: #2c3e50;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            display: none;
         }
-        /* Khu vực ẩn dùng để render nội dung trước khi xuất PDF */
+        .note {
+            margin-top: 20px;
+            font-size: 13px;
+            color: #777;
+            text-align: left;
+            background: #fff8e6;
+            padding: 12px;
+            border-left: 4px solid #f5a623;
+            border-radius: 4px;
+        }
+        /* Khu vực render ẩn */
         #pdf-render-area {
             text-align: left;
             padding: 20px;
             background: white;
             display: none;
+            color: #000;
         }
-        #pdf-render-area img {
-            max-width: 100%;
-            height: auto;
-            display: block;
-            margin: 10px auto;
-            page-break-after: always;
-        }
-        .text-page {
-            white-space: pre-wrap;
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            page-break-after: always;
-        }
+        .page-break { page-break-after: always; margin-bottom: 20px; }
+        #pdf-render-area img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+        #pdf-render-area table { border-collapse: collapse; width: 100%; margin-bottom: 15px; font-size: 12px; }
+        #pdf-render-area th, #pdf-render-area td { border: 1px solid #999; padding: 6px; text-align: left; }
+        .text-content { white-space: pre-wrap; font-family: Arial, sans-serif; line-height: 1.5; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Chuyển Đổi File Sang PDF</h1>
-    <p class="subtitle">Hỗ trợ: Hình ảnh (JPG, PNG, WEBP), Văn bản (.TXT), Markdown (.MD), Web (.HTML)</p>
+    <p class="subtitle">Chạy 100% trên trình duyệt • Bảo mật tuyệt đối • Không tải file lên máy chủ</p>
 
-    <label for="file-input" class="upload-area" id="drop-zone">
-        <strong>Nhấn để chọn file</strong> hoặc kéo thả file vào đây<br>
-        <small>(Có thể chọn nhiều file cùng lúc để gộp thành 1 PDF)</small>
+    <label for="file-input" class="upload-area">
+        <strong>Nhấn để chọn file</strong> hoặc kéo thả nhiều file vào đây<br>
+        <small>Hỗ trợ: Word (.docx), Excel (.xlsx), Ảnh (.png, .jpg, .webp), Văn bản (.txt, .md)</small>
     </label>
-    <input type="file" id="file-input" multiple accept=".jpg,.jpeg,.png,.webp,.txt,.md,.html">
+    <input type="file" id="file-input" multiple accept=".docx,.xlsx,.xls,.png,.jpg,.jpeg,.webp,.txt,.md">
 
     <div id="file-list"></div>
-    <button class="btn" id="convert-btn">Chuyển sang PDF & Tải về</button>
+    <button class="btn" id="convert-btn">Gộp & Xuất ra file PDF</button>
+
+    <div class="note">
+        <strong>Lưu ý khi chạy không cần Server (GitHub Pages):</strong>
+        <ul>
+            <li>File <strong>.docx</strong> và <strong>.xlsx</strong> sẽ giữ được nội dung chữ, bảng biểu và hình ảnh cơ bản, nhưng một số định dạng phức tạp (header/footer, biểu đồ) có thể thay đổi nhẹ.</li>
+            <li>File <strong>.pptx</strong> không thể chuyển trực tiếp bằng trình duyệt thuần túy (bạn nên lưu PowerPoint dưới dạng PDF trực tiếp từ phần mềm Office).</li>
+        </ul>
+    </div>
 </div>
 
-<!-- Khung chứa nội dung để chuyển đổi -->
 <div id="pdf-render-area"></div>
 
 <script>
@@ -116,7 +120,8 @@
     fileInput.addEventListener('change', (e) => {
         selectedFiles = Array.from(e.target.files);
         if (selectedFiles.length > 0) {
-            fileList.innerHTML = '<strong>Đã chọn:</strong><ul>' + 
+            fileList.style.display = 'block';
+            fileList.innerHTML = '<strong>Danh sách file sẽ gộp thành PDF:</strong><ul>' + 
                 selectedFiles.map(f => `<li>${f.name} (${(f.size/1024).toFixed(1)} KB)</li>`).join('') + 
                 '</ul>';
             convertBtn.style.display = 'inline-block';
@@ -126,63 +131,76 @@
     convertBtn.addEventListener('click', async () => {
         if (selectedFiles.length === 0) return;
 
-        convertBtn.textContent = 'Đang xử lý...';
+        convertBtn.textContent = 'Đang xử lý dữ liệu...';
         convertBtn.disabled = true;
         renderArea.innerHTML = '';
         renderArea.style.display = 'block';
 
-        for (const file of selectedFiles) {
-            const ext = file.name.split('.').pop().toLowerCase();
+        try {
+            for (const file of selectedFiles) {
+                const ext = file.name.split('.').pop().toLowerCase();
+                const wrapper = document.createElement('div');
+                wrapper.className = 'page-break';
 
-            if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
-                const imgUrl = await readFileAsDataURL(file);
-                const img = document.createElement('img');
-                img.src = imgUrl;
-                renderArea.appendChild(img);
-            } 
-            else if (ext === 'txt') {
-                const text = await readFileAsText(file);
-                const div = document.createElement('div');
-                div.className = 'text-page';
-                div.textContent = text;
-                renderArea.appendChild(div);
-            } 
-            else if (ext === 'md') {
-                const text = await readFileAsText(file);
-                const div = document.createElement('div');
-                div.className = 'text-page';
-                div.innerHTML = marked.parse(text);
-                renderArea.appendChild(div);
-            } 
-            else if (ext === 'html') {
-                const text = await readFileAsText(file);
-                const div = document.createElement('div');
-                div.className = 'text-page';
-                div.innerHTML = text;
-                renderArea.appendChild(div);
+                if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                    const imgUrl = await readAsDataURL(file);
+                    const img = document.createElement('img');
+                    img.src = imgUrl;
+                    wrapper.appendChild(img);
+                } 
+                else if (ext === 'docx') {
+                    const arrayBuffer = await readAsArrayBuffer(file);
+                    const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
+                    wrapper.innerHTML = result.value;
+                } 
+                else if (['xlsx', 'xls'].includes(ext)) {
+                    const arrayBuffer = await readAsArrayBuffer(file);
+                    const workbook = XLSX.read(arrayBuffer, { type: 'array' });
+                    workbook.SheetNames.forEach(sheetName => {
+                        const title = document.createElement('h3');
+                        title.textContent = `Sheet: ${sheetName}`;
+                        wrapper.appendChild(title);
+                        const htmlTable = XLSX.utils.sheet_to_html(workbook.Sheets[sheetName]);
+                        const div = document.createElement('div');
+                        div.innerHTML = htmlTable;
+                        wrapper.appendChild(div);
+                    });
+                } 
+                else if (ext === 'txt') {
+                    const text = await readAsText(file);
+                    const div = document.createElement('div');
+                    div.className = 'text-content';
+                    div.textContent = text;
+                    wrapper.appendChild(div);
+                } 
+                else if (ext === 'md') {
+                    const text = await readAsText(file);
+                    wrapper.innerHTML = marked.parse(text);
+                }
+
+                renderArea.appendChild(wrapper);
             }
+
+            const opt = {
+                margin:       10,
+                filename:     'tong_hop_tai_lieu.pdf',
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true },
+                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+
+            await html2pdf().set(opt).from(renderArea).save();
+        } catch (err) {
+            alert('Có lỗi xảy ra khi đọc file: ' + err.message);
+        } finally {
+            renderArea.style.display = 'none';
+            renderArea.innerHTML = '';
+            convertBtn.textContent = 'Gộp & Xuất ra file PDF';
+            convertBtn.disabled = false;
         }
-
-        // Cấu hình xuất PDF
-        const opt = {
-            margin:       10,
-            filename:     'converted_document.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 2, useCORS: true },
-            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-        };
-
-        // Tạo và tải file PDF
-        await html2pdf().set(opt).from(renderArea).save();
-
-        // Dọn dẹp sau khi tải xong
-        renderArea.style.display = 'none';
-        renderArea.innerHTML = '';
-        convertBtn.textContent = 'Chuyển sang PDF & Tải về';
-        convertBtn.disabled = false;
     });
 
-    function readFileAsDataURL(file) {
+    function readAsDataURL(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target.result);
@@ -190,7 +208,15 @@
         });
     }
 
-    function readFileAsText(file) {
+    function readAsArrayBuffer(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsArrayBuffer(file);
+        });
+    }
+
+    function readAsText(file) {
         return new Promise((resolve) => {
             const reader = new FileReader();
             reader.onload = (e) => resolve(e.target.result);
