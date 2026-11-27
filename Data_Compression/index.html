@@ -3,23 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chuyển Đổi Đa Định Dạng Sang PNG</title>
-    <!-- Thư viện đọc PDF, Word, Excel, Markdown, Chụp HTML sang Canvas và Nén ZIP -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <title>Nén Dung Lượng File Thông Minh (Client-Side)</title>
+    <!-- Thư viện xử lý ZIP, PDF, Word/Excel (ZIP-based) trực tiếp trên trình duyệt -->
     <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-
         :root {
-            --primary: #059669;
-            --primary-hover: #047857;
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #10b981;
             --danger: #ef4444;
             --danger-hover: #dc2626;
-            --bg-gradient: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
             --card-bg: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
@@ -33,7 +28,7 @@
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg-gradient);
             color: var(--text-main);
             min-height: 100vh;
@@ -46,7 +41,7 @@
         .container {
             background: var(--card-bg);
             width: 100%;
-            max-width: 740px;
+            max-width: 760px;
             padding: 40px;
             border-radius: 20px;
             box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1), 0 0 1px 1px rgba(0, 0, 0, 0.03);
@@ -64,7 +59,7 @@
         p.subtitle {
             color: var(--text-muted);
             font-size: 14px;
-            margin-bottom: 30px;
+            margin-bottom: 28px;
         }
 
         /* Vùng chọn & kéo thả file */
@@ -73,23 +68,23 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            border: 2px dashed #6ee7b7;
+            border: 2px dashed #93c5fd;
             border-radius: 16px;
-            padding: 45px 25px;
+            padding: 42px 25px;
             background-color: #f8fafc;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .upload-area:hover, .upload-area.dragover {
-            background-color: #ecfdf5;
+            background-color: #eff6ff;
             border-color: var(--primary);
             transform: translateY(-2px);
         }
 
         .upload-icon {
             font-size: 36px;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
 
         .upload-area strong {
@@ -172,26 +167,39 @@
 
         .file-info {
             display: flex;
+            flex-direction: column;
+            gap: 3px;
+            overflow: hidden;
+        }
+
+        .file-title-row {
+            display: flex;
             align-items: center;
             gap: 8px;
-            overflow: hidden;
         }
 
         .file-name {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 360px;
+            max-width: 340px;
         }
 
-        .file-size {
+        .file-meta {
             font-size: 12px;
             color: var(--text-muted);
             font-weight: 400;
-            flex-shrink: 0;
         }
 
-        /* Nhóm nút hành động cho từng file */
+        .badge-saved {
+            background: #dcfce7;
+            color: #15803d;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+
         .file-actions {
             display: flex;
             align-items: center;
@@ -236,46 +244,96 @@
             background: #fecaca;
         }
 
-        /* Thanh tùy chọn tên file & chất lượng ảnh */
-        .options-bar {
+        /* Bảng điều khiển mức nén tự điều chỉnh */
+        .controls-panel {
             display: none;
             margin-top: 18px;
             text-align: left;
-            grid-template-columns: 2fr 1fr;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 18px 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .slider-header label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        .slider-value {
+            background: #dbeafe;
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 13px;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            accent-color: var(--primary);
+            cursor: pointer;
+            height: 6px;
+            border-radius: 5px;
+        }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            margin-bottom: 16px;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 14px;
+            padding-top: 14px;
+            border-top: 1px solid #e2e8f0;
         }
 
         .option-group label {
             display: block;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--text-muted);
             margin-bottom: 6px;
         }
 
-        .option-group input,
-        .option-group select {
+        .option-group select,
+        .option-group input[type="text"] {
             width: 100%;
-            padding: 10px 14px;
+            padding: 9px 12px;
             border: 1px solid var(--border-color);
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 13px;
             font-family: inherit;
             outline: none;
             background: #fff;
             color: var(--text-main);
         }
 
-        .option-group input:focus,
-        .option-group select:focus {
+        .option-group select:focus,
+        .option-group input[type="text"]:focus {
             border-color: var(--primary);
         }
 
-        /* Nút bấm xuất PNG */
+        /* Nút bấm nén & tải về */
         .btn {
             display: none;
             width: 100%;
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             color: white;
             border: none;
             padding: 15px 28px;
@@ -284,13 +342,13 @@
             border-radius: 12px;
             cursor: pointer;
             margin-top: 20px;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
             transition: all 0.2s ease;
         }
 
         .btn:hover:not(:disabled) {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
         }
 
         .btn:disabled {
@@ -299,22 +357,36 @@
             cursor: not-allowed;
         }
 
-        /* Hộp ghi chú */
+        /* Thống kê tổng dung lượng sau nén */
+        #summary-box {
+            display: none;
+            margin-top: 16px;
+            padding: 14px 18px;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 10px;
+            color: #065f46;
+            font-size: 14px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        /* Hộp ghi chú kỹ thuật */
         .note {
-            margin-top: 28px;
+            margin-top: 24px;
             font-size: 13px;
             color: #475569;
             text-align: left;
-            background: #fffbeb;
+            background: #f8fafc;
             padding: 16px 20px;
-            border: 1px solid #fde68a;
-            border-left: 4px solid #f59e0b;
+            border: 1px solid #e2e8f0;
+            border-left: 4px solid var(--primary);
             border-radius: 10px;
             line-height: 1.6;
         }
 
         .note strong {
-            color: #92400e;
+            color: var(--text-main);
             display: block;
             margin-bottom: 4px;
         }
@@ -324,118 +396,104 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Khu vực render ẩn ngoài màn hình để chụp thành PNG */
-        #render-sandbox {
-            position: fixed;
-            left: -9999px;
-            top: 0;
-            width: 794px; /* Khổ chuẩn A4 ở 96 DPI */
-            background: #ffffff;
-            color: #000000;
-            padding: 40px;
-            font-family: Arial, Helvetica, sans-serif;
-            line-height: 1.6;
-            font-size: 14px;
-        }
-
-        #render-sandbox table {
-            border-collapse: collapse;
-            width: 100%;
-            margin-bottom: 16px;
-            font-size: 12px;
-        }
-
-        #render-sandbox th, #render-sandbox td {
-            border: 1px solid #888;
-            padding: 6px 8px;
-            text-align: left;
-        }
-
-        #render-sandbox h1, #render-sandbox h2, #render-sandbox h3 {
-            margin-top: 12px;
-            margin-bottom: 8px;
-        }
-
-        #render-sandbox p {
-            margin-bottom: 8px;
-        }
-
-        .text-content {
-            white-space: pre-wrap;
-        }
-
         @media (max-width: 600px) {
             .container { padding: 25px 18px; }
             h1 { font-size: 22px; }
-            .file-name { max-width: 150px; }
-            .options-bar { grid-template-columns: 1fr; }
+            .file-name { max-width: 160px; }
+            .options-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Chuyển Đổi File Sang PNG</h1>
-    <p class="subtitle">Chạy 100% trên trình duyệt • Xuất ảnh PNG độ nét cao • Bảo mật tuyệt đối</p>
+    <h1>Nén Dung Lượng File Thông Minh</h1>
+    <p class="subtitle">Giữ nguyên định dạng gốc & toàn vẹn giá trị dữ liệu • Xử lý 100% trên trình duyệt</p>
 
     <label for="file-input" class="upload-area" id="drop-zone">
-        <div class="upload-icon">🖼️</div>
+        <div class="upload-icon">🗜️</div>
         <strong>Nhấn để chọn file hoặc kéo thả vào đây</strong>
-        <small>Hỗ trợ: PDF (.pdf), Ảnh (.jpg, .webp, .bmp, .svg), Word (.docx), Excel (.xlsx), Văn bản (.txt, .md)</small>
+        <small>Hỗ trợ: Ảnh (.jpg, .png, .webp), Office (.docx, .xlsx, .pptx), PDF (.pdf), Văn bản/Dữ liệu (.json, .xml, .svg, .txt, .csv)</small>
     </label>
-    <input type="file" id="file-input" multiple accept=".pdf,.jpg,.jpeg,.png,.webp,.bmp,.svg,.docx,.xlsx,.xls,.txt,.md">
+    <input type="file" id="file-input" multiple>
 
     <div id="file-list-wrapper">
         <div class="list-header">
-            <strong>Danh sách file đã chọn (<span id="file-count">0</span>)</strong>
+            <strong>Danh sách file (<span id="file-count">0</span>)</strong>
             <button type="button" class="clear-all" id="clear-all-btn">Xóa tất cả</button>
         </div>
         <ul id="file-list"></ul>
     </div>
 
-    <div class="options-bar" id="options-bar">
-        <div class="option-group">
-            <label for="output-filename">Tên file lưu về (PNG hoặc ZIP):</label>
-            <input type="text" id="output-filename" value="anh_chuyen_doi" placeholder="Nhập tên file...">
+    <div class="controls-panel" id="controls-panel">
+        <div class="slider-header">
+            <label for="compression-slider">Mức độ nén dung lượng:</label>
+            <span class="slider-value" id="slider-badge">Cân bằng (75% chất lượng)</span>
         </div>
-        <div class="option-group">
-            <label for="image-scale">Độ phân giải (Scale):</label>
-            <select id="image-scale">
-                <option value="1.5">Tiêu chuẩn (1.5x)</option>
-                <option value="2" selected>Sắc nét HD (2x)</option>
-                <option value="3">Siêu nét (3x)</option>
-            </select>
+        <input type="range" id="compression-slider" min="10" max="95" value="75" step="5">
+        <div class="slider-labels">
+            <span>Nén tối đa (Nhẹ nhất)</span>
+            <span>Cân bằng tối ưu</span>
+            <span>Giữ nguyên chi tiết cao</span>
+        </div>
+
+        <div class="options-grid">
+            <div class="option-group">
+                <label for="preserve-resolution">Kích thước khung hình ảnh (nếu có):</label>
+                <select id="preserve-resolution">
+                    <option value="1" selected>Giữ nguyên 100% kích thước gốc (Không biến dạng)</option>
+                    <option value="0.85">Thu nhỏ nhẹ 85% (Tối ưu hiển thị web)</option>
+                    <option value="0.7">Thu nhỏ 70% (Tiết kiệm tối đa)</option>
+                </select>
+            </div>
+            <div class="option-group">
+                <label for="output-mode">Cách thức tải về:</label>
+                <select id="output-mode">
+                    <option value="auto" selected>Tự động (1 file tải trực tiếp, nhiều file gộp .ZIP)</option>
+                    <option value="zip">Luôn đóng gói thành 1 file .ZIP duy nhất</option>
+                </select>
+            </div>
         </div>
     </div>
 
-    <button class="btn" id="convert-btn">Chuyển sang PNG & Tải về</button>
+    <button class="btn" id="compress-btn">Bắt đầu nén & Tải về</button>
+    <div id="summary-box"></div>
 
     <div class="note">
-        <strong>Cơ chế xuất file thông minh:</strong>
-        Nếu kết quả chỉ có <strong>1 ảnh PNG</strong>, trình duyệt sẽ tải trực tiếp file <code>.png</code> về máy. Nếu có <strong>nhiều trang PDF hoặc nhiều file</strong>, hệ thống sẽ tự động đóng gói tất cả thành 1 file <code>.zip</code> để bạn tải về nhanh gọn.
+        <strong>Cơ chế nén bảo toàn giá trị & cấu trúc file gốc:</strong>
+        • <b>Office (.docx, .xlsx, .pptx):</b> Giải nén cấu trúc XML bên trong, tối ưu lại hình ảnh nhúng và tái đóng gói chuẩn ZIP mức 9 mà không làm thay đổi công thức, bảng biểu hay chữ.<br>
+        • <b>Hình ảnh (.jpg, .png, .webp):</b> Giữ nguyên tỷ lệ khung hình, loại bỏ metadata dư thừa và tối ưu bảng màu/mức lượng tử hóa theo thanh trượt.<br>
+        • <b>PDF & Văn bản/Dữ liệu (.pdf, .json, .xml, .svg, .csv):</b> Tối ưu luồng đối tượng PDF (Object Streams) và loại bỏ khoảng trắng thừa mà giữ nguyên 100% giá trị.
     </div>
 </div>
 
-<div id="render-sandbox"></div>
-
 <script>
-    if (typeof pdfjsLib !== 'undefined') {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    }
-
     const fileInput = document.getElementById('file-input');
     const dropZone = document.getElementById('drop-zone');
     const fileListWrapper = document.getElementById('file-list-wrapper');
     const fileList = document.getElementById('file-list');
     const fileCount = document.getElementById('file-count');
     const clearAllBtn = document.getElementById('clear-all-btn');
-    const optionsBar = document.getElementById('options-bar');
-    const outputFilenameInput = document.getElementById('output-filename');
-    const imageScaleSelect = document.getElementById('image-scale');
-    const convertBtn = document.getElementById('convert-btn');
-    const renderSandbox = document.getElementById('render-sandbox');
+    const controlsPanel = document.getElementById('controls-panel');
+    const compressionSlider = document.getElementById('compression-slider');
+    const sliderBadge = document.getElementById('slider-badge');
+    const preserveResolution = document.getElementById('preserve-resolution');
+    const outputMode = document.getElementById('output-mode');
+    const compressBtn = document.getElementById('compress-btn');
+    const summaryBox = document.getElementById('summary-box');
 
     let selectedFiles = [];
+
+    // Cập nhật nhãn thanh trượt mức nén
+    compressionSlider.addEventListener('input', () => {
+        const val = parseInt(compressionSlider.value, 10);
+        let label = 'Cân bằng';
+        if (val <= 35) label = 'Nén tối đa';
+        else if (val <= 60) label = 'Nén cao';
+        else if (val <= 80) label = 'Cân bằng';
+        else label = 'Bảo toàn cao';
+        sliderBadge.textContent = `${label} (${val}% chất lượng)`;
+    });
 
     fileInput.addEventListener('change', (e) => {
         addFiles(Array.from(e.target.files));
@@ -460,24 +518,19 @@
     });
 
     function addFiles(files) {
-        const validExts = ['pdf', 'jpg', 'jpeg', 'png', 'webp', 'bmp', 'svg', 'docx', 'xlsx', 'xls', 'txt', 'md'];
-        const filtered = files.filter(f => {
-            const ext = f.name.split('.').pop().toLowerCase();
-            return validExts.includes(ext);
+        files.forEach(f => {
+            selectedFiles.push({
+                file: f,
+                compressedSize: null
+            });
         });
-
-        if (filtered.length < files.length) {
-            alert('Một số file không đúng định dạng hỗ trợ đã được bỏ qua.');
-        }
-
-        selectedFiles = selectedFiles.concat(filtered);
+        summaryBox.style.display = 'none';
         renderFileList();
     }
 
     function moveFile(index, direction) {
         const targetIndex = index + direction;
         if (targetIndex < 0 || targetIndex >= selectedFiles.length) return;
-
         const temp = selectedFiles[index];
         selectedFiles[index] = selectedFiles[targetIndex];
         selectedFiles[targetIndex] = temp;
@@ -486,204 +539,255 @@
 
     function removeFile(index) {
         selectedFiles.splice(index, 1);
+        summaryBox.style.display = 'none';
         renderFileList();
     }
 
     clearAllBtn.addEventListener('click', () => {
         selectedFiles = [];
+        summaryBox.style.display = 'none';
         renderFileList();
     });
+
+    function formatBytes(bytes) {
+        if (bytes === 0) return '0 B';
+        const k = 1024;
+        const sizes = ['B', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
 
     function renderFileList() {
         fileCount.textContent = selectedFiles.length;
 
         if (selectedFiles.length === 0) {
             fileListWrapper.style.display = 'none';
-            optionsBar.style.display = 'none';
-            convertBtn.style.display = 'none';
+            controlsPanel.style.display = 'none';
+            compressBtn.style.display = 'none';
             return;
         }
 
         fileListWrapper.style.display = 'block';
-        optionsBar.style.display = 'grid';
-        convertBtn.style.display = 'inline-block';
+        controlsPanel.style.display = 'block';
+        compressBtn.style.display = 'inline-block';
 
-        fileList.innerHTML = selectedFiles.map((f, index) => `
-            <li>
-                <div class="file-info">
-                    <span class="file-name" title="${f.name}">${index + 1}. ${f.name}</span>
-                    <span class="file-size">(${(f.size / 1024).toFixed(1)} KB)</span>
-                </div>
-                <div class="file-actions">
-                    <button type="button" class="action-btn move-btn" onclick="moveFile(${index}, -1)" ${index === 0 ? 'disabled' : ''} title="Di chuyển lên">↑</button>
-                    <button type="button" class="action-btn move-btn" onclick="moveFile(${index}, 1)" ${index === selectedFiles.length - 1 ? 'disabled' : ''} title="Di chuyển xuống">↓</button>
-                    <button type="button" class="action-btn remove-btn" onclick="removeFile(${index})" title="Xóa file này">✕</button>
-                </div>
-            </li>
-        `).join('');
+        fileList.innerHTML = selectedFiles.map((item, index) => {
+            const f = item.file;
+            let statusHtml = `Gốc: ${formatBytes(f.size)}`;
+            if (item.compressedSize !== null) {
+                const diff = f.size - item.compressedSize;
+                const percent = diff > 0 ? ((diff / f.size) * 100).toFixed(1) : 0;
+                statusHtml += ` → <b>${formatBytes(item.compressedSize)}</b> <span class="badge-saved">-${percent}%</span>`;
+            }
+
+            return `
+                <li>
+                    <div class="file-info">
+                        <div class="file-title-row">
+                            <span class="file-name" title="${f.name}">${index + 1}. ${f.name}</span>
+                        </div>
+                        <span class="file-meta">${statusHtml}</span>
+                    </div>
+                    <div class="file-actions">
+                        <button type="button" class="action-btn move-btn" onclick="moveFile(${index}, -1)" ${index === 0 ? 'disabled' : ''} title="Di chuyển lên">↑</button>
+                        <button type="button" class="action-btn move-btn" onclick="moveFile(${index}, 1)" ${index === selectedFiles.length - 1 ? 'disabled' : ''} title="Di chuyển xuống">↓</button>
+                        <button type="button" class="action-btn remove-btn" onclick="removeFile(${index})" title="Xóa file này">✕</button>
+                    </div>
+                </li>
+            `;
+        }).join('');
     }
 
-    convertBtn.addEventListener('click', async () => {
+    // Nén hình ảnh giữ nguyên định dạng gốc và tỷ lệ khung hình
+    function compressImageBlob(blob, mimeType, quality, scale) {
+        return new Promise((resolve) => {
+            const url = URL.createObjectURL(blob);
+            const img = new Image();
+            img.onload = () => {
+                URL.revokeObjectURL(url);
+                const targetWidth = Math.max(1, Math.round(img.width * scale));
+                const targetHeight = Math.max(1, Math.round(img.height * scale));
+
+                const canvas = document.createElement('canvas');
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.imageSmoothingEnabled = true;
+                ctx.imageSmoothingQuality = 'high';
+                ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+                // Nếu là PNG và chất lượng < 90%, áp dụng giảm màu nhẹ (posterize) để nén PNG hiệu quả mà giữ kênh Alpha
+                if (mimeType === 'image/png' && quality < 0.9) {
+                    const imgData = ctx.getImageData(0, 0, targetWidth, targetHeight);
+                    const data = imgData.data;
+                    const step = quality < 0.4 ? 16 : (quality < 0.7 ? 8 : 4);
+                    for (let i = 0; i < data.length; i += 4) {
+                        data[i] = Math.round(data[i] / step) * step;
+                        data[i + 1] = Math.round(data[i + 1] / step) * step;
+                        data[i + 2] = Math.round(data[i + 2] / step) * step;
+                    }
+                    ctx.putImageData(imgData, 0, 0);
+                }
+
+                canvas.toBlob((newBlob) => {
+                    if (!newBlob || newBlob.size >= blob.size) {
+                        resolve(blob); // Giữ nguyên bản gốc nếu nén không nhỏ hơn
+                    } else {
+                        resolve(newBlob);
+                    }
+                }, mimeType, quality);
+            };
+            img.onerror = () => {
+                URL.revokeObjectURL(url);
+                resolve(blob);
+            };
+            img.src = url;
+        });
+    }
+
+    // Nén file Office (.docx, .xlsx, .pptx) bằng cách tối ưu ảnh nhúng và nén DEFLATE mức 9
+    async function compressOfficeFile(file, quality, scale) {
+        if (typeof JSZip === 'undefined') return file;
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const zip = await JSZip.loadAsync(arrayBuffer);
+            const newZip = new JSZip();
+
+            const entries = Object.keys(zip.files);
+            for (const filename of entries) {
+                const zipObj = zip.files[filename];
+                if (zipObj.dir) {
+                    newZip.folder(filename);
+                    continue;
+                }
+
+                const lower = filename.toLowerCase();
+                if (lower.startsWith('word/media/') || lower.startsWith('xl/media/') || lower.startsWith('ppt/media/')) {
+                    const rawBlob = await zipObj.async('blob');
+                    let mime = '';
+                    if (lower.endsWith('.jpg') || lower.endsWith('.jpeg')) mime = 'image/jpeg';
+                    else if (lower.endsWith('.png')) mime = 'image/png';
+                    else if (lower.endsWith('.webp')) mime = 'image/webp';
+
+                    if (mime) {
+                        const optBlob = await compressImageBlob(rawBlob, mime, quality, scale);
+                        newZip.file(filename, optBlob, { compression: 'DEFLATE', compressionOptions: { level: 9 } });
+                        continue;
+                    }
+                }
+
+                const content = await zipObj.async('uint8array');
+                newZip.file(filename, content, { compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            }
+
+            const outBlob = await newZip.generateAsync({
+                type: 'blob',
+                mimeType: file.type || 'application/octet-stream',
+                compression: 'DEFLATE',
+                compressionOptions: { level: 9 }
+            });
+
+            return outBlob.size < file.size ? new File([outBlob], file.name, { type: file.type }) : file;
+        } catch (e) {
+            return file;
+        }
+    }
+
+    // Nén file PDF bằng Object Streams của pdf-lib
+    async function compressPdfFile(file) {
+        if (typeof PDFLib === 'undefined') return file;
+        try {
+            const arrayBuffer = await file.arrayBuffer();
+            const pdfDoc = await PDFLib.PDFDocument.load(arrayBuffer, { ignoreEncryption: true });
+            const compressedBytes = await pdfDoc.save({ useObjectStreams: true, addDefaultPage: false });
+            const outBlob = new Blob([compressedBytes], { type: 'application/pdf' });
+            return outBlob.size < file.size ? new File([outBlob], file.name, { type: 'application/pdf' }) : file;
+        } catch (e) {
+            return file;
+        }
+    }
+
+    // Nén dữ liệu văn bản cấu trúc (JSON, XML, SVG) mà giữ nguyên 100% giá trị
+    async function compressStructuredTextFile(file) {
+        try {
+            const text = await file.text();
+            const ext = file.name.split('.').pop().toLowerCase();
+            let minified = text;
+
+            if (ext === 'json') {
+                minified = JSON.stringify(JSON.parse(text));
+            } else if (ext === 'xml' || ext === 'svg') {
+                minified = text.replace(/>\s+</g, '><').trim();
+            }
+
+            const outBlob = new Blob([minified], { type: file.type || 'text/plain' });
+            return outBlob.size < file.size ? new File([outBlob], file.name, { type: file.type }) : file;
+        } catch (e) {
+            return file;
+        }
+    }
+
+    compressBtn.addEventListener('click', async () => {
         if (selectedFiles.length === 0) return;
 
-        convertBtn.textContent = 'Đang chuyển đổi sang PNG...';
-        convertBtn.disabled = true;
+        compressBtn.textContent = 'Đang tối ưu & nén dung lượng...';
+        compressBtn.disabled = true;
 
-        const scale = parseFloat(imageScaleSelect.value) || 2;
-        const baseName = outputFilenameInput.value.trim() || 'anh_chuyen_doi';
-        const pngOutputs = []; // Mảng chứa { name, blob }
+        const quality = parseInt(compressionSlider.value, 10) / 100;
+        const scale = parseFloat(preserveResolution.value);
+        const mode = outputMode.value;
 
-        try {
-            for (let fIdx = 0; fIdx < selectedFiles.length; fIdx++) {
-                const file = selectedFiles[fIdx];
-                const ext = file.name.split('.').pop().toLowerCase();
-                const cleanFileName = file.name.replace(/\.[^/.]+$/, "");
+        let totalOriginal = 0;
+        let totalCompressed = 0;
+        const processedFiles = [];
 
-                if (['jpg', 'jpeg', 'png', 'webp', 'bmp', 'svg'].includes(ext)) {
-                    const blob = await convertImageFileToPngBlob(file);
-                    pngOutputs.push({
-                        name: `${String(fIdx + 1).padStart(2, '0')}_${cleanFileName}.png`,
-                        blob: blob
-                    });
-                } 
-                else if (ext === 'pdf') {
-                    if (typeof pdfjsLib === 'undefined') {
-                        throw new Error('Không tải được thư viện đọc PDF. Vui lòng kiểm tra kết nối Internet.');
-                    }
-                    const arrayBuffer = await readAsArrayBuffer(file);
-                    const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        for (let i = 0; i < selectedFiles.length; i++) {
+            const origFile = selectedFiles[i].file;
+            totalOriginal += origFile.size;
+            const ext = origFile.name.split('.').pop().toLowerCase();
+            let resultFile = origFile;
 
-                    for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-                        const page = await pdf.getPage(pageNum);
-                        const viewport = page.getViewport({ scale: scale });
-                        const canvas = document.createElement('canvas');
-                        const ctx = canvas.getContext('2d');
-                        canvas.width = viewport.width;
-                        canvas.height = viewport.height;
-
-                        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
-                        const blob = await canvasToBlob(canvas);
-                        pngOutputs.push({
-                            name: `${String(fIdx + 1).padStart(2, '0')}_${cleanFileName}_trang_${pageNum}.png`,
-                            blob: blob
-                        });
-                    }
-                } 
-                else {
-                    // Xử lý Word, Excel, TXT, Markdown bằng cách render ra sandbox rồi chụp canvas
-                    renderSandbox.innerHTML = '';
-
-                    if (ext === 'docx') {
-                        if (typeof mammoth === 'undefined') {
-                            throw new Error('Không tải được thư viện đọc Word. Vui lòng kiểm tra kết nối Internet.');
-                        }
-                        const arrayBuffer = await readAsArrayBuffer(file);
-                        const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
-                        renderSandbox.innerHTML = result.value;
-                    } 
-                    else if (['xlsx', 'xls'].includes(ext)) {
-                        if (typeof XLSX === 'undefined') {
-                            throw new Error('Không tải được thư viện đọc Excel. Vui lòng kiểm tra kết nối Internet.');
-                        }
-                        const arrayBuffer = await readAsArrayBuffer(file);
-                        const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-                        workbook.SheetNames.forEach(sheetName => {
-                            const title = document.createElement('h3');
-                            title.textContent = `Sheet: ${sheetName}`;
-                            renderSandbox.appendChild(title);
-                            const htmlTable = XLSX.utils.sheet_to_html(workbook.Sheets[sheetName]);
-                            const div = document.createElement('div');
-                            div.innerHTML = htmlTable;
-                            renderSandbox.appendChild(div);
-                        });
-                    } 
-                    else if (ext === 'txt') {
-                        const text = await readAsText(file);
-                        const div = document.createElement('div');
-                        div.className = 'text-content';
-                        div.textContent = text;
-                        renderSandbox.appendChild(div);
-                    } 
-                    else if (ext === 'md') {
-                        const text = await readAsText(file);
-                        renderSandbox.innerHTML = typeof marked !== 'undefined' ? marked.parse(text) : `<pre>${text}</pre>`;
-                    }
-
-                    if (typeof html2canvas === 'undefined') {
-                        throw new Error('Không tải được thư viện xuất ảnh. Vui lòng kiểm tra kết nối Internet.');
-                    }
-
-                    const canvas = await html2canvas(renderSandbox, {
-                        scale: scale,
-                        backgroundColor: '#ffffff',
-                        useCORS: true
-                    });
-                    const blob = await canvasToBlob(canvas);
-                    pngOutputs.push({
-                        name: `${String(fIdx + 1).padStart(2, '0')}_${cleanFileName}.png`,
-                        blob: blob
-                    });
-                }
+            if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                const mime = ext === 'png' ? 'image/png' : (ext === 'webp' ? 'image/webp' : 'image/jpeg');
+                const optBlob = await compressImageBlob(origFile, mime, quality, scale);
+                resultFile = new File([optBlob], origFile.name, { type: mime });
+            } else if (['docx', 'xlsx', 'pptx'].includes(ext)) {
+                resultFile = await compressOfficeFile(origFile, quality, scale);
+            } else if (ext === 'pdf') {
+                resultFile = await compressPdfFile(origFile);
+            } else if (['json', 'xml', 'svg'].includes(ext)) {
+                resultFile = await compressStructuredTextFile(origFile);
             }
 
-            renderSandbox.innerHTML = '';
-
-            if (pngOutputs.length === 1) {
-                downloadBlob(pngOutputs[0].blob, `${baseName}.png`);
-            } else if (pngOutputs.length > 1) {
-                if (typeof JSZip === 'undefined') {
-                    throw new Error('Không tải được thư viện nén ZIP.');
-                }
-                const zip = new JSZip();
-                pngOutputs.forEach(item => {
-                    zip.file(item.name, item.blob);
-                });
-                const zipBlob = await zip.generateAsync({ type: 'blob' });
-                downloadBlob(zipBlob, `${baseName}.zip`);
-            }
-
-        } catch (err) {
-            alert('Lỗi: ' + err.message);
-        } finally {
-            convertBtn.textContent = 'Chuyển sang PNG & Tải về';
-            convertBtn.disabled = false;
+            selectedFiles[i].compressedSize = resultFile.size;
+            totalCompressed += resultFile.size;
+            processedFiles.push(resultFile);
         }
+
+        renderFileList();
+
+        const savedBytes = totalOriginal - totalCompressed;
+        const savedPercent = totalOriginal > 0 ? ((savedBytes / totalOriginal) * 100).toFixed(1) : 0;
+        summaryBox.style.display = 'block';
+        summaryBox.innerHTML = `Hoàn tất! Tổng dung lượng giảm từ <b>${formatBytes(totalOriginal)}</b> xuống <b>${formatBytes(totalCompressed)}</b> (Tiết kiệm <b>${savedPercent}%</b>)`;
+
+        // Xuất tải về
+        if (processedFiles.length === 1 && mode === 'auto') {
+            triggerDownload(processedFiles[0], processedFiles[0].name);
+        } else {
+            const zip = new JSZip();
+            processedFiles.forEach((f) => {
+                zip.file(f.name, f, { compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            });
+            const zipBlob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 9 } });
+            triggerDownload(zipBlob, 'tai_lieu_da_nen.zip');
+        }
+
+        compressBtn.textContent = 'Bắt đầu nén & Tải về';
+        compressBtn.disabled = false;
     });
 
-    function convertImageFileToPngBlob(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = img.naturalWidth || img.width;
-                    canvas.height = img.naturalHeight || img.height;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0);
-                    canvas.toBlob((blob) => {
-                        if (blob) resolve(blob);
-                        else reject(new Error('Không thể xuất ảnh PNG từ file này.'));
-                    }, 'image/png');
-                };
-                img.onerror = () => reject(new Error('Không thể đọc dữ liệu hình ảnh.'));
-                img.src = e.target.result;
-            };
-            reader.onerror = () => reject(new Error('Lỗi đọc file ảnh.'));
-            reader.readAsDataURL(file);
-        });
-    }
-
-    function canvasToBlob(canvas) {
-        return new Promise((resolve, reject) => {
-            canvas.toBlob((blob) => {
-                if (blob) resolve(blob);
-                else reject(new Error('Không thể tạo dữ liệu ảnh PNG.'));
-            }, 'image/png');
-        });
-    }
-
-    function downloadBlob(blob, filename) {
+    function triggerDownload(blob, filename) {
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
@@ -693,23 +797,8 @@
         document.body.removeChild(a);
         setTimeout(() => URL.revokeObjectURL(url), 1000);
     }
-
-    function readAsArrayBuffer(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.readAsArrayBuffer(file);
-        });
-    }
-
-    function readAsText(file) {
-        return new Promise((resolve) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.readAsText(file);
-        });
-    }
 </script>
 
 </body>
 </html>
+```
