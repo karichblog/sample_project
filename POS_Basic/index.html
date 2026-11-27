@@ -4,10 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Web POS Chuyên Dụng</title>
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     * { box-sizing: border-box; font-family: Arial, sans-serif; }
-    body { margin: 0; background: #f3f4f6; display: flex; flex-direction: row; height: 100vh; }
-    @media (max-width: 768px) { body { flex-direction: column; height: auto; } }
+    body { margin: 0; background: #f3f4f6; display: flex; flex-direction: row; min-height: 100vh; }
+    @media (max-width: 768px) { body { flex-direction: column; } }
     .left { flex: 1.8; padding: 14px; overflow-y: auto; }
     .right { flex: 1.3; background: #fff; border-left: 1px solid #ddd; display: flex; flex-direction: column; padding: 14px; }
     .toolbar { display: flex; gap: 6px; margin-bottom: 12px; flex-wrap: wrap; }
@@ -17,12 +18,12 @@
     .btn-gray { background: #4b5563; }
     .btn-orange { background: #d97706; }
     .btn-teal { background: #0d9488; }
-    .btn-green { background: #16a34a; font-weight: bold; font-size: 15px; padding: 12px; }
-    .btn-red { background: #dc2626; padding: 4px 8px; }
+    .btn-green { background: #16a34a; font-weight: bold; font-size: 15px; padding: 12px; width: 100%; }
+    .btn-red { background: #dc2626; padding: 5px 9px; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(155px, 1fr)); gap: 10px; }
-    .card { background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb; cursor: pointer; position: relative; }
-    .card:hover { border-color: #2563eb; }
-    .card h4 { margin: 0 0 4px; font-size: 14px; }
+    .card { background: #fff; padding: 10px; border-radius: 8px; border: 1px solid #e5e7eb; cursor: pointer; transition: 0.15s; }
+    .card:hover { border-color: #2563eb; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .card h4 { margin: 0 0 4px; font-size: 14px; color: #111827; }
     .card .price { color: #2563eb; font-weight: bold; }
     .card .meta { font-size: 11px; color: #6b7280; margin-top: 4px; line-height: 1.4; }
     .badge { background: #fef3c7; color: #92400e; font-size: 10px; padding: 2px 5px; border-radius: 4px; display: inline-block; margin-top: 4px; }
@@ -39,7 +40,7 @@
     .quick-cash button { background: #e5e7eb; color: #111; font-size: 12px; padding: 5px 8px; }
     #scannerModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 999; align-items: center; justify-content: center; }
     .scanner-box { background: #fff; padding: 16px; border-radius: 10px; width: 92%; max-width: 420px; text-align: center; }
-    video { width: 100%; border-radius: 8px; background: #000; margin: 10px 0; max-height: 280px; object-fit: cover; }
+    #reader { width: 100%; margin: 10px 0; }
     @media print {
       body * { visibility: hidden; }
       #receipt, #receipt * { visibility: visible; }
@@ -50,11 +51,11 @@
 <body>
   <div class="left">
     <div class="toolbar">
-      <input id="search" placeholder="Tìm tên / quét mã..." style="flex:1; min-width:140px" oninput="renderProducts()" />
-      <button class="btn-orange" onclick="openScanner()">📷 Quét Camera</button>
-      <button class="btn-gray" onclick="addNewProduct()">+ Thêm SP</button>
-      <button class="btn-teal" onclick="exportOrdersCSV()">⬇ Xuất Đơn (CSV)</button>
-      <button class="btn-teal" onclick="exportStockCSV()">⬇ Xuất Kho (CSV)</button>
+      <input id="search" placeholder="Tìm tên / quét mã..." style="flex:1; min-width:140px" />
+      <button type="button" id="btnScan" class="btn-orange">📷 Quét Camera</button>
+      <button type="button" id="btnAddProd" class="btn-gray">+ Thêm SP</button>
+      <button type="button" id="btnExportOrders" class="btn-teal">⬇ Xuất Đơn (CSV)</button>
+      <button type="button" id="btnExportStock" class="btn-teal">⬇ Xuất Kho (CSV)</button>
     </div>
     <div id="productGrid" class="grid"></div>
   </div>
@@ -63,8 +64,8 @@
     <div class="row">
       <h3 style="margin:0">Hóa đơn bán hàng</h3>
       <div>
-        <button class="btn-gray" onclick="showDailyReport()">Báo cáo ngày</button>
-        <button class="btn-red" onclick="clearCart()">Xóa giỏ</button>
+        <button type="button" id="btnReport" class="btn-gray">Báo cáo ngày</button>
+        <button type="button" id="btnClearCart" class="btn-red">Xóa giỏ</button>
       </div>
     </div>
 
@@ -79,8 +80,8 @@
       <div class="row">
         <span>Giảm giá toàn đơn:</span>
         <div>
-          <input id="discountVal" type="number" value="0" min="0" style="width:80px" oninput="calculate()" />
-          <select id="discountType" onchange="calculate()">
+          <input id="discountVal" type="number" value="0" min="0" style="width:80px" />
+          <select id="discountType">
             <option value="amount">VNĐ</option>
             <option value="percent">%</option>
           </select>
@@ -88,12 +89,12 @@
       </div>
 
       <div class="row">
-        <label><input type="checkbox" id="vatToggle" onchange="calculate()" /> Thuế VAT (%)</label>
-        <input id="vatRate" type="number" value="8" min="0" style="width:60px" oninput="calculate()" />
+        <label><input type="checkbox" id="vatToggle" /> Thuế VAT (%)</label>
+        <input id="vatRate" type="number" value="8" min="0" style="width:60px" />
       </div>
 
       <div class="row">
-        <label><input type="checkbox" id="roundToggle" checked onchange="calculate()" /> Làm tròn hàng nghìn</label>
+        <label><input type="checkbox" id="roundToggle" checked /> Làm tròn hàng nghìn</label>
       </div>
 
       <div class="profit-box">
@@ -108,15 +109,15 @@
 
       <div class="row">
         <span>Tiền khách đưa:</span>
-        <input id="customerCash" type="number" value="0" min="0" style="width:125px; font-weight:bold" oninput="calculateChange()" />
+        <input id="customerCash" type="number" value="0" min="0" style="width:125px; font-weight:bold" />
       </div>
 
       <div class="quick-cash">
-        <button onclick="setExactCash()">Đủ tiền</button>
-        <button onclick="setCash(50000)">50k</button>
-        <button onclick="setCash(100000)">100k</button>
-        <button onclick="setCash(200000)">200k</button>
-        <button onclick="setCash(500000)">500k</button>
+        <button type="button" id="btnExactCash">Đủ tiền</button>
+        <button type="button" class="cash-preset" data-amount="50000">50k</button>
+        <button type="button" class="cash-preset" data-amount="100000">100k</button>
+        <button type="button" class="cash-preset" data-amount="200000">200k</button>
+        <button type="button" class="cash-preset" data-amount="500000">500k</button>
       </div>
 
       <div class="row">
@@ -124,389 +125,397 @@
         <strong id="changeAmount" style="color:#16a34a; font-size:15px">0 đ</strong>
       </div>
 
-      <button class="btn-green" onclick="checkout()">THANH TOÁN & IN BILL</button>
+      <button type="button" id="btnCheckout" class="btn-green">THANH TOÁN & IN BILL</button>
     </div>
   </div>
 
-  <!-- Modal Quét Camera (Sử dụng BarcodeDetector API tích hợp sẵn trên trình duyệt) -->
+  <!-- Modal Quét Camera -->
   <div id="scannerModal">
     <div class="scanner-box">
-      <h4 style="margin:0 0 6px">Đưa mã vạch / QR vào khung camera</h4>
-      <video id="cameraVideo" autoplay playsinline></video>
-      <div id="scanStatus" style="font-size:12px; color:#16a34a; margin-bottom:8px"></div>
-      <div style="display:flex; gap:6px; justify-content:center; margin-bottom:8px;">
+      <h4 style="margin:0 0 8px">Đưa mã vạch / QR vào khung hình</h4>
+      <div id="reader"></div>
+      <div style="display:flex; gap:6px; margin-bottom:8px;">
         <input id="manualBarcodeInput" placeholder="Hoặc nhập mã thủ công..." style="flex:1" />
-        <button onclick="submitManualBarcode()">Thêm</button>
+        <button type="button" id="btnManualAdd">Thêm</button>
       </div>
-      <button class="btn-red" onclick="closeScanner()">Đóng Camera</button>
+      <div id="scanStatus" style="font-size:12px; color:#16a34a; margin-bottom:8px"></div>
+      <button type="button" id="btnCloseScan" class="btn-red">Đóng Camera</button>
     </div>
   </div>
 
   <div id="receipt" style="display:none"></div>
 
   <script>
-    const defaultProducts = [
-      { id: 1, barcode: "893001", name: "Cà phê sữa đá", cost: 12000, price: 29000, wholesaleQty: 5, wholesalePrice: 25000, stock: 50 },
-      { id: 2, barcode: "893002", name: "Trà đào cam sả", cost: 15000, price: 35000, wholesaleQty: 5, wholesalePrice: 30000, stock: 40 },
-      { id: 3, barcode: "893003", name: "Bánh mì thịt", cost: 11000, price: 25000, wholesaleQty: 10, wholesalePrice: 22000, stock: 30 },
-      { id: 4, barcode: "893004", name: "Nước suối", cost: 4000, price: 10000, wholesaleQty: 12, wholesalePrice: 8000, stock: 100 }
-    ];
+    document.addEventListener("DOMContentLoaded", function () {
+      const defaultProducts = [
+        { id: 1, barcode: "893001", name: "Cà phê sữa đá", cost: 12000, price: 29000, wholesaleQty: 5, wholesalePrice: 25000, stock: 50 },
+        { id: 2, barcode: "893002", name: "Trà đào cam sả", cost: 15000, price: 35000, wholesaleQty: 5, wholesalePrice: 30000, stock: 40 },
+        { id: 3, barcode: "893003", name: "Bánh mì thịt", cost: 11000, price: 25000, wholesaleQty: 10, wholesalePrice: 22000, stock: 30 },
+        { id: 4, barcode: "893004", name: "Nước suối", cost: 4000, price: 10000, wholesaleQty: 12, wholesalePrice: 8000, stock: 100 }
+      ];
 
-    let products = JSON.parse(localStorage.getItem("pos_products_v2")) || defaultProducts;
-    let orders = JSON.parse(localStorage.getItem("pos_orders_v2")) || [];
-    let cart = [];
-    let currentFinalTotal = 0;
-    let currentProfit = 0;
-    let videoStream = null;
-    let scanInterval = null;
+      let products = JSON.parse(localStorage.getItem("pos_products_v3")) || defaultProducts;
+      let orders = JSON.parse(localStorage.getItem("pos_orders_v3")) || [];
+      let cart = [];
+      let currentFinalTotal = 0;
+      let currentProfit = 0;
+      let html5QrCode = null;
 
-    const formatMoney = (n) => Math.round(n).toLocaleString("vi-VN") + " đ";
+      const formatMoney = (n) => Math.round(n).toLocaleString("vi-VN") + " đ";
 
-    function saveStorage() {
-      localStorage.setItem("pos_products_v2", JSON.stringify(products));
-      localStorage.setItem("pos_orders_v2", JSON.stringify(orders));
-    }
-
-    function renderProducts() {
-      const q = document.getElementById("search").value.trim().toLowerCase();
-      const exactBarcode = products.find(p => p.barcode.toLowerCase() === q && q !== "");
-      if (exactBarcode) {
-        addToCart(exactBarcode.id);
-        document.getElementById("search").value = "";
-        return renderProducts();
+      function saveStorage() {
+        localStorage.setItem("pos_products_v3", JSON.stringify(products));
+        localStorage.setItem("pos_orders_v3", JSON.stringify(orders));
       }
 
-      const grid = document.getElementById("productGrid");
-      grid.innerHTML = products
-        .filter(p => p.name.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q))
-        .map(p => `
-          <div class="card" onclick="addToCart(${p.id})">
+      function getEffectiveUnitPrice(prod, qty) {
+        if (prod.wholesaleQty && qty >= prod.wholesaleQty && prod.wholesalePrice > 0) {
+          return prod.wholesalePrice;
+        }
+        return prod.price;
+      }
+
+      function renderProducts() {
+        const searchEl = document.getElementById("search");
+        const q = searchEl.value.trim().toLowerCase();
+        const exactBarcode = products.find(p => p.barcode.toLowerCase() === q && q !== "");
+        if (exactBarcode) {
+          addToCart(exactBarcode.id);
+          searchEl.value = "";
+          return renderProducts();
+        }
+
+        const grid = document.getElementById("productGrid");
+        const filtered = products.filter(p => p.name.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q));
+        grid.innerHTML = filtered.map(p => `
+          <div class="card" data-id="${p.id}">
             <h4>${p.name}</h4>
             <div class="price">${formatMoney(p.price)}</div>
             <div class="meta">Kho: ${p.stock} | Mã: ${p.barcode}</div>
             ${p.wholesaleQty ? `<div class="badge">Mua ≥${p.wholesaleQty}: ${formatMoney(p.wholesalePrice)}</div>` : ""}
           </div>
         `).join("");
-    }
 
-    function getEffectiveUnitPrice(prod, qty) {
-      if (prod.wholesaleQty && qty >= prod.wholesaleQty && prod.wholesalePrice > 0) {
-        return prod.wholesalePrice;
+        grid.querySelectorAll(".card").forEach(card => {
+          card.addEventListener("click", () => {
+            addToCart(Number(card.getAttribute("data-id")));
+          });
+        });
       }
-      return prod.price;
-    }
 
-    function addToCart(id) {
-      const prod = products.find(p => p.id === id);
-      if (!prod || prod.stock <= 0) return alert("Sản phẩm đã hết hàng!");
-      const existing = cart.find(c => c.id === id);
-      if (existing) {
-        if (existing.qty + 1 > prod.stock) return alert("Vượt quá tồn kho!");
-        existing.qty = +(existing.qty + 1).toFixed(2);
-      } else {
-        cart.push({ id: prod.id, name: prod.name, cost: prod.cost || 0, qty: 1, itemDiscountPercent: 0 });
-      }
-      renderCart();
-    }
-
-    function updateQty(id, val) {
-      const qty = parseFloat(val);
-      const prod = products.find(p => p.id === id);
-      if (isNaN(qty) || qty <= 0) {
-        cart = cart.filter(c => c.id !== id);
-      } else if (qty > prod.stock) {
-        alert("Vượt quá tồn kho!");
-      } else {
-        const item = cart.find(c => c.id === id);
-        if (item) item.qty = qty;
-      }
-      renderCart();
-    }
-
-    function updateItemDiscount(id, val) {
-      const item = cart.find(c => c.id === id);
-      if (item) {
-        item.itemDiscountPercent = Math.min(100, Math.max(0, parseFloat(val) || 0));
+      function addToCart(id) {
+        const prod = products.find(p => p.id === id);
+        if (!prod || prod.stock <= 0) {
+          alert("Sản phẩm đã hết hàng!");
+          return;
+        }
+        const existing = cart.find(c => c.id === id);
+        if (existing) {
+          if (existing.qty + 1 > prod.stock) {
+            alert("Vượt quá tồn kho!");
+            return;
+          }
+          existing.qty = +(existing.qty + 1).toFixed(2);
+        } else {
+          cart.push({ id: prod.id, name: prod.name, cost: prod.cost || 0, qty: 1, itemDiscountPercent: 0 });
+        }
         renderCart();
       }
-    }
 
-    function renderCart() {
-      const list = document.getElementById("cartList");
-      list.innerHTML = cart.map(item => {
-        const prod = products.find(p => p.id === item.id);
-        const unitPrice = getEffectiveUnitPrice(prod, item.qty);
-        const isWholesale = unitPrice < prod.price;
-        const lineTotal = unitPrice * item.qty * (1 - item.itemDiscountPercent / 100);
-
-        return `
-          <div class="cart-item">
-            <div class="cart-top">
-              <div style="flex:1">
-                <strong>${item.name}</strong>
-                ${isWholesale ? `<span class="badge">Giá sỉ</span>` : ""}
-              </div>
-              <input type="number" step="0.1" value="${item.qty}" onchange="updateQty(${item.id}, this.value)" title="Số lượng" />
-              <div style="width:85px; text-align:right"><strong>${formatMoney(lineTotal)}</strong></div>
-              <button class="btn-red" onclick="updateQty(${item.id}, 0)">×</button>
-            </div>
-            <div class="cart-sub">
-              <span>Đơn giá: ${formatMoney(unitPrice)}</span>
-              <span>CK dòng (%): <input type="number" min="0" max="100" value="${item.itemDiscountPercent}" onchange="updateItemDiscount(${item.id}, this.value)" style="width:48px; padding:2px" /></span>
-            </div>
-          </div>
-        `;
-      }).join("");
-      calculate();
-    }
-
-    function calculate() {
-      let subTotal = 0;
-      let totalCost = 0;
-
-      cart.forEach(item => {
-        const prod = products.find(p => p.id === item.id);
-        const unitPrice = getEffectiveUnitPrice(prod, item.qty);
-        const lineTotal = unitPrice * item.qty * (1 - item.itemDiscountPercent / 100);
-        subTotal += lineTotal;
-        totalCost += (item.cost || 0) * item.qty;
-      });
-
-      const discountVal = parseFloat(document.getElementById("discountVal").value) || 0;
-      const discountType = document.getElementById("discountType").value;
-      const orderDiscount = discountType === "percent" ? subTotal * (discountVal / 100) : discountVal;
-
-      let afterDiscount = Math.max(0, subTotal - orderDiscount);
-      const vatEnabled = document.getElementById("vatToggle").checked;
-      const vatRate = parseFloat(document.getElementById("vatRate").value) || 0;
-      const vatAmount = vatEnabled ? afterDiscount * (vatRate / 100) : 0;
-
-      let total = afterDiscount + vatAmount;
-      if (document.getElementById("roundToggle").checked) {
-        total = Math.round(total / 1000) * 1000;
-      }
-
-      currentProfit = afterDiscount - totalCost;
-      const margin = afterDiscount > 0 ? ((currentProfit / afterDiscount) * 100).toFixed(1) : 0;
-
-      currentFinalTotal = total;
-      document.getElementById("subTotal").innerText = formatMoney(subTotal);
-      document.getElementById("finalTotal").innerText = formatMoney(total);
-      document.getElementById("grossProfit").innerText = `${formatMoney(currentProfit)} (${margin}%)`;
-      calculateChange();
-    }
-
-    function setExactCash() {
-      document.getElementById("customerCash").value = currentFinalTotal;
-      calculateChange();
-    }
-
-    function setCash(amount) {
-      document.getElementById("customerCash").value = amount;
-      calculateChange();
-    }
-
-    function calculateChange() {
-      const cash = parseFloat(document.getElementById("customerCash").value) || 0;
-      const change = cash - currentFinalTotal;
-      document.getElementById("changeAmount").innerText = change >= 0 ? formatMoney(change) : "Thiếu " + formatMoney(Math.abs(change));
-    }
-
-    function clearCart() {
-      cart = [];
-      document.getElementById("discountVal").value = 0;
-      document.getElementById("customerCash").value = 0;
-      renderCart();
-    }
-
-    function checkout() {
-      if (cart.length === 0) return alert("Giỏ hàng đang trống!");
-      const cash = parseFloat(document.getElementById("customerCash").value) || 0;
-      if (cash < currentFinalTotal) return alert("Tiền khách đưa chưa đủ!");
-
-      const orderItems = cart.map(item => {
-        const prod = products.find(p => p.id === item.id);
-        const unitPrice = getEffectiveUnitPrice(prod, item.qty);
-        const lineTotal = unitPrice * item.qty * (1 - item.itemDiscountPercent / 100);
-        if (prod) prod.stock = Math.max(0, +(prod.stock - item.qty).toFixed(2));
-        return { name: item.name, qty: item.qty, unitPrice, discount: item.itemDiscountPercent, lineTotal };
-      });
-
-      const order = {
-        id: "HD" + Date.now().toString().slice(-6),
-        time: new Date().toLocaleString("vi-VN"),
-        items: orderItems,
-        total: currentFinalTotal,
-        profit: Math.round(currentProfit),
-        cash,
-        change: cash - currentFinalTotal
-      };
-      orders.push(order);
-      saveStorage();
-
-      const receipt = document.getElementById("receipt");
-      receipt.style.display = "block";
-      receipt.innerHTML = `
-        <h3 style="text-align:center;margin:0">HÓA ĐƠN BÁN HÀNG</h3>
-        <p style="text-align:center;margin:4px 0">Mã: ${order.id} - ${order.time}</p><hr/>
-        ${order.items.map(i => `<div>${i.name} x${i.qty} (${formatMoney(i.unitPrice)}) = ${formatMoney(i.lineTotal)}</div>`).join("")}
-        <hr/>
-        <div><strong>Tổng cộng: ${formatMoney(order.total)}</strong></div>
-        <div>Khách đưa: ${formatMoney(order.cash)}</div>
-        <div>Tiền thừa: ${formatMoney(order.change)}</div>
-      `;
-      window.print();
-      receipt.style.display = "none";
-
-      clearCart();
-      renderProducts();
-    }
-
-    function addNewProduct() {
-      const name = prompt("Tên sản phẩm:");
-      if (!name) return;
-      const cost = parseFloat(prompt("Giá vốn (VNĐ):") || "0");
-      const price = parseFloat(prompt("Giá bán lẻ (VNĐ):") || "0");
-      const wholesaleQty = parseFloat(prompt("Mốc số lượng mua sỉ (nhập 0 nếu không áp dụng):") || "0");
-      const wholesalePrice = wholesaleQty > 0 ? parseFloat(prompt("Đơn giá sỉ (VNĐ):") || price) : 0;
-      const stock = parseFloat(prompt("Số lượng tồn kho:") || "0");
-      const barcode = prompt("Mã vạch / QR (để trống tự tạo):") || Date.now().toString().slice(-6);
-
-      products.push({ id: Date.now(), name, cost, price, wholesaleQty, wholesalePrice, stock, barcode });
-      saveStorage();
-      renderProducts();
-    }
-
-    function showDailyReport() {
-      const today = new Date().toLocaleDateString("vi-VN");
-      const todayOrders = orders.filter(o => o.time.includes(today));
-      const revenue = todayOrders.reduce((s, o) => s + o.total, 0);
-      const profit = todayOrders.reduce((s, o) => s + (o.profit || 0), 0);
-      alert(`Báo cáo hôm nay (${today}):
-- Số đơn: ${todayOrders.length}
-- Doanh thu: ${formatMoney(revenue)}
-- Lãi gộp ước tính: ${formatMoney(profit)}`);
-    }
-
-    function handleDetectedCode(code) {
-      const prod = products.find(p => p.barcode.toLowerCase() === code.trim().toLowerCase());
-      if (prod) {
-        addToCart(prod.id);
-        document.getElementById("scanStatus").innerText = `✓ Đã thêm: ${prod.name}`;
-        if (navigator.vibrate) navigator.vibrate(100);
-      } else {
-        document.getElementById("scanStatus").innerText = `Mã "${code}" chưa có trong danh mục!`;
-      }
-    }
-
-    function submitManualBarcode() {
-      const val = document.getElementById("manualBarcodeInput").value.trim();
-      if (val) {
-        handleDetectedCode(val);
-        document.getElementById("manualBarcodeInput").value = "";
-      }
-    }
-
-    async function openScanner() {
-      document.getElementById("scannerModal").style.display = "flex";
-      const statusEl = document.getElementById("scanStatus");
-      statusEl.innerText = "Đang khởi động camera...";
-
-      try {
-        videoStream = await navigator.mediaDevices.getUserMedia({
-          video: { facingMode: "environment" }
-        });
-        const video = document.getElementById("cameraVideo");
-        video.srcObject = videoStream;
-        await video.play();
-
-        if ("BarcodeDetector" in window) {
-          const detector = new BarcodeDetector({
-            formats: ["ean_13", "ean_8", "code_128", "code_39", "qr_code", "upc_a", "upc_e"]
-          });
-          statusEl.innerText = "Camera sẵn sàng. Đưa mã vào khung hình...";
-          let lastCode = "";
-          let lastTime = 0;
-
-          scanInterval = setInterval(async () => {
-            if (video.readyState === video.HAVE_ENOUGH_DATA) {
-              try {
-                const barcodes = await detector.detect(video);
-                if (barcodes.length > 0) {
-                  const code = barcodes[0].rawValue;
-                  const now = Date.now();
-                  if (code !== lastCode || now - lastTime > 2000) {
-                    lastCode = code;
-                    lastTime = now;
-                    handleDetectedCode(code);
-                  }
-                }
-              } catch (e) {}
-            }
-          }, 400);
+      function updateQty(id, val) {
+        const qty = parseFloat(val);
+        const prod = products.find(p => p.id === id);
+        if (isNaN(qty) || qty <= 0) {
+          cart = cart.filter(c => c.id !== id);
+        } else if (qty > prod.stock) {
+          alert("Vượt quá tồn kho!");
         } else {
-          statusEl.innerText = "Trình duyệt chưa hỗ trợ quét tự động BarcodeDetector (hãy dùng Chrome/Edge mới hoặc nhập mã bên dưới).";
+          const item = cart.find(c => c.id === id);
+          if (item) item.qty = qty;
         }
-      } catch (err) {
-        statusEl.innerText = "Không mở được camera (Cần chạy trên HTTPS/localhost hoặc cấp quyền camera).";
+        renderCart();
       }
-    }
 
-    function closeScanner() {
-      if (scanInterval) {
-        clearInterval(scanInterval);
-        scanInterval = null;
+      function updateItemDiscount(id, val) {
+        const item = cart.find(c => c.id === id);
+        if (item) {
+          item.itemDiscountPercent = Math.min(100, Math.max(0, parseFloat(val) || 0));
+          renderCart();
+        }
       }
-      if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        videoStream = null;
+
+      function renderCart() {
+        const list = document.getElementById("cartList");
+        list.innerHTML = cart.map(item => {
+          const prod = products.find(p => p.id === item.id);
+          const unitPrice = getEffectiveUnitPrice(prod, item.qty);
+          const isWholesale = unitPrice < prod.price;
+          const lineTotal = unitPrice * item.qty * (1 - item.itemDiscountPercent / 100);
+
+          return `
+            <div class="cart-item" data-id="${item.id}">
+              <div class="cart-top">
+                <div style="flex:1">
+                  <strong>${item.name}</strong>
+                  ${isWholesale ? `<span class="badge">Giá sỉ</span>` : ""}
+                </div>
+                <input type="number" step="0.1" class="qty-input" value="${item.qty}" title="Số lượng" />
+                <div style="width:85px; text-align:right"><strong>${formatMoney(lineTotal)}</strong></div>
+                <button type="button" class="btn-red btn-remove">×</button>
+              </div>
+              <div class="cart-sub">
+                <span>Đơn giá: ${formatMoney(unitPrice)}</span>
+                <span>CK dòng (%): <input type="number" min="0" max="100" class="disc-input" value="${item.itemDiscountPercent}" style="width:48px; padding:2px" /></span>
+              </div>
+            </div>
+          `;
+        }).join("");
+
+        list.querySelectorAll(".cart-item").forEach(row => {
+          const id = Number(row.getAttribute("data-id"));
+          row.querySelector(".qty-input").addEventListener("change", (e) => updateQty(id, e.target.value));
+          row.querySelector(".disc-input").addEventListener("change", (e) => updateItemDiscount(id, e.target.value));
+          row.querySelector(".btn-remove").addEventListener("click", () => updateQty(id, 0));
+        });
+
+        calculate();
       }
-      document.getElementById("scannerModal").style.display = "none";
-    }
 
-    function downloadCSV(filename, rows) {
-      const csvContent = "﻿" + rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("
-");
-      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = filename;
-      link.click();
-    }
+      function calculate() {
+        let subTotal = 0;
+        let totalCost = 0;
 
-    function exportOrdersCSV() {
-      if (orders.length === 0) return alert("Chưa có đơn hàng nào để xuất!");
-      const rows = [
-        ["Mã đơn", "Thời gian", "Chi tiết sản phẩm", "Tổng thanh toán (VNĐ)", "Lãi gộp (VNĐ)", "Khách đưa", "Tiền thừa"]
-      ];
-      orders.forEach(o => {
-        const detail = o.items.map(i => `${i.name} (x${i.qty})`).join("; ");
-        rows.push([o.id, o.time, detail, o.total, o.profit || 0, o.cash, o.change]);
+        cart.forEach(item => {
+          const prod = products.find(p => p.id === item.id);
+          const unitPrice = getEffectiveUnitPrice(prod, item.qty);
+          const lineTotal = unitPrice * item.qty * (1 - item.itemDiscountPercent / 100);
+          subTotal += lineTotal;
+          totalCost += (item.cost || 0) * item.qty;
+        });
+
+        const discountVal = parseFloat(document.getElementById("discountVal").value) || 0;
+        const discountType = document.getElementById("discountType").value;
+        const orderDiscount = discountType === "percent" ? subTotal * (discountVal / 100) : discountVal;
+
+        let afterDiscount = Math.max(0, subTotal - orderDiscount);
+        const vatEnabled = document.getElementById("vatToggle").checked;
+        const vatRate = parseFloat(document.getElementById("vatRate").value) || 0;
+        const vatAmount = vatEnabled ? afterDiscount * (vatRate / 100) : 0;
+
+        let total = afterDiscount + vatAmount;
+        if (document.getElementById("roundToggle").checked) {
+          total = Math.round(total / 1000) * 1000;
+        }
+
+        currentProfit = afterDiscount - totalCost;
+        const margin = afterDiscount > 0 ? ((currentProfit / afterDiscount) * 100).toFixed(1) : 0;
+
+        currentFinalTotal = total;
+        document.getElementById("subTotal").innerText = formatMoney(subTotal);
+        document.getElementById("finalTotal").innerText = formatMoney(total);
+        document.getElementById("grossProfit").innerText = `${formatMoney(currentProfit)} (${margin}%)`;
+        calculateChange();
+      }
+
+      function calculateChange() {
+        const cash = parseFloat(document.getElementById("customerCash").value) || 0;
+        const change = cash - currentFinalTotal;
+        document.getElementById("changeAmount").innerText = change >= 0
+          ? formatMoney(change)
+          : "Thiếu " + formatMoney(Math.abs(change));
+      }
+
+      function clearCart() {
+        cart = [];
+        document.getElementById("discountVal").value = 0;
+        document.getElementById("customerCash").value = 0;
+        renderCart();
+      }
+
+      function checkout() {
+        if (cart.length === 0) {
+          alert("Giỏ hàng đang trống!");
+          return;
+        }
+        const cash = parseFloat(document.getElementById("customerCash").value) || 0;
+        if (cash < currentFinalTotal) {
+          alert("Tiền khách đưa chưa đủ!");
+          return;
+        }
+
+        const orderItems = cart.map(item => {
+          const prod = products.find(p => p.id === item.id);
+          const unitPrice = getEffectiveUnitPrice(prod, item.qty);
+          const lineTotal = unitPrice * item.qty * (1 - item.itemDiscountPercent / 100);
+          if (prod) prod.stock = Math.max(0, +(prod.stock - item.qty).toFixed(2));
+          return { name: item.name, qty: item.qty, unitPrice, discount: item.itemDiscountPercent, lineTotal };
+        });
+
+        const order = {
+          id: "HD" + Date.now().toString().slice(-6),
+          time: new Date().toLocaleString("vi-VN"),
+          items: orderItems,
+          total: currentFinalTotal,
+          profit: Math.round(currentProfit),
+          cash,
+          change: cash - currentFinalTotal
+        };
+        orders.push(order);
+        saveStorage();
+
+        const receipt = document.getElementById("receipt");
+        receipt.style.display = "block";
+        receipt.innerHTML = `
+          <h3 style="text-align:center;margin:0">HÓA ĐƠN BÁN HÀNG</h3>
+          <p style="text-align:center;margin:4px 0">Mã: ${order.id} - ${order.time}</p><hr/>
+          ${order.items.map(i => `<div>${i.name} x${i.qty} (${formatMoney(i.unitPrice)}) = ${formatMoney(i.lineTotal)}</div>`).join("")}
+          <hr/>
+          <div><strong>Tổng cộng: ${formatMoney(order.total)}</strong></div>
+          <div>Khách đưa: ${formatMoney(order.cash)}</div>
+          <div>Tiền thừa: ${formatMoney(order.change)}</div>
+        `;
+        window.print();
+        receipt.style.display = "none";
+
+        clearCart();
+        renderProducts();
+      }
+
+      function addNewProduct() {
+        const name = prompt("Tên sản phẩm:");
+        if (!name) return;
+        const cost = parseFloat(prompt("Giá vốn (VNĐ):") || "0");
+        const price = parseFloat(prompt("Giá bán lẻ (VNĐ):") || "0");
+        const wholesaleQty = parseFloat(prompt("Mốc số lượng mua sỉ (nhập 0 nếu không áp dụng):") || "0");
+        const wholesalePrice = wholesaleQty > 0 ? parseFloat(prompt("Đơn giá sỉ (VNĐ):") || price) : 0;
+        const stock = parseFloat(prompt("Số lượng tồn kho:") || "0");
+        const barcode = prompt("Mã vạch / QR (để trống tự tạo):") || Date.now().toString().slice(-6);
+
+        products.push({ id: Date.now(), name, cost, price, wholesaleQty, wholesalePrice, stock, barcode });
+        saveStorage();
+        renderProducts();
+      }
+
+      function showDailyReport() {
+        const today = new Date().toLocaleDateString("vi-VN");
+        const todayOrders = orders.filter(o => o.time.includes(today));
+        const revenue = todayOrders.reduce((s, o) => s + o.total, 0);
+        const profit = todayOrders.reduce((s, o) => s + (o.profit || 0), 0);
+        alert("Báo cáo hôm nay (" + today + "):\n- Số đơn: " + todayOrders.length + "\n- Doanh thu: " + formatMoney(revenue) + "\n- Lãi gộp ước tính: " + formatMoney(profit));
+      }
+
+      function processBarcode(code) {
+        const clean = code.trim().toLowerCase();
+        if (!clean) return;
+        const prod = products.find(p => p.barcode.toLowerCase() === clean);
+        if (prod) {
+          addToCart(prod.id);
+          document.getElementById("scanStatus").innerText = "✓ Đã thêm: " + prod.name;
+          if (navigator.vibrate) navigator.vibrate(100);
+        } else {
+          document.getElementById("scanStatus").innerText = "Mã '" + code + "' chưa có trong danh mục!";
+        }
+      }
+
+      function openScanner() {
+        document.getElementById("scannerModal").style.display = "flex";
+        document.getElementById("scanStatus").innerText = "Đang khởi động camera...";
+
+        if (typeof Html5Qrcode === "undefined") {
+          document.getElementById("scanStatus").innerText = "Không tải được thư viện camera. Vui lòng nhập mã thủ công bên trên.";
+          return;
+        }
+
+        html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+          { facingMode: "environment" },
+          { fps: 10, qrbox: { width: 250, height: 150 } },
+          (decodedText) => processBarcode(decodedText),
+          () => {}
+        ).catch(err => {
+          document.getElementById("scanStatus").innerText = "Không mở được camera (Cần HTTPS hoặc cấp quyền camera): " + err;
+        });
+      }
+
+      function closeScanner() {
+        if (html5QrCode) {
+          html5QrCode.stop().then(() => html5QrCode.clear()).catch(() => {});
+          html5QrCode = null;
+        }
+        document.getElementById("scannerModal").style.display = "none";
+      }
+
+      function downloadCSV(filename, rows) {
+        const csvContent = "\uFEFF" + rows.map(r => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
+        const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      function exportOrdersCSV() {
+        if (orders.length === 0) {
+          alert("Chưa có đơn hàng nào để xuất!");
+          return;
+        }
+        const rows = [
+          ["Mã đơn", "Thời gian", "Chi tiết sản phẩm", "Tổng thanh toán (VNĐ)", "Lãi gộp (VNĐ)", "Khách đưa", "Tiền thừa"]
+        ];
+        orders.forEach(o => {
+          const detail = o.items.map(i => `${i.name} (x${i.qty})`).join("; ");
+          rows.push([o.id, o.time, detail, o.total, o.profit || 0, o.cash, o.change]);
+        });
+        downloadCSV("Danh_sach_don_hang_" + new Date().toISOString().slice(0, 10) + ".csv", rows);
+      }
+
+      function exportStockCSV() {
+        const rows = [
+          ["Mã vạch/QR", "Tên sản phẩm", "Giá vốn", "Giá bán lẻ", "Mốc SL sỉ", "Giá sỉ", "Tồn kho hiện tại", "Giá trị tồn kho"]
+        ];
+        products.forEach(p => {
+          rows.push([p.barcode, p.name, p.cost || 0, p.price, p.wholesaleQty || 0, p.wholesalePrice || 0, p.stock, (p.cost || 0) * p.stock]);
+        });
+        downloadCSV("Bao_cao_ton_kho_" + new Date().toISOString().slice(0, 10) + ".csv", rows);
+      }
+
+      // Gắn sự kiện cho toàn bộ nút và ô nhập
+      document.getElementById("search").addEventListener("input", renderProducts);
+      document.getElementById("btnScan").addEventListener("click", openScanner);
+      document.getElementById("btnCloseScan").addEventListener("click", closeScanner);
+      document.getElementById("btnManualAdd").addEventListener("click", () => {
+        const input = document.getElementById("manualBarcodeInput");
+        processBarcode(input.value);
+        input.value = "";
       });
-      downloadCSV(`Danh_sach_don_hang_${new Date().toISOString().slice(0,10)}.csv`, rows);
-    }
-
-    function exportStockCSV() {
-      const rows = [
-        ["Mã vạch/QR", "Tên sản phẩm", "Giá vốn", "Giá bán lẻ", "Mốc SL sỉ", "Giá sỉ", "Tồn kho hiện tại", "Giá trị tồn kho"]
-      ];
-      products.forEach(p => {
-        rows.push([
-          p.barcode,
-          p.name,
-          p.cost || 0,
-          p.price,
-          p.wholesaleQty || 0,
-          p.wholesalePrice || 0,
-          p.stock,
-          (p.cost || 0) * p.stock
-        ]);
+      document.getElementById("btnAddProd").addEventListener("click", addNewProduct);
+      document.getElementById("btnExportOrders").addEventListener("click", exportOrdersCSV);
+      document.getElementById("btnExportStock").addEventListener("click", exportStockCSV);
+      document.getElementById("btnReport").addEventListener("click", showDailyReport);
+      document.getElementById("btnClearCart").addEventListener("click", clearCart);
+      document.getElementById("discountVal").addEventListener("input", calculate);
+      document.getElementById("discountType").addEventListener("change", calculate);
+      document.getElementById("vatToggle").addEventListener("change", calculate);
+      document.getElementById("vatRate").addEventListener("input", calculate);
+      document.getElementById("roundToggle").addEventListener("change", calculate);
+      document.getElementById("customerCash").addEventListener("input", calculateChange);
+      document.getElementById("btnExactCash").addEventListener("click", () => {
+        document.getElementById("customerCash").value = currentFinalTotal;
+        calculateChange();
       });
-      downloadCSV(`Bao_cao_ton_kho_${new Date().toISOString().slice(0,10)}.csv`, rows);
-    }
+      document.querySelectorAll(".cash-preset").forEach(btn => {
+        btn.addEventListener("click", () => {
+          document.getElementById("customerCash").value = Number(btn.getAttribute("data-amount"));
+          calculateChange();
+        });
+      });
+      document.getElementById("btnCheckout").addEventListener("click", checkout);
 
-    renderProducts();
-    renderCart();
+      renderProducts();
+      renderCart();
+    });
   </script>
 </body>
 </html>
