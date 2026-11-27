@@ -1,1 +1,186 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mô Phỏng Chi Phí Vay Mua Nhà & Xe</title>
+    <script src="https://jsdelivr.net"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f9; color: #333; margin: 0; padding: 20px; }
+        .container { max-width: 1100px; margin: auto; background: #fff; padding: 25px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); }
+        h1 { text-align: center; color: #1a365d; margin-bottom: 25px; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .input-group { display: flex; flex-direction: column; }
+        label { font-size: 13px; font-weight: 600; margin-bottom: 5px; color: #4a5568; }
+        input { padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 15px; }
+        button { width: 100%; padding: 12px; background: #2b6cb0; color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #2c5282; }
+        .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .card { padding: 15px; border-radius: 8px; border-left: 5px solid; background: #f8fafc; }
+        .card.fixed { border-color: #3182ce; }
+        .card.hybrid { border-color: #38a169; }
+        .card.floating { border-color: #e53e3e; }
+        .card h3 { margin: 0 0 10px 0; font-size: 16px; }
+        .card p { margin: 5px 0; font-size: 14px; }
+        .highlight { font-weight: bold; color: #1a202c; }
+        .chart-box { margin-top: 30px; height: 360px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 25px; font-size: 13px; }
+        th, td { border: 1px solid #e2e8f0; padding: 8px 10px; text-align: right; }
+        th { background: #edf2f7; text-align: center; }
+        .table-wrapper { max-height: 350px; overflow-y: auto; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Mô Phỏng Cơ Chế Lãi Suất Vay (Dư Nợ Giảm Dần)</h1>
+
+    <div class="grid-inputs">
+        <div class="input-group">
+            <label>Số tiền vay (VNĐ)</label>
+            <input type="number" id="principal" value="1000000000" step="50000000">
+        </div>
+        <div class="input-group">
+            <label>Thời hạn vay (Tháng)</label>
+            <input type="number" id="months" value="120" step="12">
+        </div>
+        <div class="input-group">
+            <label>LS Cố định suốt kỳ (%/năm)</label>
+            <input type="number" id="fixed_rate" value="9.5" step="0.1">
+        </div>
+        <div class="input-group">
+            <label>Thời gian ưu đãi Hỗn hợp (Tháng)</label>
+            <input type="number" id="hybrid_promo_months" value="24" step="6">
+        </div>
+        <div class="input-group">
+            <label>LS Hỗn hợp - Giai đoạn ưu đãi (%)</label>
+            <input type="number" id="hybrid_promo_rate" value="7.5" step="0.1">
+        </div>
+        <div class="input-group">
+            <label>LS Hỗn hợp - Sau ưu đãi (%)</label>
+            <input type="number" id="hybrid_float_rate" value="11.5" step="0.1">
+        </div>
+        <div class="input-group">
+            <label>LS Thả nổi - Giai đoạn đầu (%)</label>
+            <input type="number" id="float_init_rate" value="10.5" step="0.1">
+        </div>
+        <div class="input-group">
+            <label>LS Thả nổi - Giai đoạn sau (%)</label>
+            <input type="number" id="float_later_rate" value="12.0" step="0.1">
+        </div>
+    </div>
+
+    <button onclick="runSimulation()">Tính Toán & So Sánh Ngay</button>
+
+    <div class="summary-cards" id="summaryCards"></div>
+
+    <div class="chart-box">
+        <canvas id="paymentChart"></canvas>
+    </div>
+
+    <h3>Lịch trả nợ chi tiết theo từng tháng (Gói Hỗn Hợp)</h3>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Tháng</th>
+                    <th>Lãi suất (%/năm)</th>
+                    <th>Tiền gốc (VNĐ)</th>
+                    <th>Tiền lãi (VNĐ)</th>
+                    <th>Tổng trả tháng (VNĐ)</th>
+                    <th>Dư nợ còn lại (VNĐ)</th>
+                </tr>
+            </thead>
+            <tbody id="scheduleBody"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    let chartInstance = null;
+    const formatVND = (num) => new Intl.NumberFormat('vi-VN').format(num) + ' đ';
+
+    async function runSimulation() {
+        const payload = {
+            principal: document.getElementById('principal').value,
+            months: document.getElementById('months').value,
+            fixed_rate: document.getElementById('fixed_rate').value,
+            hybrid_promo_months: document.getElementById('hybrid_promo_months').value,
+            hybrid_promo_rate: document.getElementById('hybrid_promo_rate').value,
+            hybrid_float_rate: document.getElementById('hybrid_float_rate').value,
+            float_init_rate: document.getElementById('float_init_rate').value,
+            float_later_rate: document.getElementById('float_later_rate').value
+        };
+
+        const res = await fetch('/api/calculate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        // Cập nhật 3 thẻ tóm tắt
+        document.getElementById('summaryCards').innerHTML = `
+            <div class="card fixed">
+                <h3>1. Lãi suất Cố định</h3>
+                <p>Trả tháng 1: <span class="highlight">${formatVND(data.fixed.month_1)}</span></p>
+                <p>Trả tháng 25: <span class="highlight">${formatVND(data.fixed.month_25)}</span></p>
+                <p>Tổng tiền lãi: <span class="highlight">${formatVND(data.fixed.total_interest)}</span></p>
+            </div>
+            <div class="card hybrid">
+                <h3>2. Lãi suất Hỗn hợp</h3>
+                <p>Trả tháng 1: <span class="highlight">${formatVND(data.hybrid.month_1)}</span></p>
+                <p>Trả tháng 25 (hết ưu đãi): <span class="highlight">${formatVND(data.hybrid.month_25)}</span></p>
+                <p>Tổng tiền lãi: <span class="highlight">${formatVND(data.hybrid.total_interest)}</span></p>
+            </div>
+            <div class="card floating">
+                <h3>3. Lãi suất Thả nổi</h3>
+                <p>Trả tháng 1: <span class="highlight">${formatVND(data.floating.month_1)}</span></p>
+                <p>Trả tháng 25: <span class="highlight">${formatVND(data.floating.month_25)}</span></p>
+                <p>Tổng tiền lãi: <span class="highlight">${formatVND(data.floating.total_interest)}</span></p>
+            </div>
+        `;
+
+        // Vẽ biểu đồ dòng tiền hàng tháng
+        const labels = data.hybrid.schedule.map(item => `T${item.month}`);
+        const ctx = document.getElementById('paymentChart').getContext('2d');
+        if (chartInstance) chartInstance.destroy();
+
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    { label: 'Cố định (VNĐ/tháng)', data: data.fixed.schedule.map(i => i.total_payment), borderColor: '#3182ce', tension: 0.1, pointRadius: 0 },
+                    { label: 'Hỗn hợp (VNĐ/tháng)', data: data.hybrid.schedule.map(i => i.total_payment), borderColor: '#38a169', tension: 0.1, pointRadius: 0 },
+                    { label: 'Thả nổi (VNĐ/tháng)', data: data.floating.schedule.map(i => i.total_payment), borderColor: '#e53e3e', tension: 0.1, pointRadius: 0 }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { title: { display: true, text: 'Biến động số tiền phải trả hàng tháng giữa 3 cơ chế lãi suất' } }
+            }
+        });
+
+        // Đổ dữ liệu vào bảng lịch trả nợ gói Hỗn hợp
+        const tbody = document.getElementById('scheduleBody');
+        tbody.innerHTML = data.hybrid.schedule.map(row => `
+            <tr>
+                <td style="text-align:center">${row.month}</td>
+                <td style="text-align:center">${row.rate}%</td>
+                <td>${formatVND(row.principal)}</td>
+                <td>${formatVND(row.interest)}</td>
+                <td><strong>${formatVND(row.total_payment)}</strong></td>
+                <td>${formatVND(row.remaining)}</td>
+            </tr>
+        `).join('');
+    }
+
+    // Tự động chạy khi tải trang
+    window.onload = runSimulation;
+</script>
+
+</body>
+</html>
 
