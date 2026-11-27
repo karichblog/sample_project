@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuyển Đổi File Sang PDF Đa Năng</title>
+    <!-- Thư viện tạo PDF và đọc Markdown -->
+    <script src="https://cloudflare.com"></script>
+    <script src="https://cloudflare.com"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .container {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        p.subtitle {
+            color: #7f8c8d;
+            margin-bottom: 25px;
+        }
+        .upload-area {
+            border: 2px dashed #3498db;
+            border-radius: 8px;
+            padding: 40px 20px;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-bottom: 20px;
+        }
+        .upload-area:hover {
+            background-color: #ebf5fb;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        .btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: none;
+            margin-top: 15px;
+        }
+        .btn:hover {
+            background-color: #c0392b;
+        }
+        #file-list {
+            text-align: left;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #2c3e50;
+        }
+        /* Khu vực ẩn dùng để render nội dung trước khi xuất PDF */
+        #pdf-render-area {
+            text-align: left;
+            padding: 20px;
+            background: white;
+            display: none;
+        }
+        #pdf-render-area img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+            page-break-after: always;
+        }
+        .text-page {
+            white-space: pre-wrap;
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            page-break-after: always;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Chuyển Đổi File Sang PDF</h1>
+    <p class="subtitle">Hỗ trợ: Hình ảnh (JPG, PNG, WEBP), Văn bản (.TXT), Markdown (.MD), Web (.HTML)</p>
+
+    <label for="file-input" class="upload-area" id="drop-zone">
+        <strong>Nhấn để chọn file</strong> hoặc kéo thả file vào đây<br>
+        <small>(Có thể chọn nhiều file cùng lúc để gộp thành 1 PDF)</small>
+    </label>
+    <input type="file" id="file-input" multiple accept=".jpg,.jpeg,.png,.webp,.txt,.md,.html">
+
+    <div id="file-list"></div>
+    <button class="btn" id="convert-btn">Chuyển sang PDF & Tải về</button>
+</div>
+
+<!-- Khung chứa nội dung để chuyển đổi -->
+<div id="pdf-render-area"></div>
+
+<script>
+    const fileInput = document.getElementById('file-input');
+    const fileList = document.getElementById('file-list');
+    const convertBtn = document.getElementById('convert-btn');
+    const renderArea = document.getElementById('pdf-render-area');
+    let selectedFiles = [];
+
+    fileInput.addEventListener('change', (e) => {
+        selectedFiles = Array.from(e.target.files);
+        if (selectedFiles.length > 0) {
+            fileList.innerHTML = '<strong>Đã chọn:</strong><ul>' + 
+                selectedFiles.map(f => `<li>${f.name} (${(f.size/1024).toFixed(1)} KB)</li>`).join('') + 
+                '</ul>';
+            convertBtn.style.display = 'inline-block';
+        }
+    });
+
+    convertBtn.addEventListener('click', async () => {
+        if (selectedFiles.length === 0) return;
+
+        convertBtn.textContent = 'Đang xử lý...';
+        convertBtn.disabled = true;
+        renderArea.innerHTML = '';
+        renderArea.style.display = 'block';
+
+        for (const file of selectedFiles) {
+            const ext = file.name.split('.').pop().toLowerCase();
+
+            if (['jpg', 'jpeg', 'png', 'webp'].includes(ext)) {
+                const imgUrl = await readFileAsDataURL(file);
+                const img = document.createElement('img');
+                img.src = imgUrl;
+                renderArea.appendChild(img);
+            } 
+            else if (ext === 'txt') {
+                const text = await readFileAsText(file);
+                const div = document.createElement('div');
+                div.className = 'text-page';
+                div.textContent = text;
+                renderArea.appendChild(div);
+            } 
+            else if (ext === 'md') {
+                const text = await readFileAsText(file);
+                const div = document.createElement('div');
+                div.className = 'text-page';
+                div.innerHTML = marked.parse(text);
+                renderArea.appendChild(div);
+            } 
+            else if (ext === 'html') {
+                const text = await readFileAsText(file);
+                const div = document.createElement('div');
+                div.className = 'text-page';
+                div.innerHTML = text;
+                renderArea.appendChild(div);
+            }
+        }
+
+        // Cấu hình xuất PDF
+        const opt = {
+            margin:       10,
+            filename:     'converted_document.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        // Tạo và tải file PDF
+        await html2pdf().set(opt).from(renderArea).save();
+
+        // Dọn dẹp sau khi tải xong
+        renderArea.style.display = 'none';
+        renderArea.innerHTML = '';
+        convertBtn.textContent = 'Chuyển sang PDF & Tải về';
+        convertBtn.disabled = false;
+    });
+
+    function readFileAsDataURL(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsDataURL(file);
+        });
+    }
+
+    function readFileAsText(file) {
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onload = (e) => resolve(e.target.result);
+            reader.readAsText(file);
+        });
+    }
+</script>
+
+</body>
+</html>
