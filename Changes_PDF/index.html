@@ -3,333 +3,426 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chuyển Đổi Đa Định Dạng Sang PDF (Client-Side)</title>
-    <!-- Các thư viện xử lý trực tiếp trên trình duyệt -->
-    <script src="./html2pdf.bundle.min.js"></script>
-    <script src="./mammoth.browser.min.js"></script>
-    <script src="./xlsx.full.min.js"></script>
-    <script src="./marked.min.js"></script>
-
+    <title>Chuyển Đổi Đa Định Dạng Sang PDF</title>
+    <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@9.1.6/marked.min.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f0f2f5;
-            color: #1c1e21;
-            max-width: 850px;
-            margin: 40px auto;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             padding: 20px;
         }
+
         .container {
-            background: #fff;
-            padding: 35px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 740px;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1), 0 0 1px 1px rgba(0, 0, 0, 0.03);
             text-align: center;
         }
-        h1 { color: #2c3e50; margin-bottom: 8px; }
-        p.subtitle { color: #606770; margin-bottom: 25px; font-size: 15px; }
-        .upload-area {
-            border: 2px dashed #0066cc;
-            border-radius: 10px;
-            padding: 45px 20px;
-            cursor: pointer;
-            transition: all 0.2s;
-            background: #f8fbff;
+
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
-        .upload-area:hover { background: #ebf3ff; border-color: #004c99; }
-        input[type="file"] { display: none; }
-        .btn {
-            background-color: #d93025;
-            color: white;
-            border: none;
-            padding: 14px 28px;
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #93c5fd;
+            border-radius: 16px;
+            padding: 45px 25px;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            background-color: #eff6ff;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 12px;
+        }
+
+        .upload-area strong {
             font-size: 16px;
-            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .upload-area small {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        #file-list-wrapper {
+            display: none;
+            margin-top: 24px;
+            text-align: left;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .list-header strong {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .clear-all {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .clear-all:hover {
+            text-decoration: underline;
+        }
+
+        #file-list {
+            list-style: none;
+        }
+
+        #file-list li {
+            font-size: 14px;
+            padding: 10px 14px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-main);
+            font-weight: 500;
+            gap: 10px;
+        }
+
+        #file-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .file-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 360px;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+            flex-shrink: 0;
+        }
+
+        .file-actions {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .action-btn {
+            border: none;
+            width: 28px;
+            height: 28px;
             border-radius: 6px;
             cursor: pointer;
-            display: none;
-            margin-top: 20px;
-        }
-        .btn:hover { background-color: #b3241b; }
-        .btn:disabled { background-color: #999; cursor: not-allowed; }
-        #file-list {
-            text-align: left;
-            margin-top: 20px;
-            padding: 15px;
-            background: #f9f9f9;
-            border-radius: 8px;
-            display: none;
-        }
-        .note {
-            margin-top: 20px;
+            font-weight: bold;
             font-size: 13px;
-            color: #777;
-            text-align: left;
-            background: #fff8e6;
-            padding: 12px;
-            border-left: 4px solid #f5a623;
-            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
         }
-        /* Khu vực render ẩn */
-        #pdf-render-area {
-            text-align: left;
-            padding: 20px;
-            background: white;
+
+        .move-btn {
+            background: #e2e8f0;
+            color: #334155;
+        }
+
+        .move-btn:hover:not(:disabled) {
+            background: #cbd5e1;
+        }
+
+        .move-btn:disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .remove-btn {
+            background: #fee2e2;
+            color: var(--danger);
+        }
+
+        .remove-btn:hover {
+            background: #fecaca;
+        }
+
+        .options-bar {
             display: none;
-            color: #000;
+            margin-top: 18px;
+            text-align: left;
+            grid-template-columns: 2fr 1fr;
+            gap: 14px;
         }
-        .page-break { page-break-after: always; margin-bottom: 20px; }
-        #pdf-render-area img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
-        #pdf-render-area table { border-collapse: collapse; width: 100%; margin-bottom: 15px; font-size: 12px; }
-        #pdf-render-area th, #pdf-render-area td { border: 1px solid #999; padding: 6px; text-align: left; }
-        .text-content { white-space: pre-wrap; font-family: Arial, sans-serif; line-height: 1.5; }
+
+        .option-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .option-group input,
+        .option-group select {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            outline: none;
+            background: #fff;
+            color: var(--text-main);
+        }
+
+        .option-group input:focus,
+        .option-group select:focus {
+            border-color: var(--primary);
+        }
+
+        .btn {
+            display: none;
+            width: 100%;
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            border: none;
+            padding: 15px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+        }
+
+        .btn:disabled {
+            background: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .note {
+            margin-top: 28px;
+            font-size: 13px;
+            color: #475569;
+            text-align: left;
+            background: #fffbeb;
+            padding: 16px 20px;
+            border: 1px solid #fde68a;
+            border-left: 4px solid #f59e0b;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+        .note strong {
+            color: #92400e;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #pdf-render-area { display: none; }
+
+        @media print {
+            body {
+                background: white !important;
+                padding: 0 !important;
+                display: block !important;
+            }
+            .container { display: none !important; }
+            #pdf-render-area {
+                display: block !important;
+                width: 100%;
+                color: #000;
+                font-family: Arial, Helvetica, sans-serif;
+            }
+            .page-break {
+                page-break-after: always;
+                margin-bottom: 20px;
+            }
+            .page-break:last-child {
+                page-break-after: auto;
+            }
+            #pdf-render-area img {
+                max-width: 100%;
+                max-height: 90vh;
+                height: auto;
+                display: block;
+                margin: 0 auto;
+                object-fit: contain;
+            }
+            #pdf-render-area table {
+                border-collapse: collapse;
+                width: 100%;
+                margin-bottom: 15px;
+                font-size: 12px;
+            }
+            #pdf-render-area th, #pdf-render-area td {
+                border: 1px solid #888;
+                padding: 6px 8px;
+                text-align: left;
+            }
+            #pdf-render-area h1, #pdf-render-area h2, #pdf-render-area h3 {
+                margin-top: 12px;
+                margin-bottom: 8px;
+            }
+            #pdf-render-area p {
+                margin-bottom: 8px;
+                line-height: 1.5;
+            }
+            .text-content {
+                white-space: pre-wrap;
+                line-height: 1.6;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 25px 18px; }
+            h1 { font-size: 22px; }
+            .file-name { max-width: 150px; }
+            .options-bar { grid-template-columns: 1fr; }
+        }
     </style>
-    <style>
-    @import url('https://googleapis.com');
-
-    :root {
-        --primary: #2563eb;
-        --primary-hover: #1d4ed8;
-        --danger: #ef4444;
-        --danger-hover: #dc2626;
-        --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
-        --card-bg: #ffffff;
-        --text-main: #1e293b;
-        --text-muted: #64748b;
-        --border-color: #cbd5e1;
-    }
-
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
-
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-        background: var(--bg-gradient);
-        color: var(--text-main);
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 20px;
-    }
-
-    .container {
-        background: var(--card-bg);
-        width: 100%;
-        max-width: 720px;
-        padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1), 0 0 1px 1px rgba(0, 0, 0, 0.03);
-        text-align: center;
-        transition: transform 0.3s ease;
-    }
-
-    h1 {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--text-main);
-        margin-bottom: 8px;
-        letter-spacing: -0.5px;
-    }
-
-    p.subtitle {
-        color: var(--text-muted);
-        font-size: 14px;
-        margin-bottom: 30px;
-    }
-
-    /* Vùng kéo thả file */
-    .upload-area {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        border: 2px dashed #93c5fd;
-        border-radius: 16px;
-        padding: 45px 25px;
-        background-color: #f8fafc;
-        cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    .upload-area:hover {
-        background-color: #eff6ff;
-        border-color: var(--primary);
-        transform: translateY(-2px);
-    }
-
-    .upload-area strong {
-        font-size: 16px;
-        color: var(--primary);
-        margin-bottom: 6px;
-    }
-
-    .upload-area small {
-        font-size: 13px;
-        color: var(--text-muted);
-        line-height: 1.5;
-    }
-
-    input[type="file"] {
-        display: none;
-    }
-
-    /* Danh sách file đã chọn */
-    #file-list {
-        display: none;
-        margin-top: 24px;
-        text-align: left;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 16px 20px;
-        animation: fadeIn 0.3s ease;
-    }
-
-    #file-list strong {
-        display: block;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        color: var(--text-muted);
-        margin-bottom: 10px;
-    }
-
-    #file-list ul {
-        list-style: none;
-    }
-
-    #file-list li {
-        font-size: 14px;
-        padding: 8px 12px;
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        margin-bottom: 6px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        color: var(--text-main);
-        font-weight: 500;
-    }
-
-    #file-list li:last-child {
-        margin-bottom: 0;
-    }
-
-    /* Nút bấm xuất PDF */
-    .btn {
-        display: none;
-        width: 100%;
-        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-        color: white;
-        border: none;
-        padding: 15px 28px;
-        font-size: 16px;
-        font-weight: 600;
-        border-radius: 12px;
-        cursor: pointer;
-        margin-top: 22px;
-        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        transition: all 0.2s ease;
-    }
-
-    .btn:hover:not(:disabled) {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
-    }
-
-    .btn:active:not(:disabled) {
-        transform: translateY(0);
-    }
-
-    .btn:disabled {
-        background: #94a3b8;
-        box-shadow: none;
-        cursor: not-allowed;
-    }
-
-    /* Hộp ghi chú */
-    .note {
-        margin-top: 28px;
-        font-size: 13px;
-        color: #475569;
-        text-align: left;
-        background: #fffbeb;
-        padding: 16px 20px;
-        border: 1px solid #fde68a;
-        border-left: 4px solid #f59e0b;
-        border-radius: 10px;
-        line-height: 1.6;
-    }
-
-    .note strong {
-        color: #92400e;
-        display: block;
-        margin-bottom: 6px;
-    }
-
-    .note ul {
-        padding-left: 18px;
-    }
-
-    .note li {
-        margin-bottom: 4px;
-    }
-
-    /* Hiệu ứng xuất hiện */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(8px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* Khu vực render PDF ẩn (Giữ nguyên định dạng in chuẩn) */
-    #pdf-render-area {
-        text-align: left;
-        padding: 20px;
-        background: white;
-        display: none;
-        color: #000;
-    }
-    .page-break { page-break-after: always; margin-bottom: 20px; }
-    #pdf-render-area img { max-width: 100%; height: auto; display: block; margin: 0 auto; }
-    #pdf-render-area table { border-collapse: collapse; width: 100%; margin-bottom: 15px; font-size: 12px; }
-    #pdf-render-area th, #pdf-render-area td { border: 1px solid #999; padding: 6px; text-align: left; }
-    .text-content { white-space: pre-wrap; font-family: Arial, sans-serif; line-height: 1.5; }
-
-    /* Tối ưu cho màn hình điện thoại */
-    @media (max-width: 600px) {
-        .container { padding: 25px 20px; }
-        h1 { font-size: 22px; }
-        .upload-area { padding: 30px 15px; }
-    }
-</style>
-
+    <style id="dynamic-print-style">
+        @media print {
+            @page { size: A4 portrait; margin: 12mm; }
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Chuyển Đổi File Sang PDF</h1>
-    <p class="subtitle">Chạy 100% trên trình duyệt • Bảo mật tuyệt đối • Không tải file lên máy chủ</p>
+    <p class="subtitle">Chạy 100% trên trình duyệt • Xuất PDF vector siêu nét • Bảo mật tuyệt đối</p>
 
-    <label for="file-input" class="upload-area">
-        <strong>Nhấn để chọn file</strong> hoặc kéo thả nhiều file vào đây<br>
-        <small>Hỗ trợ: Word (.docx), Excel (.xlsx), Ảnh (.png, .jpg, .webp), Văn bản (.txt, .md)</small>
+    <label for="file-input" class="upload-area" id="drop-zone">
+        <div class="upload-icon">📄</div>
+        <strong>Nhấn để chọn file hoặc kéo thả vào đây</strong>
+        <small>Hỗ trợ gộp nhiều file: Ảnh (.png, .jpg, .webp), Word (.docx), Excel (.xlsx), Văn bản (.txt, .md)</small>
     </label>
     <input type="file" id="file-input" multiple accept=".docx,.xlsx,.xls,.png,.jpg,.jpeg,.webp,.txt,.md">
 
-    <div id="file-list"></div>
-    <button class="btn" id="convert-btn">Gộp & Xuất ra file PDF</button>
+    <div id="file-list-wrapper">
+        <div class="list-header">
+            <strong>Danh sách file sẽ gộp (<span id="file-count">0</span>)</strong>
+            <button type="button" class="clear-all" id="clear-all-btn">Xóa tất cả</button>
+        </div>
+        <ul id="file-list"></ul>
+    </div>
+
+    <div class="options-bar" id="options-bar">
+        <div class="option-group">
+            <label for="pdf-filename">Tên file PDF khi lưu:</label>
+            <input type="text" id="pdf-filename" value="tai_lieu_chuyen_doi" placeholder="Nhập tên file...">
+        </div>
+        <div class="option-group">
+            <label for="page-orientation">Khổ giấy:</label>
+            <select id="page-orientation">
+                <option value="portrait">Khổ dọc (Portrait)</option>
+                <option value="landscape">Khổ ngang (Landscape)</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn" id="convert-btn">Chuyển sang PDF & Lưu về máy</button>
 
     <div class="note">
-        <strong>Lưu ý khi chạy không cần Server (GitHub Pages):</strong>
-        <ul>
-            <li>File <strong>.docx</strong> và <strong>.xlsx</strong> sẽ giữ được nội dung chữ, bảng biểu và hình ảnh cơ bản, nhưng một số định dạng phức tạp (header/footer, biểu đồ) có thể thay đổi nhẹ.</li>
-            <li>File <strong>.pptx</strong> không thể chuyển trực tiếp bằng trình duyệt thuần túy (bạn nên lưu PowerPoint dưới dạng PDF trực tiếp từ phần mềm Office).</li>
-        </ul>
+        <strong>Hướng dẫn lưu thành file PDF:</strong>
+        Khi bấm nút chuyển đổi, cửa sổ in của trình duyệt sẽ mở ra. Tại mục <strong>Máy in (Destination)</strong>, hãy chọn <strong>Lưu dưới dạng PDF (Save as PDF)</strong> rồi bấm <strong>Lưu (Save)</strong>.
     </div>
 </div>
 
@@ -337,29 +430,120 @@
 
 <script>
     const fileInput = document.getElementById('file-input');
+    const dropZone = document.getElementById('drop-zone');
+    const fileListWrapper = document.getElementById('file-list-wrapper');
     const fileList = document.getElementById('file-list');
+    const fileCount = document.getElementById('file-count');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+    const optionsBar = document.getElementById('options-bar');
+    const pdfFilenameInput = document.getElementById('pdf-filename');
+    const pageOrientationSelect = document.getElementById('page-orientation');
+    const dynamicPrintStyle = document.getElementById('dynamic-print-style');
     const convertBtn = document.getElementById('convert-btn');
     const renderArea = document.getElementById('pdf-render-area');
+
     let selectedFiles = [];
+    const originalTitle = document.title;
 
     fileInput.addEventListener('change', (e) => {
-        selectedFiles = Array.from(e.target.files);
-        if (selectedFiles.length > 0) {
-            fileList.style.display = 'block';
-            fileList.innerHTML = '<strong>Danh sách file sẽ gộp thành PDF:</strong><ul>' + 
-                selectedFiles.map(f => `<li>${f.name} (${(f.size/1024).toFixed(1)} KB)</li>`).join('') + 
-                '</ul>';
-            convertBtn.style.display = 'inline-block';
+        addFiles(Array.from(e.target.files));
+        fileInput.value = ''; 
+    });
+
+    dropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        dropZone.classList.add('dragover');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+        dropZone.classList.remove('dragover');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        dropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            addFiles(Array.from(e.dataTransfer.files));
         }
     });
+
+    function addFiles(files) {
+        const validExts = ['docx', 'xlsx', 'xls', 'png', 'jpg', 'jpeg', 'webp', 'txt', 'md'];
+        const filtered = files.filter(f => {
+            const ext = f.name.split('.').pop().toLowerCase();
+            return validExts.includes(ext);
+        });
+
+        if (filtered.length < files.length) {
+            alert('Một số file không đúng định dạng hỗ trợ đã được bỏ qua.');
+        }
+
+        selectedFiles = selectedFiles.concat(filtered);
+        renderFileList();
+    }
+
+    function moveFile(index, direction) {
+        const targetIndex = index + direction;
+        if (targetIndex < 0 || targetIndex >= selectedFiles.length) return;
+
+        const temp = selectedFiles[index];
+        selectedFiles[index] = selectedFiles[targetIndex];
+        selectedFiles[targetIndex] = temp;
+        renderFileList();
+    }
+
+    function removeFile(index) {
+        selectedFiles.splice(index, 1);
+        renderFileList();
+    }
+
+    clearAllBtn.addEventListener('click', () => {
+        selectedFiles = [];
+        renderFileList();
+    });
+
+    function renderFileList() {
+        fileCount.textContent = selectedFiles.length;
+
+        if (selectedFiles.length === 0) {
+            fileListWrapper.style.display = 'none';
+            optionsBar.style.display = 'none';
+            convertBtn.style.display = 'none';
+            return;
+        }
+
+        fileListWrapper.style.display = 'block';
+        optionsBar.style.display = 'grid';
+        convertBtn.style.display = 'inline-block';
+
+        fileList.innerHTML = selectedFiles.map((f, index) => `
+            <li>
+                <div class="file-info">
+                    <span class="file-name" title="${f.name}">${index + 1}. ${f.name}</span>
+                    <span class="file-size">(${(f.size / 1024).toFixed(1)} KB)</span>
+                </div>
+                <div class="file-actions">
+                    <button type="button" class="action-btn move-btn" onclick="moveFile(${index}, -1)" ${index === 0 ? 'disabled' : ''} title="Di chuyển lên">↑</button>
+                    <button type="button" class="action-btn move-btn" onclick="moveFile(${index}, 1)" ${index === selectedFiles.length - 1 ? 'disabled' : ''} title="Di chuyển xuống">↓</button>
+                    <button type="button" class="action-btn remove-btn" onclick="removeFile(${index})" title="Xóa file này">✕</button>
+                </div>
+            </li>
+        `).join('');
+    }
 
     convertBtn.addEventListener('click', async () => {
         if (selectedFiles.length === 0) return;
 
-        convertBtn.textContent = 'Đang xử lý dữ liệu...';
+        convertBtn.textContent = 'Đang xử lý tài liệu...';
         convertBtn.disabled = true;
         renderArea.innerHTML = '';
-        renderArea.style.display = 'block';
+
+        const orientation = pageOrientationSelect.value;
+        dynamicPrintStyle.innerHTML = `
+            @media print {
+                @page { size: A4 ${orientation}; margin: 12mm; }
+            }
+        `;
 
         try {
             for (const file of selectedFiles) {
@@ -371,14 +555,24 @@
                     const imgUrl = await readAsDataURL(file);
                     const img = document.createElement('img');
                     img.src = imgUrl;
+                    await new Promise((resolve) => {
+                        img.onload = resolve;
+                        img.onerror = resolve;
+                    });
                     wrapper.appendChild(img);
                 } 
                 else if (ext === 'docx') {
+                    if (typeof mammoth === 'undefined') {
+                        throw new Error('Không tải được thư viện đọc Word. Vui lòng kiểm tra kết nối Internet.');
+                    }
                     const arrayBuffer = await readAsArrayBuffer(file);
                     const result = await mammoth.convertToHtml({ arrayBuffer: arrayBuffer });
                     wrapper.innerHTML = result.value;
                 } 
                 else if (['xlsx', 'xls'].includes(ext)) {
+                    if (typeof XLSX === 'undefined') {
+                        throw new Error('Không tải được thư viện đọc Excel. Vui lòng kiểm tra kết nối Internet.');
+                    }
                     const arrayBuffer = await readAsArrayBuffer(file);
                     const workbook = XLSX.read(arrayBuffer, { type: 'array' });
                     workbook.SheetNames.forEach(sheetName => {
@@ -400,27 +594,27 @@
                 } 
                 else if (ext === 'md') {
                     const text = await readAsText(file);
-                    wrapper.innerHTML = marked.parse(text);
+                    wrapper.innerHTML = typeof marked !== 'undefined' ? marked.parse(text) : `<pre>${text}</pre>`;
                 }
 
                 renderArea.appendChild(wrapper);
             }
 
-            const opt = {
-                margin:       10,
-                filename:     'tong_hop_tai_lieu.pdf',
-                image:        { type: 'jpeg', quality: 0.98 },
-                html2canvas:  { scale: 2, useCORS: true },
-                jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
-            };
+            const customName = pdfFilenameInput.value.trim();
+            if (customName) {
+                document.title = customName;
+            }
 
-            await html2pdf().set(opt).from(renderArea).save();
+            setTimeout(() => {
+                window.print();
+                document.title = originalTitle;
+                convertBtn.textContent = 'Chuyển sang PDF & Lưu về máy';
+                convertBtn.disabled = false;
+            }, 300);
+
         } catch (err) {
-            alert('Có lỗi xảy ra khi đọc file: ' + err.message);
-        } finally {
-            renderArea.style.display = 'none';
-            renderArea.innerHTML = '';
-            convertBtn.textContent = 'Gộp & Xuất ra file PDF';
+            alert('Lỗi: ' + err.message);
+            convertBtn.textContent = 'Chuyển sang PDF & Lưu về máy';
             convertBtn.disabled = false;
         }
     });
