@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mb-4 fw-bold">🎓 Góc Học Tập Sinh Viên / Học Sinh</h3>
+
+<div class="row g-4">
+    <!-- Điểm danh & Lớp học -->
+    <div class="col-md-6">
+        <div class="card p-3 shadow-sm mb-4">
+            <h5 class="fw-bold text-success">✅ Điểm Danh Nhanh Bằng Mã PIN</h5>
+            <form id="checkin-form" class="row g-2">
+                <div class="col-md-6">
+                    <select name="course_id" class="form-select" required>
+                        {% for c in courses %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4"><input type="text" name="pin" class="form-control" placeholder="Nhập mã PIN 6 số" required></div>
+                <div class="col-md-2"><button type="submit" class="btn btn-success w-100">Gửi</button></div>
+            </form>
+            <div id="checkin-msg" class="mt-2 small fw-bold"></div>
+        </div>
+
+        <div class="card p-3 shadow-sm mb-4">
+            <h5 class="fw-bold text-primary">📚 Danh Sách Môn Học & Tài Liệu</h5>
+            <ul class="list-group">
+                {% for c in courses %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ c.name }}</span>
+                    <a href="/course/{{ c.id }}/materials" class="btn btn-sm btn-primary">Vào lớp & Học bài</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card p-3 shadow-sm">
+            <h5 class="fw-bold text-warning">📅 Lịch Nhắc Sự Kiện</h5>
+            <ul class="list-group list-group-flush small">
+                {% for ev in events %}
+                <li class="list-group-item"><b>[{{ ev.event_date }}] {{ ev.title }}</b>: {{ ev.description }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Bài kiểm tra & Điểm số -->
+    <div class="col-md-6">
+        <div class="card p-3 shadow-sm mb-4">
+            <h5 class="fw-bold text-danger">📝 Bài Kiểm Tra Đang Mở</h5>
+            <ul class="list-group">
+                {% for ex in exams %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <b>{{ ex.title }}</b><br>
+                        <small class="text-muted">Thời gian: {{ ex.duration_minutes }} phút</small>
+                    </div>
+                    <a href="/exam/{{ ex.id }}" class="btn btn-sm btn-danger">Vào Thi</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <div class="card p-3 shadow-sm">
+            <h5 class="fw-bold">📊 Lịch Sử Điểm Kiểm Tra</h5>
+            <table class="table table-sm">
+                <thead><tr><th>Mã đề</th><th>Điểm số</th><th>Thời gian nộp</th></tr></thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td>Đề #{{ r.exam_id }}</td>
+                        <td class="fw-bold text-success">{{ r.score }}/10</td>
+                        <td>{{ r.submitted_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('checkin-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    fetch('/student/checkin', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            const msg = document.getElementById('checkin-msg');
+            msg.className = data.status === 'success' ? 'mt-2 small fw-bold text-success' : 'mt-2 small fw-bold text-danger';
+            msg.innerText = data.message;
+        });
+});
+</script>
+{% endblock %}

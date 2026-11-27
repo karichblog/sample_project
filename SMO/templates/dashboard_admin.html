@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<h3 class="mb-4 fw-bold">🛠️ Bảng Điều Khiển Quản Trị Viên (Admin)</h3>
+
+<div class="row g-4">
+    <!-- Quản lý người dùng -->
+    <div class="col-md-6">
+        <div class="card p-3 shadow-sm h-100">
+            <h5 class="fw-bold text-primary">1. Tạo Tài Khoản & Nhập Hàng Loạt</h5>
+            <form action="/admin/add_user" method="POST" class="row g-2 mb-3 border-bottom pb-3">
+                <div class="col-md-4"><input type="text" name="username" class="form-control form-control-sm" placeholder="Username" required></div>
+                <div class="col-md-4"><input type="text" name="password" class="form-control form-control-sm" placeholder="Mật khẩu" required></div>
+                <div class="col-md-4">
+                    <select name="role" class="form-select form-select-sm">
+                        <option value="student">Học sinh</option>
+                        <option value="teacher">Giáo viên</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div class="col-md-8"><input type="text" name="full_name" class="form-control form-control-sm" placeholder="Họ và tên" required></div>
+                <div class="col-md-4"><button class="btn btn-primary btn-sm w-100">Thêm tài khoản</button></div>
+            </form>
+
+            <form action="/admin/import_users" method="POST" enctype="multipart/form-data">
+                <label class="form-label small fw-bold">Nhập từ Excel/CSV (cột: username, password, full_name, role):</label>
+                <div class="input-group input-group-sm">
+                    <input type="file" name="file" class="form-control" accept=".xlsx,.csv" required>
+                    <button class="btn btn-success">Tải lên</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Quản lý môn học & Lịch sự kiện -->
+    <div class="col-md-6">
+        <div class="card p-3 shadow-sm h-100">
+            <h5 class="fw-bold text-primary">2. Tạo Lớp / Môn Học & Lịch Nhắc</h5>
+            <form action="/admin/create_course" method="POST" class="row g-2 mb-3 border-bottom pb-3">
+                <div class="col-md-6"><input type="text" name="name" class="form-control form-control-sm" placeholder="Tên môn học / Lớp" required></div>
+                <div class="col-md-4">
+                    <select name="teacher_id" class="form-select form-select-sm">
+                        {% for t in teachers %}
+                        <option value="{{ t.id }}">{{ t.full_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2"><button class="btn btn-primary btn-sm w-100">Tạo</button></div>
+            </form>
+
+            <form action="/add_event" method="POST" class="row g-2">
+                <div class="col-md-5"><input type="text" name="title" class="form-control form-control-sm" placeholder="Tên sự kiện nhắc nhở" required></div>
+                <div class="col-md-4"><input type="date" name="event_date" class="form-control form-control-sm" required></div>
+                <div class="col-md-3"><button class="btn btn-warning btn-sm w-100">Thêm lịch</button></div>
+                <div class="col-12"><input type="text" name="description" class="form-control form-control-sm" placeholder="Ghi chú chi tiết sự kiện..."></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Danh sách tài khoản -->
+    <div class="col-md-7">
+        <div class="card p-3 shadow-sm">
+            <h5 class="fw-bold">Danh Sách Người Dùng ({{ users|length }})</h5>
+            <div class="table-responsive" style="max-height: 300px;">
+                <table class="table table-sm table-hover">
+                    <thead><tr><th>Username</th><th>Họ tên</th><th>Vai trò</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
+                    <tbody>
+                        {% for u in users %}
+                        <tr>
+                            <td>{{ u.username }}</td>
+                            <td>{{ u.full_name }}</td>
+                            <td><span class="badge bg-secondary">{{ u.role }}</span></td>
+                            <td>{{ 'Hoạt động' if u.is_active else 'Đã khóa' }}</td>
+                            <td>
+                                {% if u.username != 'admin' %}
+                                <a href="/admin/toggle_user/{{ u.id }}" class="btn btn-xs btn-outline-danger py-0 px-2">Khóa/Mở</a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Log -->
+    <div class="col-md-5">
+        <div class="card p-3 shadow-sm">
+            <h5 class="fw-bold">Nhật Ký Hệ Thống (Audit Log)</h5>
+            <ul class="list-group list-group-flush small" style="max-height: 300px; overflow-y: auto;">
+                {% for log in logs %}
+                <li class="list-group-item">
+                    <b>{{ log.user_name }}</b>: {{ log.action }}
+                    <br><span class="text-muted">{{ log.timestamp.strftime('%H:%M:%S %d/%m/%Y') }}</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}

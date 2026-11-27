@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-9">
+        <div class="card p-4 shadow">
+            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
+                <h4 class="fw-bold">Bài thi: {{ exam.title }}</h4>
+                <div>
+                    <span id="warning-badge" class="badge bg-danger me-2">Cảnh báo gian lận: 0/3</span>
+                    <span id="timer" class="badge bg-dark fs-6">Thời gian: {{ exam.duration_minutes }}:00</span>
+                </div>
+            </div>
+            <button type="button" class="btn btn-warning mb-3 fw-bold" onclick="enableFullscreen(); startWebcam();">
+                ⚠️ Bấm vào đây để kích hoạt Toàn Màn Hình & Webcam Giám Sát
+            </button>
+            
+            <form id="exam-form" onchange="autoSaveAnswers({{ exam.id }})">
+                {% for q in questions %}
+                <div class="mb-4 p-3 border rounded bg-white">
+                    <p class="fw-bold">Câu {{ loop.index }} <span class="badge bg-secondary">{{ q.level }}</span>: {{ q.question }}</p>
+                    {% if q.type == 'mc' %}
+                        {% for opt in q.options %}
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="{{ q.id }}" value="{{ opt }}">
+                            <label class="form-check-label">{{ opt }}</label>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <textarea class="form-control" name="{{ q.id }}" rows="3" placeholder="Nhập câu trả lời tự luận..."></textarea>
+                    {% endif %}
+                </div>
+                {% endfor %}
+                <button type="button" class="btn btn-success btn-lg w-100 fw-bold" onclick="submitExam(false)">Nộp Bài Thi</button>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card p-3 text-center shadow sticky-top" style="top: 20px;">
+            <h6 class="fw-bold">🎥 Camera Giám Sát</h6>
+            <video id="proctor-cam" autoplay playsinline class="w-100 rounded bg-dark" style="height: 180px; object-fit: cover;"></video>
+            <small class="text-muted mt-2">Bài làm được tự động lưu vào bộ nhớ trình duyệt khi bạn chọn đáp án.</small>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/exam_anti_cheat.js"></script>
+<script>
+    const EXAM_ID = {{ exam.id }};
+    let timeLeft = {{ exam.duration_minutes }} * 60;
+    restoreAnswers(EXAM_ID);
+
+    setInterval(() => {
+        if (timeLeft <= 0) {
+            submitExam(true);
+            return;
+        }
+        let mins = Math.floor(timeLeft / 60);
+        let secs = timeLeft % 60;
+        document.getElementById('timer').innerText = `Thời gian: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        timeLeft--;
+    }, 1000);
+
+    function submitExam(forced) {
+        const formData = new FormData(document.getElementById('exam-form'));
+        let answers = {};
+        formData.forEach((v, k) => answers[k] = v);
+
+        fetch(`/submit_exam/${EXAM_ID}`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ answers: answers, warnings: warningCount })
+        })
+        .then(res => res.json())
+        .then(data => {
+            localStorage.removeItem(`exam_draft_${EXAM_ID}`);
+            alert(`Đã nộp bài thành công! Điểm trắc nghiệm của bạn: ${data.score}/10`);
+            window.location.href = '/dashboard';
+        });
+    }
+</script>
+{% endblock %}

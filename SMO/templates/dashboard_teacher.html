@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold">👨‍🏫 Bảng Điều Khiển Giáo Viên</h3>
+    <a href="/teacher/export_grades" class="btn btn-success">📊 Xuất Bảng Điểm Excel</a>
+</div>
+
+<div class="row g-4">
+    <!-- Danh sách lớp học & Điểm danh -->
+    <div class="col-md-6">
+        <div class="card p-3 shadow-sm mb-4">
+            <h5 class="fw-bold text-primary">📚 Lớp Học & Điểm Danh PIN</h5>
+            <form action="/admin/create_course" method="POST" class="input-group input-group-sm mb-3">
+                <input type="text" name="name" class="form-control" placeholder="Tên lớp / môn học mới..." required>
+                <button class="btn btn-primary">Tạo lớp</button>
+            </form>
+            <ul class="list-group">
+                {% for c in courses %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <b>{{ c.name }}</b><br>
+                        <small class="text-success">Mã PIN hiện tại: <span id="pin-{{ c.id }}" class="fw-bold">{{ c.attendance_pin or 'Chưa mở' }}</span></small>
+                    </div>
+                    <div>
+                        <button class="btn btn-sm btn-outline-primary" onclick="genPin({{ c.id }})">Tạo PIN</button>
+                        <a href="/course/{{ c.id }}/materials" class="btn btn-sm btn-info text-white">Tài liệu & Chat</a>
+                    </div>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Lịch nhắc sự kiện -->
+        <div class="card p-3 shadow-sm">
+            <h5 class="fw-bold text-warning">📅 Lịch Nhắc Sự Kiện</h5>
+            <form action="/add_event" method="POST" class="row g-2 mb-3">
+                <div class="col-6"><input type="text" name="title" class="form-control form-control-sm" placeholder="Sự kiện..." required></div>
+                <div class="col-4"><input type="date" name="event_date" class="form-control form-control-sm" required></div>
+                <div class="col-2"><button class="btn btn-warning btn-sm w-100">Lưu</button></div>
+                <div class="col-12"><input type="text" name="description" class="form-control form-control-sm" placeholder="Mô tả"></div>
+            </form>
+            <ul class="list-group list-group-flush small">
+                {% for ev in events %}
+                <li class="list-group-item"><b>[{{ ev.event_date }}] {{ ev.title }}</b>: {{ ev.description }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <!-- Tạo đề thi & Xem kết quả -->
+    <div class="col-md-6">
+        <div class="card p-3 shadow-sm mb-4">
+            <h5 class="fw-bold text-danger">📝 Tạo Đề Kiểm Tra Mới</h5>
+            <form action="/teacher/create_exam" method="POST" id="create-exam-form">
+                <div class="row g-2 mb-2">
+                    <div class="col-md-6">
+                        <select name="course_id" class="form-select form-select-sm" required>
+                            {% for c in courses %}<option value="{{ c.id }}">{{ c.name }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6"><input type="text" name="title" class="form-control form-control-sm" placeholder="Tên bài kiểm tra" required></div>
+                    <div class="col-md-6"><input type="number" name="duration" class="form-control form-control-sm" value="30" placeholder="Thời gian (phút)" required></div>
+                    <div class="col-md-6"><input type="text" name="password" class="form-control form-control-sm" placeholder="Mật khẩu phòng thi (để trống nếu không)"></div>
+                </div>
+                <label class="small fw-bold">Danh sách câu hỏi (Định dạng JSON):</label>
+                <textarea name="questions_json" class="form-control form-control-sm font-monospace mb-2" rows="5" required>[{"id": 1, "level": "Dễ", "type": "mc", "question": "Thủ đô của Việt Nam là gì?", "options": ["Hà Nội", "TP.HCM", "Đà Nẵng", "Huế"], "answer": "Hà Nội"}]</textarea>
+                <button class="btn btn-danger btn-sm w-100">Phát Hành Đề Thi</button>
+            </form>
+        </div>
+
+        <div class="card p-3 shadow-sm">
+            <h5 class="fw-bold">📈 Kết Quả Thi Gần Đây</h5>
+            <table class="table table-sm">
+                <thead><tr><th>Học sinh</th><th>Điểm</th><th>Cảnh báo gian lận</th></tr></thead>
+                <tbody>
+                    {% for r in results %}
+                    <tr>
+                        <td>{{ users_map.get(r.student_id, 'HS') }}</td>
+                        <td class="fw-bold text-primary">{{ r.score }}/10</td>
+                        <td><span class="badge bg-{{ 'danger' if r.cheat_warnings > 0 else 'success' }}">{{ r.cheat_warnings }} lần</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function genPin(courseId) {
+    fetch(`/teacher/generate_pin/${courseId}`)
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById(`pin-${courseId}`).innerText = data.pin;
+        });
+}
+</script>
+{% endblock %}

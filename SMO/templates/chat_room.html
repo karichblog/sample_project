@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="mb-3">
+    <a href="/dashboard" class="btn btn-sm btn-outline-secondary">← Quay lại Dashboard</a>
+    <h4 class="d-inline-block ms-2 fw-bold">{{ course.name if course else 'Phòng Học' }}</h4>
+</div>
+
+<div class="row g-4">
+    <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+            <h5 class="fw-bold text-primary">📂 Tài Liệu Tham Khảo & Tiến Độ Học</h5>
+            {% if session['role'] in ['teacher', 'admin'] %}
+            <form method="POST" enctype="multipart/form-data" class="mb-3 border-bottom pb-3">
+                <input type="text" name="title" class="form-control form-control-sm mb-2" placeholder="Tên bài học / tài liệu" required>
+                <input type="file" name="file" class="form-control form-control-sm mb-2" required>
+                <button class="btn btn-primary btn-sm">Tải tài liệu lên</button>
+            </form>
+            {% endif %}
+
+            <ul class="list-group">
+                {% for m in materials %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <input type="checkbox" class="form-check-input me-2" 
+                               onchange="toggleProgress({{ m.id }})"
+                               {% if session['user_id']|string in m.completed_students %}checked{% endif %}>
+                        <a href="/uploads/{{ m.filename }}" target="_blank" class="fw-bold text-decoration-none">{{ m.title }}</a>
+                    </div>
+                    <span class="badge bg-info text-dark">Đánh dấu đã học</span>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card p-3 shadow-sm">
+            <h5 class="fw-bold text-success">💬 Phòng Trò Chuyện Lớp Học</h5>
+            <div id="chat-box" class="border rounded p-3 mb-2 bg-light" style="height: 320px; overflow-y: scroll;"></div>
+            <div class="input-group">
+                <input type="text" id="msg-input" class="form-control" placeholder="Nhập tin nhắn thảo luận..." onkeypress="if(event.key==='Enter') sendMsg()">
+                <button class="btn btn-success" onclick="sendMsg()">Gửi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const socket = io();
+    const room = "course_{{ course_id }}";
+    socket.emit('join', {room: room});
+
+    socket.on('message', data => {
+        const box = document.getElementById('chat-box');
+        box.innerHTML += `<div class="mb-1"><b>${data.user}:</b> ${data.msg}</div>`;
+        box.scrollTop = box.scrollHeight;
+    });
+
+    function sendMsg() {
+        const input = document.getElementById('msg-input');
+        if (input.value.trim() !== "") {
+            socket.emit('message', {room: room, msg: input.value});
+            input.value = "";
+        }
+    }
+
+    function toggleProgress(matId) {
+        fetch(`/toggle_progress/${matId}`, {method: 'POST'});
+    }
+</script>
+{% endblock %}
