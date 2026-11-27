@@ -1,1 +1,1118 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Khóa Mật Khẩu File & Thư Mục (AES-256)</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --success: #059669;
+            --success-hover: #047857;
+            --danger: #ef4444;
+            --bg-gradient: linear-gradient(135deg, #f0f4ff 0%, #e0e7ff 100%);
+            --card-bg: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+        }
 
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 760px;
+            padding: 36px 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.1), 0 0 1px 1px rgba(0, 0, 0, 0.03);
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+        }
+
+        /* Tabs chuyển chế độ Khóa / Mở khóa */
+        .tabs {
+            display: flex;
+            background: #f1f5f9;
+            padding: 5px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            gap: 6px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 11px 16px;
+            border: none;
+            background: transparent;
+            border-radius: 9px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn.active {
+            background: #ffffff;
+            color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+            animation: fadeIn 0.25s ease;
+        }
+
+        /* Vùng chọn file & thư mục */
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed #93c5fd;
+            border-radius: 16px;
+            padding: 36px 20px;
+            background-color: #f8fafc;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            background-color: #eff6ff;
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+
+        .upload-area strong {
+            font-size: 16px;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+
+        .upload-area small {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .picker-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pick-btn {
+            background: #ffffff;
+            border: 1px solid #bfdbfe;
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .pick-btn:hover {
+            background: #dbeafe;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        /* Danh sách file đã chọn */
+        .file-list-wrapper {
+            display: none;
+            margin-top: 20px;
+            text-align: left;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+
+        .list-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .list-header strong {
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .clear-all {
+            background: none;
+            border: none;
+            color: var(--danger);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .clear-all:hover {
+            text-decoration: underline;
+        }
+
+        .file-list {
+            list-style: none;
+            max-height: 210px;
+            overflow-y: auto;
+        }
+
+        .file-list li {
+            font-size: 13.5px;
+            padding: 9px 12px;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 7px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .file-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .file-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 420px;
+            font-weight: 500;
+        }
+
+        .file-size {
+            font-size: 12px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+        }
+
+        .remove-btn {
+            background: #fee2e2;
+            color: var(--danger);
+            border: none;
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .remove-btn:hover {
+            background: #fecaca;
+        }
+
+        /* Form cài đặt mật khẩu & tên gói */
+        .form-grid {
+            display: none;
+            margin-top: 18px;
+            text-align: left;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .form-grid.single-col {
+            grid-template-columns: 1fr;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 11px 14px;
+            border: 1px solid var(--border-color);
+            border-radius: 9px;
+            font-size: 14px;
+            outline: none;
+            background: #ffffff;
+            color: var(--text-main);
+        }
+
+        .form-group input:focus {
+            border-color: var(--primary);
+        }
+
+        .toggle-pw {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            padding: 4px 6px;
+        }
+
+        .toggle-pw:hover {
+            color: var(--primary);
+        }
+
+        /* Tùy chọn xuất file cho người nhận */
+        .export-mode {
+            display: none;
+            margin-top: 14px;
+            text-align: left;
+            background: #f1f5f9;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13px;
+        }
+
+        .export-mode label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            margin-bottom: 8px;
+            line-height: 1.45;
+        }
+
+        .export-mode label:last-child {
+            margin-bottom: 0;
+        }
+
+        .export-mode input[type="radio"] {
+            margin-top: 3px;
+            accent-color: var(--primary);
+        }
+
+        /* Nút hành động chính */
+        .btn {
+            display: none;
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            padding: 15px 28px;
+            font-size: 15.5px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            margin-top: 20px;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.28);
+            transition: all 0.2s ease;
+        }
+
+        .btn.unlock-btn {
+            background: linear-gradient(135deg, #059669 0%, #047857 100%);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.28);
+        }
+
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            background: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        /* Danh sách file đã giải mã */
+        #unlocked-results {
+            display: none;
+            margin-top: 20px;
+            text-align: left;
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            border-radius: 12px;
+            padding: 16px 20px;
+        }
+
+        #unlocked-results h3 {
+            font-size: 14px;
+            color: #065f46;
+            margin-bottom: 10px;
+        }
+
+        .dl-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #ffffff;
+            padding: 9px 12px;
+            border-radius: 8px;
+            border: 1px solid #d1fae5;
+            margin-bottom: 7px;
+            font-size: 13.5px;
+        }
+
+        .dl-link {
+            background: #059669;
+            color: #ffffff;
+            text-decoration: none;
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .dl-link:hover {
+            background: #047857;
+        }
+
+        .note {
+            margin-top: 24px;
+            font-size: 13px;
+            color: #475569;
+            text-align: left;
+            background: #fffbeb;
+            padding: 15px 18px;
+            border: 1px solid #fde68a;
+            border-left: 4px solid #f59e0b;
+            border-radius: 10px;
+            line-height: 1.6;
+        }
+
+        .note strong {
+            color: #92400e;
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 600px) {
+            .container { padding: 24px 18px; }
+            h1 { font-size: 22px; }
+            .form-grid { grid-template-columns: 1fr; }
+            .file-name { max-width: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Khóa Mật Khẩu File & Thư Mục</h1>
+    <p class="subtitle">Mã hóa chuẩn quân sự AES-256-GCM trực tiếp trên trình duyệt • Không tải dữ liệu lên máy chủ</p>
+
+    <div class="tabs">
+        <button type="button" class="tab-btn active" data-tab="lock-panel">🔒 Khóa & Đóng Gói Gửi Đi</button>
+        <button type="button" class="tab-btn" data-tab="unlock-panel">🔓 Mở Khóa File Nhận Được</button>
+    </div>
+
+    <!-- TAB 1: KHÓA MẬT KHẨU -->
+    <div id="lock-panel" class="tab-panel active">
+        <div class="upload-area" id="lock-drop-zone">
+            <div class="upload-icon">🛡️</div>
+            <strong>Kéo thả nhiều file hoặc nguyên cả thư mục vào đây</strong>
+            <small>Hỗ trợ mọi định dạng (Word, Excel, PDF, Ảnh, Video, Source code...)</small>
+            <div class="picker-buttons">
+                <button type="button" class="pick-btn" id="pick-files-btn">+ Chọn nhiều File</button>
+                <button type="button" class="pick-btn" id="pick-folder-btn">+ Chọn cả Thư mục</button>
+            </div>
+        </div>
+        <input type="file" id="file-input" multiple>
+        <input type="file" id="folder-input" webkitdirectory directory multiple>
+
+        <div class="file-list-wrapper" id="lock-list-wrapper">
+            <div class="list-header">
+                <strong>Danh sách tệp sẽ mã hóa (<span id="lock-count">0</span> tệp)</strong>
+                <button type="button" class="clear-all" id="lock-clear-btn">Xóa tất cả</button>
+            </div>
+            <ul class="file-list" id="lock-file-list"></ul>
+        </div>
+
+        <div class="form-grid" id="lock-form">
+            <div class="form-group">
+                <label for="lock-password">Đặt mật khẩu bảo vệ (*):</label>
+                <div class="input-wrapper">
+                    <input type="password" id="lock-password" placeholder="Nhập mật khẩu mạnh...">
+                    <button type="button" class="toggle-pw" data-target="lock-password">Hiện</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="lock-confirm">Nhập lại mật khẩu (*):</label>
+                <div class="input-wrapper">
+                    <input type="password" id="lock-confirm" placeholder="Xác nhận mật khẩu...">
+                    <button type="button" class="toggle-pw" data-target="lock-confirm">Hiện</button>
+                </div>
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+                <label for="package-name">Tên gói tệp khi xuất ra:</label>
+                <input type="text" id="package-name" value="tai_lieu_bao_mat" placeholder="Ví dụ: hop_dong_2026">
+            </div>
+        </div>
+
+        <div class="export-mode" id="export-mode-box">
+            <label>
+                <input type="radio" name="exportType" value="html" checked>
+                <span><strong>Xuất file tự mở khóa (.html) — Khuyên dùng:</strong> Người nhận chỉ cần nhấp đúp mở file trên mọi trình duyệt (kể cả khi mất mạng) và nhập đúng mật khẩu để xem/tải dữ liệu.</span>
+            </label>
+            <label>
+                <input type="radio" name="exportType" value="vault">
+                <span><strong>Xuất file dữ liệu mã hóa (.vault):</strong> Gọn nhẹ, người nhận dùng chính trang web này (tab Mở Khóa) để giải mã.</span>
+            </label>
+        </div>
+
+        <button type="button" class="btn" id="encrypt-btn">Mã Hóa & Tải Gói Bảo Mật Về Máy</button>
+    </div>
+
+    <!-- TAB 2: MỞ KHÓA FILE -->
+    <div id="unlock-panel" class="tab-panel">
+        <label for="unlock-input" class="upload-area" id="unlock-drop-zone">
+            <div class="upload-icon">🔑</div>
+            <strong>Chọn hoặc kéo thả file đã khóa (.vault hoặc .html) vào đây</strong>
+            <small>Nhập chính xác mật khẩu do người gửi cung cấp để giải mã toàn bộ nội dung gốc</small>
+        </label>
+        <input type="file" id="unlock-input" accept=".vault,.html">
+
+        <div class="file-list-wrapper" id="unlock-file-info">
+            <div class="list-header">
+                <strong>Tệp cần mở khóa</strong>
+                <button type="button" class="clear-all" id="unlock-clear-btn">Chọn tệp khác</button>
+            </div>
+            <ul class="file-list" id="unlock-file-display"></ul>
+        </div>
+
+        <div class="form-grid single-col" id="unlock-form">
+            <div class="form-group">
+                <label for="unlock-password">Nhập mật khẩu mở khóa:</label>
+                <div class="input-wrapper">
+                    <input type="password" id="unlock-password" placeholder="Nhập mật khẩu để giải mã...">
+                    <button type="button" class="toggle-pw" data-target="unlock-password">Hiện</button>
+                </div>
+            </div>
+        </div>
+
+        <button type="button" class="btn unlock-btn" id="decrypt-btn">Giải Khóa & Xem Tài Liệu</button>
+
+        <div id="unlocked-results">
+            <h3>✅ Giải khóa thành công! Nhấn tải về từng tệp bên dưới:</h3>
+            <div id="unlocked-list"></div>
+        </div>
+    </div>
+
+    <div class="note">
+        <strong>Cơ chế bảo mật tuyệt đối (Zero-Knowledge):</strong>
+        Dữ liệu của bạn được mã hóa bằng thuật toán <strong>PBKDF2 (250.000 vòng lặp SHA-256) + AES-256-GCM</strong> ngay trên thiết bị. Mật khẩu không bao giờ được lưu trong file hay gửi qua mạng — nếu nhập sai dù chỉ 1 ký tự, không ai có thể giải mã nội dung.
+    </div>
+</div>
+
+<script>
+    // Quản lý Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            btn.classList.add('active');
+            document.getElementById(btn.dataset.tab).classList.add('active');
+        });
+    });
+
+    // Hiện/Ẩn mật khẩu
+    document.querySelectorAll('.toggle-pw').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const input = document.getElementById(btn.dataset.target);
+            if (input.type === 'password') {
+                input.type = 'text';
+                btn.textContent = 'Ẩn';
+            } else {
+                input.type = 'password';
+                btn.textContent = 'Hiện';
+            }
+        });
+    });
+
+    // ================== PHẦN 1: MÃ HÓA & ĐÓNG GÓI ==================
+    const fileInput = document.getElementById('file-input');
+    const folderInput = document.getElementById('folder-input');
+    const pickFilesBtn = document.getElementById('pick-files-btn');
+    const pickFolderBtn = document.getElementById('pick-folder-btn');
+    const lockDropZone = document.getElementById('lock-drop-zone');
+    const lockListWrapper = document.getElementById('lock-list-wrapper');
+    const lockFileList = document.getElementById('lock-file-list');
+    const lockCount = document.getElementById('lock-count');
+    const lockClearBtn = document.getElementById('lock-clear-btn');
+    const lockForm = document.getElementById('lock-form');
+    const exportModeBox = document.getElementById('export-mode-box');
+    const encryptBtn = document.getElementById('encrypt-btn');
+
+    let itemsToLock = []; // { file: File, relPath: string }
+
+    pickFilesBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.click();
+    });
+
+    pickFolderBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        folderInput.click();
+    });
+
+    lockDropZone.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
+        addLockFiles(Array.from(e.target.files));
+        fileInput.value = '';
+    });
+
+    folderInput.addEventListener('change', (e) => {
+        addLockFiles(Array.from(e.target.files));
+        folderInput.value = '';
+    });
+
+    // Hỗ trợ kéo thả cả File lẫn Folder từ máy tính
+    lockDropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        lockDropZone.classList.add('dragover');
+    });
+
+    lockDropZone.addEventListener('dragleave', () => {
+        lockDropZone.classList.remove('dragover');
+    });
+
+    lockDropZone.addEventListener('drop', async (e) => {
+        e.preventDefault();
+        lockDropZone.classList.remove('dragover');
+        const items = e.dataTransfer.items;
+        if (items && items.length > 0 && items[0].webkitGetAsEntry) {
+            const entries = [];
+            for (let i = 0; i < items.length; i++) {
+                const entry = items[i].webkitGetAsEntry();
+                if (entry) entries.push(entry);
+            }
+            const collected = [];
+            for (const entry of entries) {
+                await traverseEntry(entry, "", collected);
+            }
+            itemsToLock = itemsToLock.concat(collected);
+            renderLockList();
+        } else if (e.dataTransfer.files.length > 0) {
+            addLockFiles(Array.from(e.dataTransfer.files));
+        }
+    });
+
+    function traverseEntry(entry, pathPrefix, collected) {
+        return new Promise((resolve) => {
+            if (entry.isFile) {
+                entry.file((file) => {
+                    collected.push({ file, relPath: pathPrefix + file.name });
+                    resolve();
+                }, () => resolve());
+            } else if (entry.isDirectory) {
+                const dirReader = entry.createReader();
+                const readAllEntries = () => {
+                    dirReader.readEntries(async (entries) => {
+                        if (entries.length === 0) {
+                            resolve();
+                        } else {
+                            for (const sub of entries) {
+                                await traverseEntry(sub, pathPrefix + entry.name + "/", collected);
+                            }
+                            readAllEntries();
+                        }
+                    }, () => resolve());
+                };
+                readAllEntries();
+            } else {
+                resolve();
+            }
+        });
+    }
+
+    function addLockFiles(files) {
+        for (const f of files) {
+            const rel = f.webkitRelativePath && f.webkitRelativePath.length > 0 ? f.webkitRelativePath : f.name;
+            itemsToLock.push({ file: f, relPath: rel });
+        }
+        renderLockList();
+    }
+
+    window.removeLockItem = function(idx) {
+        itemsToLock.splice(idx, 1);
+        renderLockList();
+    };
+
+    lockClearBtn.addEventListener('click', () => {
+        itemsToLock = [];
+        renderLockList();
+    });
+
+    function renderLockList() {
+        lockCount.textContent = itemsToLock.length;
+        if (itemsToLock.length === 0) {
+            lockListWrapper.style.display = 'none';
+            lockForm.style.display = 'none';
+            exportModeBox.style.display = 'none';
+            encryptBtn.style.display = 'none';
+            return;
+        }
+        lockListWrapper.style.display = 'block';
+        lockForm.style.display = 'grid';
+        exportModeBox.style.display = 'block';
+        encryptBtn.style.display = 'inline-block';
+
+        lockFileList.innerHTML = itemsToLock.map((item, idx) => `
+            <li>
+                <div class="file-info">
+                    <span class="file-name" title="${escapeHtml(item.relPath)}">${idx + 1}. ${escapeHtml(item.relPath)}</span>
+                    <span class="file-size">(${formatBytes(item.file.size)})</span>
+                </div>
+                <button type="button" class="remove-btn" onclick="removeLockItem(${idx})" title="Xóa">✕</button>
+            </li>
+        `).join('');
+    }
+
+    // Đóng gói nhị phân nhiều file thành 1 buffer duy nhất
+    async function packFiles(items) {
+        const encoder = new TextEncoder();
+        const manifest = [];
+        const buffers = [];
+        let totalBinarySize = 0;
+
+        for (const item of items) {
+            const buf = await item.file.arrayBuffer();
+            manifest.push({
+                path: item.relPath,
+                type: item.file.type || 'application/octet-stream',
+                size: buf.byteLength
+            });
+            buffers.push(new Uint8Array(buf));
+            totalBinarySize += buf.byteLength;
+        }
+
+        const manifestBytes = encoder.encode(JSON.stringify(manifest));
+        const headerLen = 4 + manifestBytes.byteLength;
+        const combined = new Uint8Array(headerLen + totalBinarySize);
+        const view = new DataView(combined.buffer);
+        view.setUint32(0, manifestBytes.byteLength, false);
+        combined.set(manifestBytes, 4);
+
+        let offset = headerLen;
+        for (const b of buffers) {
+            combined.set(b, offset);
+            offset += b.byteLength;
+        }
+        return combined;
+    }
+
+    async function deriveAesKey(password, salt, usage) {
+        const encoder = new TextEncoder();
+        const keyMaterial = await crypto.subtle.importKey(
+            'raw',
+            encoder.encode(password),
+            'PBKDF2',
+            false,
+            ['deriveKey']
+        );
+        return crypto.subtle.deriveKey(
+            {
+                name: 'PBKDF2',
+                salt: salt,
+                iterations: 250000,
+                hash: 'SHA-256'
+            },
+            keyMaterial,
+            { name: 'AES-GCM', length: 256 },
+            false,
+            [usage]
+        );
+    }
+
+    function uint8ToBase64(bytes) {
+        let binary = '';
+        const chunkSize = 0x8000;
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+            const sub = bytes.subarray(i, i + chunkSize);
+            binary += String.fromCharCode.apply(null, sub);
+        }
+        return btoa(binary);
+    }
+
+    function base64ToUint8(b64) {
+        const binary = atob(b64);
+        const len = binary.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+            bytes[i] = binary.charCodeAt(i);
+        }
+        return bytes;
+    }
+
+    encryptBtn.addEventListener('click', async () => {
+        if (itemsToLock.length === 0) return;
+
+        const pw = document.getElementById('lock-password').value;
+        const confirmPw = document.getElementById('lock-confirm').value;
+        const pkgName = (document.getElementById('package-name').value.trim() || 'tai_lieu_bao_mat').replace(/[^a-zA-Z0-9_\-À-ỹ]/g, '_');
+        const exportType = document.querySelector('input[name="exportType"]:checked').value;
+
+        if (!pw) {
+            alert('Vui lòng nhập mật khẩu để bảo vệ dữ liệu!');
+            return;
+        }
+        if (pw !== confirmPw) {
+            alert('Mật khẩu xác nhận không khớp. Vui lòng kiểm tra lại!');
+            return;
+        }
+
+        encryptBtn.disabled = true;
+        encryptBtn.textContent = 'Đang mã hóa AES-256...';
+
+        try {
+            const packedData = await packFiles(itemsToLock);
+            const salt = crypto.getRandomValues(new Uint8Array(16));
+            const iv = crypto.getRandomValues(new Uint8Array(12));
+            const key = await deriveAesKey(pw, salt, 'encrypt');
+
+            const encryptedBuf = await crypto.subtle.encrypt(
+                { name: 'AES-GCM', iv: iv },
+                key,
+                packedData
+            );
+
+            // Ghép Header định danh "VAULT256" + Salt (16B) + IV (12B) + Ciphertext
+            const magic = new TextEncoder().encode('VAULT256');
+            const encBytes = new Uint8Array(encryptedBuf);
+            const finalVault = new Uint8Array(magic.length + salt.length + iv.length + encBytes.length);
+            finalVault.set(magic, 0);
+            finalVault.set(salt, 8);
+            finalVault.set(iv, 24);
+            finalVault.set(encBytes, 36);
+
+            if (exportType === 'vault') {
+                const blob = new Blob([finalVault], { type: 'application/octet-stream' });
+                triggerDownload(blob, pkgName + '.vault');
+            } else {
+                const b64Payload = uint8ToBase64(finalVault);
+                const selfExtractorHtml = buildSelfExtractorHtml(pkgName, itemsToLock.length, b64Payload);
+                const blob = new Blob([selfExtractorHtml], { type: 'text/html;charset=utf-8' });
+                triggerDownload(blob, pkgName + '_bao_mat.html');
+            }
+        } catch (err) {
+            alert('Lỗi khi mã hóa: ' + err.message);
+        } finally {
+            encryptBtn.disabled = false;
+            encryptBtn.textContent = 'Mã Hóa & Tải Gói Bảo Mật Về Máy';
+        }
+    });
+
+    // Tạo trang HTML tự giải mã độc lập để gửi cho người nhận
+    function buildSelfExtractorHtml(pkgTitle, fileCount, b64Data) {
+        return `<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tài Liệu Được Bảo Vệ Mật Khẩu - ${escapeHtml(pkgTitle)}</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);color:#1e293b;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.card{background:#fff;width:100%;max-width:580px;padding:36px;border-radius:18px;box-shadow:0 25px 50px -12px rgba(0,0,0,.45);text-align:center}
+.badge{display:inline-block;background:#dbeafe;color:#1d4ed8;font-size:12px;font-weight:700;padding:5px 12px;border-radius:20px;margin-bottom:14px}
+h1{font-size:22px;margin-bottom:8px;color:#0f172a}
+p{font-size:14px;color:#64748b;margin-bottom:22px;line-height:1.5}
+.input-box{position:relative;margin-bottom:16px}
+input{width:100%;padding:13px 16px;border:1.5px solid #cbd5e1;border-radius:10px;font-size:15px;outline:none}
+input:focus{border-color:#2563eb}
+button.unlock{width:100%;padding:14px;background:#2563eb;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer}
+button.unlock:hover{background:#1d4ed8}
+.err{color:#dc2626;font-size:13px;margin-top:12px;display:none;font-weight:500}
+#results{display:none;margin-top:22px;text-align:left;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:16px}
+#results h3{font-size:14px;color:#059669;margin-bottom:12px}
+.item{display:flex;justify-content:space-between;align-items:center;background:#fff;padding:10px 12px;border:1px solid #e2e8f0;border-radius:8px;margin-bottom:8px;gap:10px;font-size:13.5px}
+.item span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.actions{display:flex;gap:6px;flex-shrink:0}
+.btn-sm{padding:6px 11px;border-radius:6px;font-size:12px;font-weight:600;text-decoration:none;cursor:pointer;border:none}
+.btn-view{background:#e0e7ff;color:#1d4ed8}
+.btn-dl{background:#059669;color:#fff}
+#preview-box{display:none;margin-top:16px;border:1px solid #cbd5e1;border-radius:10px;overflow:hidden;background:#fff}
+#preview-box iframe,#preview-box img{width:100%;max-height:480px;object-fit:contain;display:block;border:none}
+</style>
+</head>
+<body>
+<div class="card">
+<div class="badge">🔒 MÃ HÓA AES-256-GCM • ${fileCount} TỆP</div>
+<h1>Tài Liệu Được Bảo Vệ Mật Khẩu</h1>
+<p>Người gửi đã khóa nội dung này. Vui lòng nhập chính xác mật khẩu để mở xem hoặc tải về máy.</p>
+<div class="input-box">
+<input type="password" id="pw" placeholder="Nhập mật khẩu mở khóa..." autofocus>
+</div>
+<button class="unlock" id="btn">Mở Khóa Tài Liệu</button>
+<div class="err" id="err">❌ Mật khẩu không chính xác hoặc dữ liệu đã bị thay đổi!</div>
+<div id="results">
+<h3>✅ Đã mở khóa thành công (${fileCount} tệp):</h3>
+<div id="list"></div>
+<div id="preview-box"></div>
+</div>
+</div>
+<script id="vault-payload" type="application/octet-stream">${b64Data}</script>
+<script>
+const btn=document.getElementById('btn'),pwInput=document.getElementById('pw'),errBox=document.getElementById('err'),resBox=document.getElementById('results'),listBox=document.getElementById('list'),previewBox=document.getElementById('preview-box');
+pwInput.addEventListener('keydown',e=>{if(e.key==='Enter')btn.click()});
+btn.addEventListener('click',async()=>{
+const pw=pwInput.value;if(!pw)return;
+errBox.style.display='none';btn.disabled=true;btn.textContent='Đang kiểm tra mật khẩu...';
+try{
+const b64=document.getElementById('vault-payload').textContent.trim();
+const bin=atob(b64);const raw=new Uint8Array(bin.length);
+for(let i=0;i<bin.length;i++)raw[i]=bin.charCodeAt(i);
+const magic=new TextDecoder().decode(raw.subarray(0,8));
+if(magic!=='VAULT256')throw new Error('Invalid format');
+const salt=raw.subarray(8,24),iv=raw.subarray(24,36),cipher=raw.subarray(36);
+const km=await crypto.subtle.importKey('raw',new TextEncoder().encode(pw),'PBKDF2',false,['deriveKey']);
+const key=await crypto.subtle.deriveKey({name:'PBKDF2',salt,iterations:250000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['decrypt']);
+const plainBuf=await crypto.subtle.decrypt({name:'AES-GCM',iv},key,cipher);
+const plain=new Uint8Array(plainBuf);
+const mLen=new DataView(plain.buffer).getUint32(0,false);
+const manifest=JSON.parse(new TextDecoder().decode(plain.subarray(4,4+mLen)));
+let offset=4+mLen;listBox.innerHTML='';
+manifest.forEach(item=>{
+const fileBytes=plain.subarray(offset,offset+item.size);offset+=item.size;
+const blob=new Blob([fileBytes],{type:item.type});
+const url=URL.createObjectURL(blob);
+const fileName=item.path.split('/').pop();
+const row=document.createElement('div');row.className='item';
+const canPreview=item.type.startsWith('image/')||item.type==='application/pdf'||item.type.startsWith('text/');
+row.innerHTML=\`<span title="\${item.path}">📄 \${item.path}</span><div class="actions">\${canPreview?\`<button class="btn-sm btn-view" onclick="previewFile('\${url}','\${item.type}')">Xem</button>\`:''}<a class="btn-sm btn-dl" href="\${url}" download="\${fileName}">Tải về</a></div>\`;
+listBox.appendChild(row);
+});
+resBox.style.display='block';btn.style.display='none';pwInput.parentElement.style.display='none';
+}catch(e){errBox.style.display='block';btn.disabled=false;btn.textContent='Mở Khóa Tài Liệu'}
+});
+window.previewFile=function(url,type){
+previewBox.style.display='block';
+if(type.startsWith('image/')){previewBox.innerHTML=\`<img src="\${url}">\`}
+else{previewBox.innerHTML=\`<iframe src="\${url}"></iframe>\`}
+};
+<\/script>
+</body>
+</html>`;
+    }
+
+    // ================== PHẦN 2: GIẢI MÃ FILE NHẬN ĐƯỢC ==================
+    const unlockInput = document.getElementById('unlock-input');
+    const unlockDropZone = document.getElementById('unlock-drop-zone');
+    const unlockFileInfo = document.getElementById('unlock-file-info');
+    const unlockFileDisplay = document.getElementById('unlock-file-display');
+    const unlockClearBtn = document.getElementById('unlock-clear-btn');
+    const unlockForm = document.getElementById('unlock-form');
+    const decryptBtn = document.getElementById('decrypt-btn');
+    const unlockedResults = document.getElementById('unlocked-results');
+    const unlockedList = document.getElementById('unlocked-list');
+
+    let lockedFileToOpen = null;
+
+    unlockInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            setLockedFile(e.target.files[0]);
+        }
+        unlockInput.value = '';
+    });
+
+    unlockDropZone.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        unlockDropZone.classList.add('dragover');
+    });
+
+    unlockDropZone.addEventListener('dragleave', () => {
+        unlockDropZone.classList.remove('dragover');
+    });
+
+    unlockDropZone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        unlockDropZone.classList.remove('dragover');
+        if (e.dataTransfer.files.length > 0) {
+            setLockedFile(e.dataTransfer.files[0]);
+        }
+    });
+
+    function setLockedFile(file) {
+        lockedFileToOpen = file;
+        unlockFileInfo.style.display = 'block';
+        unlockForm.style.display = 'grid';
+        decryptBtn.style.display = 'inline-block';
+        unlockedResults.style.display = 'none';
+        unlockedList.innerHTML = '';
+
+        unlockFileDisplay.innerHTML = `
+            <li>
+                <div class="file-info">
+                    <span class="file-name">${escapeHtml(file.name)}</span>
+                    <span class="file-size">(${formatBytes(file.size)})</span>
+                </div>
+            </li>
+        `;
+    }
+
+    unlockClearBtn.addEventListener('click', () => {
+        lockedFileToOpen = null;
+        unlockFileInfo.style.display = 'none';
+        unlockForm.style.display = 'none';
+        decryptBtn.style.display = 'none';
+        unlockedResults.style.display = 'none';
+        document.getElementById('unlock-password').value = '';
+    });
+
+    decryptBtn.addEventListener('click', async () => {
+        if (!lockedFileToOpen) return;
+        const pw = document.getElementById('unlock-password').value;
+        if (!pw) {
+            alert('Vui lòng nhập mật khẩu mở khóa!');
+            return;
+        }
+
+        decryptBtn.disabled = true;
+        decryptBtn.textContent = 'Đang giải mã...';
+
+        try {
+            let rawVaultBytes;
+            if (lockedFileToOpen.name.toLowerCase().endsWith('.html')) {
+                const text = await lockedFileToOpen.text();
+                const match = text.match(/<script id="vault-payload" type="application\/octet-stream">([\s\S]*?)<\/script>/);
+                if (!match) throw new Error('Tệp HTML này không chứa dữ liệu mã hóa hợp lệ.');
+                rawVaultBytes = base64ToUint8(match[1].trim());
+            } else {
+                rawVaultBytes = new Uint8Array(await lockedFileToOpen.arrayBuffer());
+            }
+
+            const magic = new TextDecoder().decode(rawVaultBytes.subarray(0, 8));
+            if (magic !== 'VAULT256') {
+                throw new Error('Định dạng tệp không hợp lệ hoặc bị hỏng.');
+            }
+
+            const salt = rawVaultBytes.subarray(8, 24);
+            const iv = rawVaultBytes.subarray(24, 36);
+            const cipherBytes = rawVaultBytes.subarray(36);
+
+            const key = await deriveAesKey(pw, salt, 'decrypt');
+            const plainBuf = await crypto.subtle.decrypt(
+                { name: 'AES-GCM', iv: iv },
+                key,
+                cipherBytes
+            );
+
+            const plainBytes = new Uint8Array(plainBuf);
+            const manifestLen = new DataView(plainBytes.buffer).getUint32(0, false);
+            const manifest = JSON.parse(new TextDecoder().decode(plainBytes.subarray(4, 4 + manifestLen)));
+
+            let offset = 4 + manifestLen;
+            unlockedList.innerHTML = '';
+
+            for (const item of manifest) {
+                const slice = plainBytes.subarray(offset, offset + item.size);
+                offset += item.size;
+                const blob = new Blob([slice], { type: item.type });
+                const url = URL.createObjectURL(blob);
+                const shortName = item.path.split('/').pop();
+
+                const row = document.createElement('div');
+                row.className = 'dl-item';
+                row.innerHTML = `
+                    <span title="${escapeHtml(item.path)}">📄 ${escapeHtml(item.path)} (${formatBytes(item.size)})</span>
+                    <a class="dl-link" href="${url}" download="${escapeHtml(shortName)}">Tải về</a>
+                `;
+                unlockedList.appendChild(row);
+            }
+
+            unlockedResults.style.display = 'block';
+        } catch (err) {
+            alert('Mở khóa thất bại: Mật khẩu không đúng hoặc tệp đã bị chỉnh sửa!');
+        } finally {
+            decryptBtn.disabled = false;
+            decryptBtn.textContent = 'Giải Khóa & Xem Tài Liệu';
+        }
+    });
+
+    function triggerDownload(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+
+    function formatBytes(bytes) {
+        if (bytes < 1024) return bytes + ' B';
+        if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+        return (bytes / 1048576).toFixed(2) + ' MB';
+    }
+
+    function escapeHtml(str) {
+        return str.replace(/[&<>"']/g, m => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[m]));
+    }
+</script>
+
+</body>
+</html>
