@@ -15,7 +15,7 @@
         input { padding: 10px; border: 1px solid #cbd5e0; border-radius: 6px; font-size: 15px; }
         button { width: 100%; padding: 12px; background: #2b6cb0; color: #fff; border: none; border-radius: 6px; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; }
         button:hover { background: #2c5282; }
-        .summary-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 25px; }
+        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 15px; margin-top: 25px; }
         .card { padding: 15px; border-radius: 8px; border-left: 5px solid; background: #f8fafc; }
         .card.fixed { border-color: #3182ce; }
         .card.hybrid { border-color: #38a169; }
@@ -98,51 +98,79 @@
 
 <script>
     let chartInstance = null;
-    const formatVND = (num) => new Intl.NumberFormat('vi-VN').format(num) + ' đ';
+    const formatVND = (num) => new Intl.NumberFormat('vi-VN').format(Math.round(num)) + ' đ';
 
-    async function runSimulation() {
-        const payload = {
-            principal: document.getElementById('principal').value,
-            months: document.getElementById('months').value,
-            fixed_rate: document.getElementById('fixed_rate').value,
-            hybrid_promo_months: document.getElementById('hybrid_promo_months').value,
-            hybrid_promo_rate: document.getElementById('hybrid_promo_rate').value,
-            hybrid_float_rate: document.getElementById('hybrid_float_rate').value,
-            float_init_rate: document.getElementById('float_init_rate').value,
-            float_later_rate: document.getElementById('float_later_rate').value
+    // Hàm tính toán dư nợ giảm dần trực tiếp bằng JavaScript
+    function calculateLoanSchedule(principal, months, rateInitial, promoMonths, rateFloating) {
+        const monthlyPrincipal = principal / months;
+        let remainingBalance = principal;
+        let totalInterest = 0;
+        const schedule = [];
+
+        for (let m = 1; m <= months; m++) {
+            const currentRate = m <= promoMonths ? rateInitial : rateFloating;
+            const monthlyInterest = remainingBalance * (currentRate / 100 / 12);
+            const totalPayment = monthlyPrincipal + monthlyInterest;
+
+            schedule.push({
+                month: m,
+                rate: currentRate,
+                principal: monthlyPrincipal,
+                interest: monthlyInterest,
+                total_payment: totalPayment,
+                remaining: Math.max(0, remainingBalance - monthlyPrincipal)
+            });
+
+            totalInterest += monthlyInterest;
+            remainingBalance -= monthlyPrincipal;
+        }
+
+        return {
+            month_1: months >= 1 ? schedule.total_payment : 0,
+            month_25: months >= 25 ? schedule.total_payment : schedule[schedule.length - 1].total_payment,
+            total_interest: totalInterest,
+            schedule: schedule
         };
+    }
 
-        const res = await fetch('/api/calculate', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const data = await res.json();
+    function runSimulation() {
+        const principal = parseFloat(document.getElementById('principal').value) || 1000000000;
+        const months = parseInt(document.getElementById('months').value) || 120;
+        const fixedRate = parseFloat(document.getElementById('fixed_rate').value) || 9.5;
+        const promoMonths = parseInt(document.getElementById('hybrid_promo_months').value) || 24;
+        const hybridPromoRate = parseFloat(document.getElementById('hybrid_promo_rate').value) || 7.5;
+        const hybridFloatRate = parseFloat(document.getElementById('hybrid_float_rate').value) || 11.5;
+        const floatInitRate = parseFloat(document.getElementById('float_init_rate').value) || 10.5;
+        const floatLaterRate = parseFloat(document.getElementById('float_later_rate').value) || 12.0;
+
+        const fixed = calculateLoanSchedule(principal, months, fixedRate, months, fixedRate);
+        const hybrid = calculateLoanSchedule(principal, months, hybridPromoRate, promoMonths, hybridFloatRate);
+        const floating = calculateLoanSchedule(principal, months, floatInitRate, promoMonths, floatLaterRate);
 
         // Cập nhật 3 thẻ tóm tắt
         document.getElementById('summaryCards').innerHTML = `
             <div class="card fixed">
                 <h3>1. Lãi suất Cố định</h3>
-                <p>Trả tháng 1: <span class="highlight">${formatVND(data.fixed.month_1)}</span></p>
-                <p>Trả tháng 25: <span class="highlight">${formatVND(data.fixed.month_25)}</span></p>
-                <p>Tổng tiền lãi: <span class="highlight">${formatVND(data.fixed.total_interest)}</span></p>
+                <p>Trả tháng 1: <span class="highlight">${formatVND(fixed.month_1)}</span></p>
+                <p>Trả tháng 25: <span class="highlight">${formatVND(fixed.month_25)}</span></p>
+                <p>Tổng tiền lãi: <span class="highlight">${formatVND(fixed.total_interest)}</span></p>
             </div>
             <div class="card hybrid">
                 <h3>2. Lãi suất Hỗn hợp</h3>
-                <p>Trả tháng 1: <span class="highlight">${formatVND(data.hybrid.month_1)}</span></p>
-                <p>Trả tháng 25 (hết ưu đãi): <span class="highlight">${formatVND(data.hybrid.month_25)}</span></p>
-                <p>Tổng tiền lãi: <span class="highlight">${formatVND(data.hybrid.total_interest)}</span></p>
+                <p>Trả tháng 1: <span class="highlight">${formatVND(hybrid.month_1)}</span></p>
+                <p>Trả tháng 25 (hết ưu đãi): <span class="highlight">${formatVND(hybrid.month_25)}</span></p>
+                <p>Tổng tiền lãi: <span class="highlight">${formatVND(hybrid.total_interest)}</span></p>
             </div>
             <div class="card floating">
                 <h3>3. Lãi suất Thả nổi</h3>
-                <p>Trả tháng 1: <span class="highlight">${formatVND(data.floating.month_1)}</span></p>
-                <p>Trả tháng 25: <span class="highlight">${formatVND(data.floating.month_25)}</span></p>
-                <p>Tổng tiền lãi: <span class="highlight">${formatVND(data.floating.total_interest)}</span></p>
+                <p>Trả tháng 1: <span class="highlight">${formatVND(floating.month_1)}</span></p>
+                <p>Trả tháng 25: <span class="highlight">${formatVND(floating.month_25)}</span></p>
+                <p>Tổng tiền lãi: <span class="highlight">${formatVND(floating.total_interest)}</span></p>
             </div>
         `;
 
         // Vẽ biểu đồ dòng tiền hàng tháng
-        const labels = data.hybrid.schedule.map(item => `T${item.month}`);
+        const labels = hybrid.schedule.map(item => `T${item.month}`);
         const ctx = document.getElementById('paymentChart').getContext('2d');
         if (chartInstance) chartInstance.destroy();
 
@@ -151,9 +179,9 @@
             data: {
                 labels: labels,
                 datasets: [
-                    { label: 'Cố định (VNĐ/tháng)', data: data.fixed.schedule.map(i => i.total_payment), borderColor: '#3182ce', tension: 0.1, pointRadius: 0 },
-                    { label: 'Hỗn hợp (VNĐ/tháng)', data: data.hybrid.schedule.map(i => i.total_payment), borderColor: '#38a169', tension: 0.1, pointRadius: 0 },
-                    { label: 'Thả nổi (VNĐ/tháng)', data: data.floating.schedule.map(i => i.total_payment), borderColor: '#e53e3e', tension: 0.1, pointRadius: 0 }
+                    { label: 'Cố định (VNĐ/tháng)', data: fixed.schedule.map(i => Math.round(i.total_payment)), borderColor: '#3182ce', tension: 0.1, pointRadius: 0 },
+                    { label: 'Hỗn hợp (VNĐ/tháng)', data: hybrid.schedule.map(i => Math.round(i.total_payment)), borderColor: '#38a169', tension: 0.1, pointRadius: 0 },
+                    { label: 'Thả nổi (VNĐ/tháng)', data: floating.schedule.map(i => Math.round(i.total_payment)), borderColor: '#e53e3e', tension: 0.1, pointRadius: 0 }
                 ]
             },
             options: {
@@ -165,22 +193,8 @@
 
         // Đổ dữ liệu vào bảng lịch trả nợ gói Hỗn hợp
         const tbody = document.getElementById('scheduleBody');
-        tbody.innerHTML = data.hybrid.schedule.map(row => `
+        tbody.innerHTML = hybrid.schedule.map(row => `
             <tr>
                 <td style="text-align:center">${row.month}</td>
                 <td style="text-align:center">${row.rate}%</td>
                 <td>${formatVND(row.principal)}</td>
-                <td>${formatVND(row.interest)}</td>
-                <td><strong>${formatVND(row.total_payment)}</strong></td>
-                <td>${formatVND(row.remaining)}</td>
-            </tr>
-        `).join('');
-    }
-
-    // Tự động chạy khi tải trang
-    window.onload = runSimulation;
-</script>
-
-</body>
-</html>
-
