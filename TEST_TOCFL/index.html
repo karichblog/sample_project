@@ -1,0 +1,528 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>TOCFL CAT 2026 – Luyện đề Nghe & Đọc</title>
+<style>
+:root{--bg:#f6f7fb;--card:#fff;--text:#1d2433;--muted:#667085;--line:#e4e7ec;--pri:#1f6feb;--pri2:#e8f0fe;--ok:#12805c;--okbg:#e7f6ef;--bad:#c4320a;--badbg:#fdecea;--warn:#b54708;--warnbg:#fff4e5}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1420;--card:#171d2b;--text:#e6e9ef;--muted:#98a2b3;--line:#2a3243;--pri:#5b9bff;--pri2:#1c2a44;--ok:#4cc38a;--okbg:#14301f;--bad:#ff7a59;--badbg:#3a1d16;--warn:#f5b453;--warnbg:#3a2a12}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:16px/1.6 system-ui,-apple-system,"Segoe UI","Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif}
+header{background:var(--card);border-bottom:1px solid var(--line);padding:14px 16px;position:sticky;top:0;z-index:5}
+header h1{margin:0;font-size:18px}
+header p{margin:2px 0 0;color:var(--muted);font-size:13px}
+nav{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+nav button{border:1px solid var(--line);background:transparent;color:var(--text);padding:6px 12px;border-radius:20px;cursor:pointer;font-size:14px}
+nav button.on{background:var(--pri);color:#fff;border-color:var(--pri)}
+main{max-width:860px;margin:0 auto;padding:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:14px}
+h2{font-size:18px;margin:0 0 10px}h3{font-size:16px;margin:16px 0 6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.pick{border:1.5px solid var(--line);border-radius:12px;padding:12px;cursor:pointer;background:transparent;color:var(--text);text-align:left;font-size:14px}
+.pick.on{border-color:var(--pri);background:var(--pri2)}
+.pick b{display:block;font-size:15px}
+.pick small{color:var(--muted)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:12px}
+label{font-size:14px;color:var(--muted)}
+select,input[type=range]{font-size:14px}
+.btn{background:var(--pri);color:#fff;border:0;padding:10px 18px;border-radius:10px;font-size:15px;cursor:pointer}
+.btn.sec{background:transparent;color:var(--pri);border:1.5px solid var(--pri)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.top{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;font-size:14px;color:var(--muted)}
+.timer{font-variant-numeric:tabular-nums;font-weight:600;color:var(--text)}
+.bar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin-bottom:14px}.bar i{display:block;height:100%;background:var(--pri)}
+.tag{display:inline-block;font-size:12px;padding:2px 8px;border-radius:10px;background:var(--pri2);color:var(--pri);margin-right:6px}
+.passage{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:12px 14px;font-size:18px;line-height:1.9;white-space:pre-wrap;margin:10px 0}
+.q{font-size:18px;font-weight:600;margin:10px 0}
+.opt{display:block;width:100%;text-align:left;border:1.5px solid var(--line);background:transparent;color:var(--text);border-radius:10px;padding:10px 14px;margin:8px 0;font-size:17px;cursor:pointer}
+.opt.on{border-color:var(--pri);background:var(--pri2)}
+.opt.ok{border-color:var(--ok);background:var(--okbg)}
+.opt.bad{border-color:var(--bad);background:var(--badbg)}
+.play{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--pri2);border-radius:10px;padding:10px 12px}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.dots button{width:32px;height:32px;border-radius:8px;border:1px solid var(--line);background:transparent;color:var(--text);cursor:pointer;font-size:13px}
+.dots button.done{background:var(--pri2);border-color:var(--pri)}.dots button.cur{outline:2px solid var(--pri)}
+.res{border-left:4px solid var(--line);padding:10px 14px;margin:12px 0;background:var(--card);border-radius:8px;border:1px solid var(--line)}
+.res.ok{border-left:4px solid var(--ok)}.res.bad{border-left:4px solid var(--bad)}
+.exp{background:var(--okbg);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:15px}
+.tip{background:var(--warnbg);border-radius:8px;padding:8px 12px;margin-top:8px;font-size:14px}
+.tip b,.exp b{color:var(--text)}
+.script{font-size:16px;color:var(--muted);white-space:pre-wrap;margin-top:6px}
+.score{font-size:34px;font-weight:700}
+.lvl{display:inline-block;padding:4px 12px;border-radius:20px;background:var(--pri);color:#fff;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}th{background:var(--bg)}
+ul{padding-left:20px}li{margin:4px 0}
+.note{font-size:13px;color:var(--muted)}
+.hide{display:none}
+@media (max-width:520px){.passage,.opt,.q{font-size:16px}main{padding:12px}}
+</style>
+</head>
+<body>
+<header>
+<h1>TOCFL CAT 2026 · Luyện đề Nghe & Đọc hiểu</h1>
+<p>10 đề mô phỏng · 200 câu · Bộ 1: tổng hợp 2026–2027 · Bộ 2: theo từng cấp & dạng câu tần suất cao</p>
+<nav>
+<button data-tab="home" class="on">Làm bài</button>
+<button data-tab="skills">Kỹ năng nhận dạng</button>
+<button data-tab="trend">Định hướng 2027</button>
+</nav>
+</header>
+<main>
+<section id="home">
+ <div class="card" id="setup">
+  <h2>1. Chọn đề</h2>
+  <div class="grid" id="testPick"></div>
+  <h2 style="margin-top:16px">2. Chọn phần thi</h2>
+  <div class="grid">
+   <button class="pick on" data-sec="L"><b>聽力 · Nghe hiểu</b><small>Âm thanh đọc bằng giọng tiếng Trung của trình duyệt</small></button>
+   <button class="pick" data-sec="R"><b>閱讀 · Đọc hiểu</b><small>Điền từ, quét thông tin, đọc đoạn văn</small></button>
+  </div>
+  <div class="row" id="audioOpts">
+   <label><input type="checkbox" id="once" checked> Chỉ nghe 1 lần (như thi thật)</label>
+   <label>Tốc độ <select id="rate"><option value="0.8">0.8×</option><option value="0.9" selected>0.9×</option><option value="1">1.0×</option><option value="1.1">1.1×</option></select></label>
+   <button class="btn sec" id="testVoice" type="button">Thử giọng</button>
+  </div>
+  <p class="note" id="voiceNote"></p>
+  <div class="row"><button class="btn" id="startBtn">Bắt đầu làm bài</button></div>
+  <p class="note">Đây là đề <b>mô phỏng</b> soạn theo cấu trúc và độ khó TOCFL (không phải đề thi thật). Thang cấp độ: 入門級 A1 → 基礎級 A2 → 進階級 B1 → 高階級 B2 → 流利級 C1. Thứ tự đáp án được xáo trộn mỗi lần làm.</p>
+ </div>
+ <div class="card hide" id="quiz"></div>
+ <div class="hide" id="result"></div>
+</section>
+<section id="skills" class="hide"></section>
+<section id="trend" class="hide"></section>
+</main>
+<script>
+const LV={0:"入門級 A1",1:"基礎級 A2",2:"進階級 B1",3:"高階級 B2",4:"流利級 C1"};
+const BAND={0:"Band A",1:"Band A",2:"Band B",3:"Band B",4:"Band C"};
+/* Tần suất ước tính theo dạng câu: [sao 1–3, % trong phần thi] – tổng hợp từ đề mẫu & tài liệu luyện thi, không phải số liệu chính thức */
+const FQ={L_detail:[3,20],L_number:[3,15],L_turn:[3,15],L_infer:[3,15],L_tone:[2,10],L_announce:[2,10],L_main:[2,10],L_place:[1,5],
+R_conn:[3,18],R_vocab:[3,18],R_scan:[3,18],R_main:[2,12],R_infer:[2,12],R_grammar:[2,12],R_ref:[1,10]};
+const stars=k=>"★".repeat(FQ[k][0])+"☆".repeat(3-FQ[k][0]);
+/* ===== KỸ NĂNG NHẬN DẠNG ===== */
+const SK={
+L_detail:{n:"Nghe chi tiết – bắt quyết định cuối",t:"Hội thoại thường đưa ra 2–3 phương án rồi chốt lại. Đáp án là thông tin <b>cuối cùng được cả hai đồng ý</b>. Bẫy: phương án nghe thấy đầu tiên (thường xuất hiện y nguyên trong lựa chọn)."},
+L_number:{n:"Số, giá, giờ – phải tính",t:"Nghe thấy 打X折, 早/晚X小時, 延後, 補助, 再折 → đáp án gần như luôn cần <b>tính toán</b>, không phải con số vừa nghe. 打八折 = trả 80%, không phải giảm 80%."},
+L_turn:{n:"Từ chuyển ý: 可是/不過/只是/A是A，就是…",t:"Ý chính của người nói nằm <b>sau</b> từ chuyển ý. Mẫu 「好吃是好吃，就是…」= công nhận A nhưng điểm quan trọng là phần sau."},
+L_tone:{n:"Ngữ khí & cảm xúc",t:"Nhận diện cụm cảm thán: 別提了/別說了 (tiêu cực), 非…不可 (nhất định phải), 嚥不下這口氣 (tức không chịu được), 還差得遠 (chưa hài lòng). Câu hỏi dạng 「…怎麼樣/看法」 → hỏi thái độ."},
+L_infer:{n:"Suy luận ý ngầm",t:"Câu hỏi 「…的意思是/話裡的意思」: người nói <b>không nói thẳng</b>. Loại đáp án quá tuyệt đối (完全、一定、都). Chú ý 只是…得先… = chưa quyết định; 寧可 = thà… (thể hiện lựa chọn)."},
+L_place:{n:"Nơi chốn / hành động tiếp theo",t:"Câu hỏi 「最後/現在可以…」: theo dõi điều kiện (沒有發票→只能換貨). Đáp án là kết quả sau khi áp điều kiện."},
+L_announce:{n:"Thông báo / phát thanh",t:"Cấu trúc cố định: 各位旅客請注意 / 提醒您 + <b>sự kiện</b> + <b>nguyên nhân (因為/由於)</b> + <b>thời gian mới</b> + lời xin lỗi. Nghe kỹ cụm 自…起, 即日起, 延後, 暫停, 不再."},
+L_main:{n:"Ý chính bài nói ngắn (C1)",t:"Mẫu 「很多人以為…，事實上…」 hoặc 「所謂X，是指…」. Ý chính nằm ở phần <b>事實上/因此/真正…的是</b>. Đáp án đúng thường là bản <b>diễn đạt lại</b>, không lặp nguyên văn."},
+R_scan:{n:"Quét thông tin (thông báo, tin nhắn, bảng)",t:"Đọc <b>câu hỏi trước</b>, rồi tìm từ khóa (giờ, ngày, giá, địa điểm). Chú ý từ hạn định: 優先 (ưu tiên ≠ bắt buộc), 一律, 不再, 除…外. Nhiều câu cần trừ giờ/cộng tiền."},
+R_grammar:{n:"Ngữ pháp điền chỗ trống",t:"Nhìn từ <b>ngay trước và sau</b> chỗ trống: trước lượng từ dùng 兩 không dùng 二; 正在+V (đang); 把+O+V+補語; 了 cuối câu = thay đổi trạng thái; 與其…不如."},
+R_conn:{n:"Liên từ theo cặp",t:"Tìm <b>từ hô ứng</b> ở vế sau: …卻/但→雖然/固然; …就→只要/如果; …都→不管; …不然→最好; 難怪→nguyên nhân ở trước; 因此→kết quả. Đây là dạng gặp nhiều nhất ở B1–B2."},
+R_vocab:{n:"Từ vựng & kết hợp từ (collocation)",t:"Các đáp án thường cùng chữ đầu (考慮/考試/考驗…, 意料/意見/意外…). Đừng dịch từng chữ – nhớ <b>cụm cố định</b>: 出乎意料, 盡了全力, 確切時間, 交給我處理, 調成靜音."},
+R_main:{n:"Ý chính / thái độ tác giả",t:"Tìm câu sau 然而/但/不過/事實上. Nếu đoạn văn nêu 「有人認為…也有人…」 → đáp án là <b>nêu hai mặt</b>. Loại đáp án nói quá (完全/應該不要)."},
+R_infer:{n:"Suy luận / đoán nghĩa từ mới",t:"Gặp từ lạ (雲端廚房, 躺平) → đoán qua <b>câu giải thích liền kề</b> (也就是/指的是/成為…). Đáp án đúng khớp với thông tin trong bài, không thêm ý ngoài."},
+R_ref:{n:"Tham chiếu (此、這、其、該)",t:"「此道/這一說法/此舉」 chỉ thứ được nhắc <b>ngay trước đó</b>. Quay lại 1–2 câu phía trước, thay thử từng đáp án vào chỗ tham chiếu."}
+};
+/* ===== NGÂN HÀNG ĐỀ ===== */
+const P={};
+P.t1="研究指出，人們在做決定時，往往高估自己的理性程度。以購物為例，「限時優惠」四個字就足以讓許多人在未比較價格的情況下下單。商家深諳此道，因此製造稀缺感已成為常見的行銷手法。";
+P.t2="過去，「躺平」一詞多帶貶義，被視為缺乏上進心的表現。然而，也有學者指出，這未必是消極逃避，而是部分年輕人在高房價、低薪資的環境下，對「努力就能成功」這一說法所做出的反思。";
+P.t3="有人說，閱讀紙本書與電子書的效果並無二致。然而，多項研究顯示，閱讀長篇且需要深度理解的文本時，紙本讀者在記憶情節順序上的表現明顯較佳。研究者推測，這或許與紙張提供的空間感與觸覺回饋有關。";
+P.t4="人工智慧能在幾秒鐘內生成一篇文章，這讓不少教師憂心學生的寫作能力會因此退化。不過，也有教育者主張，與其全面禁止，不如教導學生如何批判性地使用這些工具，畢竟未來職場不可能沒有AI。";
+P.t5="某市政府推出「青銀共居」計畫，讓年輕人以低於市價的租金與長者同住，條件是每月需提供一定時數的陪伴服務。支持者認為此舉一舉兩得；但也有人擔心，世代間生活習慣差異甚大，若缺乏妥善的媒合機制，恐怕衍生糾紛。";
+const FILL="選出最適合填入空格的答案。";
+const TESTS=[
+{name:"Đề 1",sub:"2026 · Sinh hoạt & học đường",
+L:[
+{lv:1,sk:"L_detail",au:[["F","請問，去臺北車站要坐幾號公車？"],["M","你可以坐三零七，大概二十分鐘就到了。不過現在是下班時間，可能會塞車。"]],q:"男的建議女的坐什麼？",o:["307公車","捷運","計程車","火車"],ans:0,e:"Người nam nói thẳng 「你可以坐307」. Câu 「可能會塞車」 chỉ là lời nhắc thêm, không đổi phương tiện."},
+{lv:1,sk:"L_number",au:[["M","這件外套多少錢？"],["F","原價兩千，現在打八折。"]],q:"外套現在多少錢？",o:["1200元","1600元","1800元","2000元"],ans:1,e:"打八折 = trả 80% giá: 2000 × 0,8 = 1600. Bẫy: 2000 là giá gốc (原價); đừng hiểu 打八折 là giảm 80%."},
+{lv:2,sk:"L_tone",au:[["F","你下禮拜的報告準備得怎麼樣了？"],["M","別提了，資料還沒找齊，組員又一直不回訊息。"]],q:"男的覺得報告準備得怎麼樣？",o:["很順利","已經完成了","不太順利","還沒開始"],ans:2,e:"「別提了」 = đừng nhắc nữa → tình hình tệ. Anh ấy đang tìm tài liệu (đã bắt đầu) nên không chọn 還沒開始."},
+{lv:2,sk:"L_detail",au:[["M","我們週末去陽明山爬山吧？"],["F","好啊，可是氣象報告說週六會下大雨，改週日怎麼樣？"],["M","週日我要打工，只有早上有空。"],["F","那就早上去，中午前下山。"]],q:"他們什麼時候去爬山？",o:["週六早上","週六下午","週日早上","週日下午"],ans:2,e:"Thứ Bảy mưa → đổi Chủ nhật; Chủ nhật nam chỉ rảnh buổi sáng → 「那就早上去」. Chốt: sáng Chủ nhật."},
+{lv:2,sk:"L_place",au:[["F","先生，您的包裹已經到了，不過需要本人簽收，請問您今天幾點會在家？"],["M","我六點以後才下班，你們可以放在管理室嗎？"],["F","可以，那我們幫您放在管理室。"]],q:"包裹最後會放在哪裡？",o:["男的家門口","管理室","便利商店","郵局"],ans:1,e:"Nam đề nghị 放在管理室 và nhân viên đồng ý 「那我們幫您放在管理室」."},
+{lv:3,sk:"L_turn",au:[["M","聽說你搬到新竹了？通勤不累嗎？"],["F","剛開始真的受不了，每天來回三個小時。不過公司現在一週可以在家工作兩天，我就覺得還好了。"]],q:"女的現在對通勤的看法是什麼？",o:["非常累，想換工作","可以接受","比以前更累","打算搬回臺北"],ans:1,e:"「剛開始受不了」 là quá khứ; sau 「不過」 là hiện tại: 「我就覺得還好了」 → chấp nhận được."},
+{lv:3,sk:"L_infer",au:[["F","這次的研討會，我們系上只能派一個人去，老師推薦你，你意下如何？"],["M","能被推薦是我的榮幸，只是時間剛好跟我的期中考撞在一起，我得先跟授課老師商量一下才能給您答覆。"]],q:"男的態度是什麼？",o:["馬上答應","直接拒絕","還不能確定","希望別人去"],ans:2,e:"「我得先…商量一下才能給您答覆」 = phải hỏi trước rồi mới trả lời → chưa chắc chắn."},
+{lv:3,sk:"L_announce",au:[["F","各位旅客請注意，原定下午三點十分開往高雄的自強號，因為前方路段設備故障，將延後約四十分鐘發車，造成不便，敬請見諒。"]],q:"這班火車預計幾點出發？",o:["下午兩點五十分","下午三點十分","下午三點四十分","下午三點五十分"],ans:3,e:"3:10 + 延後40分鐘 = 3:50. Bẫy: 3:10 là giờ cũ (原定)."},
+{lv:4,sk:"L_infer",au:[["M","你覺得公司推的那個四天工作制怎麼樣？"],["F","理論上是好事，可是工作量沒減少，等於把五天的事塞進四天，每天加班到九點，我寧可照舊。"]],q:"女的對四天工作制的看法是？",o:["完全支持","認為工作量會減少","在目前的條件下不贊成","希望改成三天"],ans:2,e:"「理論上是好事，可是…」 + 「我寧可照舊」 (thà giữ như cũ) → không tán thành trong điều kiện hiện tại."},
+{lv:4,sk:"L_main",au:[["F","很多人以為多喝咖啡會導致脫水。事實上，近年研究發現，適量飲用咖啡對體內水分的影響相當有限，真正需要注意的，是咖啡因對睡眠品質的干擾。"]],q:"這段話主要想說明什麼？",o:["咖啡會嚴重脫水","適量喝咖啡跟脫水關係不大，但可能影響睡眠","應該完全不喝咖啡","咖啡能改善睡眠"],ans:1,e:"Mẫu 「很多人以為…事實上…真正需要注意的是…」: bác bỏ quan niệm mất nước, nhấn mạnh ảnh hưởng giấc ngủ."}
+],
+R:[
+{lv:1,sk:"R_scan",p:"【圖書館公告】\n開放時間\n週一至週五 08:00–22:00\n週六 09:00–17:00\n週日 休館",q:"星期天下午可以去圖書館嗎？",o:["可以，開到五點","可以，開到十點","不可以","只有上午可以"],ans:2,e:"週日休館 = Chủ nhật đóng cửa."},
+{lv:1,sk:"R_grammar",p:"我昨天太累了，回家洗完澡＿＿睡覺了。",q:FILL,o:["就","才","還","再"],ans:0,e:"就 = liền, ngay (hành động xảy ra sớm/thuận). 才 mang nghĩa muộn, không hợp với 了 và ngữ cảnh mệt."},
+{lv:2,sk:"R_conn",p:"＿＿他只學了一年，中文卻說得很流利。",q:FILL,o:["因為","雖然","如果","只要"],ans:1,e:"Vế sau có 「卻」 → cặp 雖然…卻."},
+{lv:2,sk:"R_vocab",p:"請把手機＿＿靜音，演講馬上就要開始了。",q:FILL,o:["調成","打開","關上","放在"],ans:0,e:"把手機調成靜音 = chỉnh điện thoại sang im lặng. Cụm 調成+trạng thái."},
+{lv:2,sk:"R_scan",p:"小林：明天的聚餐改到七點半喔，餐廳那邊說七點的位子滿了。\n小美：OK，那我先去接我妹妹再過去。",q:"根據對話，下面哪個正確？",o:["聚餐取消了","聚餐時間延後了","小美不去了","餐廳換了"],ans:1,e:"7 giờ → 7 rưỡi = lùi giờ. Nhà hàng không đổi, 小美 vẫn đi."},
+{lv:3,sk:"R_main",p:"近年來，越來越多年輕人選擇「斜槓」生活，也就是同時擁有兩種以上的職業。有人認為這樣能增加收入、發展興趣；但也有人提醒，若時間管理不當，反而可能每一份工作都做不好。",q:"作者對斜槓生活的態度是？",o:["完全支持","完全反對","提出正反兩面的看法","建議年輕人不要工作"],ans:2,e:"Cấu trúc 「有人認為…但也有人提醒…」 → trình bày hai mặt."},
+{lv:3,sk:"R_conn",p:"這家店的牛肉麵＿＿好吃，＿＿便宜，難怪每天大排長龍。",q:FILL,o:["不但…而且","因為…所以","雖然…但是","只要…就"],ans:0,e:"Hai ưu điểm cộng dồn (ngon + rẻ) → 不但…而且. 「難怪」 cho thấy lý do đã nằm ở vế trước."},
+{lv:3,sk:"R_vocab",p:"那位作家的新書一上市就賣光了，出版社不得不緊急加印。",q:"「不得不」的意思最接近？",o:["不想","不可以","只好","不一定"],ans:2,e:"不得不 = buộc phải, đành phải ≈ 只好."},
+{lv:4,sk:"R_ref",p:P.t1,q:"文中「深諳此道」的「此道」指的是？",o:["比較價格的方法","人們容易受稀缺感影響而衝動消費","理性做決定的方法","網路購物的流程"],ans:1,e:"「此道」 chỉ điều vừa nói ngay trước: 「限時優惠」 khiến người ta mua mà không so giá → thương nhân hiểu rõ tâm lý này."},
+{lv:4,sk:"R_infer",p:P.t1,q:"根據上文，下列何者正確？",o:["人們做決定時通常很理性","限時優惠可能讓人不比價就購買","商家不使用稀缺感行銷","研究建議大家不要購物"],ans:1,e:"「在未比較價格的情況下下單」 = đặt mua khi chưa so sánh giá."}
+]},
+{name:"Đề 2",sub:"2026 · Du lịch & sức khỏe",
+L:[
+{lv:1,sk:"L_detail",au:[["M","你要喝咖啡還是茶？"],["F","我晚上喝咖啡會睡不著，給我一杯溫開水就好。"]],q:"女的要喝什麼？",o:["咖啡","茶","溫開水","果汁"],ans:2,e:"「給我一杯溫開水就好」. Bẫy: nghe thấy 咖啡 trong lý do."},
+{lv:1,sk:"L_number",au:[["F","你的生日是幾月幾號？"],["M","十一月二十號，剛好是下個星期五。"]],q:"男的生日是哪一天？",o:["10月20日","11月2日","11月20日","12月20日"],ans:2,e:"十一月二十號 = 20/11. Phân biệt 二 và 二十."},
+{lv:2,sk:"L_detail",au:[["M","醫生，我最近常常頭痛，晚上也睡不好。"],["F","你是不是每天看電腦看很久？先少用一點手機，多休息。如果一個禮拜還沒改善，再回來檢查。"]],q:"醫生建議男的先做什麼？",o:["馬上做檢查","吃止痛藥","減少用手機、多休息","住院"],ans:2,e:"「先少用一點手機，多休息」; kiểm tra chỉ khi 1 tuần chưa đỡ (再回來檢查)."},
+{lv:2,sk:"L_turn",au:[["F","這家民宿的房間好小啊！"],["M","是小了點，可是一打開窗戶就能看到海，還挺值得的。"]],q:"男的覺得民宿怎麼樣？",o:["太小，不值得","雖然小，但值得","很大很舒服","看不到海"],ans:1,e:"「是小了點，可是…還挺值得的」 → công nhận nhỏ nhưng xứng đáng."},
+{lv:2,sk:"L_place",au:[["M","小姐，我想退這雙鞋，昨天買的，尺寸不合。"],["F","好的，請問發票有帶嗎？沒有發票的話只能換貨，不能退錢。"],["M","啊，我忘了帶。"]],q:"男的現在可以怎麼做？",o:["退錢","換貨","再買一雙","什麼都不能做"],ans:1,e:"Điều kiện: không có hóa đơn → 只能換貨. Nam quên mang → chỉ được đổi hàng."},
+{lv:3,sk:"L_tone",au:[["F","你們這次花蓮行怎麼樣？"],["M","別說了，第一天就颱風，整天都待在飯店裡，唯一的收穫是把一本小說看完了。"]],q:"關於男的的旅行，下列何者正確？",o:["玩得很開心","因為天氣不好沒辦法出去玩","沒去花蓮","在花蓮買了很多書"],ans:1,e:"「別說了」 + 颱風 + 待在飯店 → không đi chơi được. 看完小說 ≠ mua nhiều sách."},
+{lv:3,sk:"L_number",au:[["M","經理，關於明年的預算，財務部那邊希望我們砍掉百分之十五。"],["F","十五？那研發的計畫根本推不動。你先跟他們談談，看能不能降到百分之五，最多不能超過八。"]],q:"女的最多能接受刪減多少預算？",o:["百分之五","百分之八","百分之十","百分之十五"],ans:1,e:"「最多不能超過八」 → mức tối đa chấp nhận là 8%. 5% chỉ là mức mong muốn."},
+{lv:3,sk:"L_announce",au:[["F","親愛的顧客您好，本賣場將於十分鐘後打烊，請您把握時間至一樓收銀台結帳。另外，地下停車場出口將於打烊後三十分鐘關閉。"]],q:"停車場出口什麼時候關閉？",o:["現在","十分鐘後","三十分鐘後","四十分鐘後"],ans:3,e:"Đóng cửa sau 10 phút; bãi xe đóng 30 phút SAU giờ đóng cửa → 10 + 30 = 40 phút."},
+{lv:4,sk:"L_infer",au:[["M","我在考慮要不要接受上海那邊的工作邀請，薪水是現在的兩倍。"],["F","錢當然重要，但你得想想，你爸媽年紀大了，你又是獨子，真有什麼事，你飛回來也要好幾個小時。"]],q:"女的話裡的意思是？",o:["支持他馬上去","提醒他考慮家庭因素","認為薪水不夠高","建議他帶父母一起去"],ans:1,e:"「錢當然重要，但你得想想…爸媽年紀大了」 → nhắc cân nhắc yếu tố gia đình, không nói thẳng 「別去」."},
+{lv:4,sk:"L_main",au:[["F","所謂「十分鐘法則」，是指當你不想開始某件事時，告訴自己只做十分鐘就好。心理學家發現，一旦開始，人們往往會繼續做下去，因為最困難的其實是「開始」這個動作本身。"]],q:"根據這段話，「十分鐘法則」的原理是什麼？",o:["每天只工作十分鐘","開始之後人們容易繼續做下去","十分鐘是注意力的極限","休息十分鐘效率更高"],ans:1,e:"「一旦開始，人們往往會繼續做下去」 – lý do nằm ở câu 因為…."}
+],
+R:[
+{lv:1,sk:"R_scan",p:"【公車到站資訊】\n262　→　約3分鐘\n605　→　進站中\n藍5　→　未發車",q:"哪一班公車最快到？",o:["262","605","藍5","都一樣"],ans:1,e:"進站中 = đang vào trạm → đến sớm nhất. 未發車 = chưa xuất bến."},
+{lv:1,sk:"R_grammar",p:"這本書我看了＿＿遍，還是看不懂。",q:FILL,o:["兩","二","雙","對"],ans:0,e:"Trước lượng từ (遍) dùng 兩, không dùng 二."},
+{lv:2,sk:"R_conn",p:"外面下著大雨，你＿＿帶傘，＿＿會淋濕的。",q:FILL,o:["最好…不然","如果…就","雖然…但是","因為…所以"],ans:0,e:"Lời khuyên + hậu quả nếu không làm: 最好…不然 (tốt nhất là… nếu không thì…)."},
+{lv:2,sk:"R_vocab",p:"這個問題很複雜，我們需要時間＿＿一下。",q:FILL,o:["考慮","考試","考驗","參考"],ans:0,e:"考慮一下 = cân nhắc. Các đáp án cùng chữ 考 – bẫy từ vựng hình thức."},
+{lv:2,sk:"R_scan",p:"王先生：「下週三的會議，我可能會晚到半小時，因為上午要去醫院看我母親。」",q:"王先生為什麼會晚到？",o:["塞車","要去醫院看母親","自己身體不舒服","忘了開會"],ans:1,e:"Lý do sau 因為: 去醫院看我母親 (thăm mẹ, không phải bản thân ốm)."},
+{lv:3,sk:"R_main",p:"臺灣的便利商店密度高居世界前列，除了販售日常用品，還提供繳費、寄件、列印甚至領取網購商品等服務，已經成為許多人生活中不可或缺的一部分。",q:"這段文字主要說明什麼？",o:["便利商店的商品很便宜","便利商店提供多樣服務，與生活密切相關","便利商店太多了，應該減少","網購比便利商店方便"],ans:1,e:"Liệt kê dịch vụ (除了…還…) + kết luận 不可或缺 → đa dịch vụ, gắn bó đời sống."},
+{lv:3,sk:"R_conn",p:"這份工作的薪水不高，＿＿離家又遠，難怪他不想做。",q:FILL,o:["而且","但是","所以","否則"],ans:0,e:"Thêm một nhược điểm cùng chiều (lương thấp + xa nhà) → 而且…又."},
+{lv:3,sk:"R_vocab",p:"會議因故延期，＿＿時間另行通知。",q:FILL,o:["確切","確實","正確","準確"],ans:0,e:"確切時間 = thời gian cụ thể/chính xác – cụm cố định trong thông báo. 另行通知 = sẽ thông báo sau."},
+{lv:4,sk:"R_infer",p:P.t2,q:"學者的觀點是？",o:["躺平就是懶惰","躺平可能是對社會環境的一種反思","年輕人應該更努力","房價問題已經解決"],ans:1,e:"Sau 「然而」: 未必是消極逃避，而是…反思 → có thể là sự phản tỉnh trước môi trường xã hội."},
+{lv:4,sk:"R_ref",p:P.t2,q:"文中「這一說法」指的是？",o:["躺平","努力就能成功","高房價","缺乏上進心"],ans:1,e:"「這一說法」 đứng ngay sau cụm trong ngoặc 「努力就能成功」 – nó chỉ chính quan niệm đó."}
+]},
+{name:"Đề 3",sub:"2026 · Công việc & xã hội",
+L:[
+{lv:1,sk:"L_number",au:[["M","你明天幾點上班？"],["F","平常九點，明天要開會，要早一個小時。"]],q:"女的明天幾點上班？",o:["七點","八點","九點","十點"],ans:1,e:"9 giờ − 早一個小時 = 8 giờ."},
+{lv:1,sk:"L_detail",au:[["F","你的手機呢？"],["M","剛剛還在桌上……啊，在我的包包裡。"]],q:"手機在哪裡？",o:["桌上","包包裡","口袋裡","車上"],ans:1,e:"剛剛還在桌上 là trước đó; 「啊，在我的包包裡」 là thông tin chốt."},
+{lv:2,sk:"L_tone",au:[["M","這次的考試你考得怎麼樣？"],["F","比上次好一點，可是離我的目標還差得遠。"]],q:"女的對成績滿意嗎？",o:["很滿意","不太滿意","考得比上次差","沒去考"],ans:1,e:"「還差得遠」 = còn xa mục tiêu → chưa hài lòng (dù tốt hơn lần trước)."},
+{lv:2,sk:"L_number",au:[["F","我想報名游泳課，一期多少錢？"],["M","一期八堂課，三千二。學生打九折。"],["F","我是學生。"]],q:"女的要付多少錢？",o:["2880元","3000元","3200元","3520元"],ans:0,e:"3200 × 0,9 = 2880."},
+{lv:2,sk:"L_detail",au:[["M","你怎麼還沒走？不是說今天要早點回家嗎？"],["F","本來是的，可是經理臨時要我把報表做完。"]],q:"女的為什麼還沒回家？",o:["她不想回家","要加班把報表做完","在等男的","沒有車"],ans:1,e:"「本來…可是…」: kế hoạch bị thay đổi vì 經理臨時要我把報表做完."},
+{lv:3,sk:"L_infer",au:[["F","聽說老陳要退休了？"],["M","是啊，他說想趁身體還好的時候到處走走，不想等到走不動了才後悔。"]],q:"老陳為什麼要退休？",o:["身體不好","想去旅行","被公司要求","要照顧家人"],ans:1,e:"到處走走 = đi đây đi đó. 「趁身體還好」 cho thấy sức khỏe đang tốt, loại 「身體不好」."},
+{lv:3,sk:"L_turn",au:[["M","你看這間房子怎麼樣？離捷運站走路五分鐘，租金也還可以。"],["F","地點是不錯，可是你看這面牆，都發霉了，住久了對身體不好吧。"]],q:"女的擔心什麼？",o:["交通不方便","租金太貴","房子有發霉問題","離公司太遠"],ans:2,e:"Sau 「可是」: 牆都發霉了 → lo nấm mốc."},
+{lv:3,sk:"L_announce",au:[["M","本公司自下個月一日起，員工餐廳的營業時間調整為上午十一點半至下午一點半，晚餐時段暫停供應，請有需要的同仁自行安排。"]],q:"下個月起員工餐廳有什麼改變？",o:["午餐取消","不再提供晚餐","改成免費","延長營業時間"],ans:1,e:"晚餐時段暫停供應 = tạm ngừng bữa tối."},
+{lv:4,sk:"L_infer",au:[["F","這個案子我們做了三個月，客戶一句「方向不對」就要全部重來？"],["M","我能理解你的心情，可是說實在的，當初需求沒有確認清楚，我們也有責任。"]],q:"男的話是什麼意思？",o:["完全是客戶的錯","我們自己也有問題","應該拒絕客戶","案子已經成功了"],ans:1,e:"「我們也有責任」 – chữ 也 cho thấy phía mình cũng có lỗi."},
+{lv:4,sk:"L_main",au:[["M","共享經濟看似讓資源得到更有效的運用，但批評者認為，它在某種程度上把原本由企業承擔的風險，轉嫁到了個人身上，例如外送員缺乏完整的勞健保保障。"]],q:"批評者認為共享經濟的問題是什麼？",o:["造成資源浪費","把風險轉嫁給個人","價格太高","企業承擔的責任太多"],ans:1,e:"「看似…但批評者認為…轉嫁到了個人身上」. 看似 = có vẻ (ý bị phủ định sau đó)."}
+],
+R:[
+{lv:1,sk:"R_scan",p:"【失物招領】\n3月5日下午在學生餐廳撿到黑色錢包一個，請失主到一樓服務台領取。",q:"失主應該去哪裡拿錢包？",o:["學生餐廳","一樓服務台","警察局","圖書館"],ans:1,e:"請失主到一樓服務台領取. 學生餐廳 là nơi nhặt được (bẫy)."},
+{lv:1,sk:"R_grammar",p:"他＿＿吃飯，請你等一下再打電話來。",q:FILL,o:["正在","已經","曾經","剛才"],ans:0,e:"「等一下再打」 → hành động đang diễn ra: 正在 + V."},
+{lv:2,sk:"R_conn",p:"我們＿＿明天天氣好不好，都要出發。",q:FILL,o:["不管","雖然","因為","只要"],ans:0,e:"Có cấu trúc chính-phản (好不好) + 都 → 不管…都."},
+{lv:2,sk:"R_vocab",p:"這件事你別擔心，＿＿我來處理。",q:FILL,o:["交給","送給","拿給","還給"],ans:0,e:"交給我來處理 = để tôi lo. 交給 = giao phó (việc/trách nhiệm)."},
+{lv:2,sk:"R_scan",p:"【徵人】\n咖啡店誠徵週末工讀生\n時薪200元，需會基本英文，有經驗者優先。",q:"下面哪一項「不是」這份工作的必要條件？",o:["週末能上班","會基本英文","一定要有經驗","接受時薪200元"],ans:2,e:"有經驗者優先 = người có kinh nghiệm được ưu tiên, KHÔNG bắt buộc. Chú ý câu hỏi phủ định 「不是」."},
+{lv:3,sk:"R_scan",p:"根據調查，臺灣民眾平均每天使用手機的時間超過四小時，其中以社群媒體占比最高。專家建議，睡前一小時應盡量避免使用手機，以免影響睡眠品質。",q:"專家建議什麼？",o:["每天用手機不要超過四小時","睡前一小時少用手機","不要使用社群媒體","早上不要看手機"],ans:1,e:"Lời khuyên nằm sau 「專家建議」. Con số 4 giờ là kết quả khảo sát, không phải lời khuyên (bẫy)."},
+{lv:3,sk:"R_conn",p:"他工作態度認真，＿＿被公司升為主管。",q:FILL,o:["因此","因為","然而","何況"],ans:0,e:"Vế trước là nguyên nhân, vế sau là kết quả → 因此 (vì vậy)."},
+{lv:3,sk:"R_vocab",p:"這部電影的結局出乎大家的＿＿。",q:FILL,o:["意料","意見","意思","意外"],ans:0,e:"出乎意料 = ngoài dự đoán – cụm cố định."},
+{lv:4,sk:"R_infer",p:P.t3,q:"根據研究，紙本書的優勢在於？",o:["價格便宜","讀者較能記住情節順序","字比較大","比較環保"],ans:1,e:"「紙本讀者在記憶情節順序上的表現明顯較佳」."},
+{lv:4,sk:"R_vocab",p:P.t3,q:"「並無二致」的意思是？",o:["完全不同","沒有差別","有兩種","不一致"],ans:1,e:"並無二致 = không khác gì nhau. Câu sau bắt đầu bằng 「然而」 để phản bác chính ý này."}
+]},
+{name:"Đề 4",sub:"Định hướng 2027 · Số hóa & AI",
+L:[
+{lv:1,sk:"L_detail",au:[["F","你都用什麼付錢？"],["M","我現在都用手機付，很少帶現金了。"]],q:"男的常用什麼付錢？",o:["現金","信用卡","手機","悠遊卡"],ans:2,e:"「都用手機付」 = thanh toán bằng điện thoại."},
+{lv:1,sk:"L_number",au:[["M","你的班機幾點起飛？"],["F","晚上八點，不過我六點就要到機場。"]],q:"女的幾點要到機場？",o:["六點","七點","八點","十點"],ans:0,e:"8 giờ là giờ bay; 「六點就要到機場」 là giờ có mặt."},
+{lv:2,sk:"L_detail",au:[["F","你用AI寫報告，老師不會發現嗎？"],["M","我只是用來檢查文法，內容都是我自己寫的。"]],q:"男的用AI做什麼？",o:["寫整篇報告","檢查文法","翻譯內容","找資料"],ans:1,e:"「只是用來檢查文法」 – 只是 giới hạn phạm vi sử dụng."},
+{lv:2,sk:"L_detail",au:[["M","這個月的電費怎麼這麼高？"],["F","天氣太熱了，冷氣幾乎整天開著。下個月我們把溫度調高一度試試看。"]],q:"女的打算怎麼做？",o:["不開冷氣","把冷氣溫度調高","換新冷氣","搬家"],ans:1,e:"「把溫度調高一度試試看」."},
+{lv:2,sk:"L_place",au:[["F","請問這裡可以回收寶特瓶嗎？"],["M","可以，不過要先把瓶蓋拿下來，瓶子裡面也要沖乾淨。"]],q:"回收寶特瓶前要做什麼？",o:["把瓶子壓扁","拿掉瓶蓋並把瓶子沖乾淨","撕掉標籤","裝進塑膠袋"],ans:1,e:"Hai điều kiện sau 不過: 瓶蓋拿下來 + 沖乾淨."},
+{lv:3,sk:"L_turn",au:[["M","公司說明年起全面改成混合辦公，你覺得呢？"],["F","對我來說是好事，可以省下通勤時間。只是跟同事面對面討論的機會少了，有些事情在線上溝通還是不太方便。"]],q:"女的對混合辦公的看法是？",o:["完全反對","大致支持，但也看到缺點","認為線上溝通更好","希望每天進公司"],ans:1,e:"「是好事」 + 「只是…不太方便」 → ủng hộ nhưng có nhược điểm. 只是 = chuyển ý nhẹ."},
+{lv:3,sk:"L_number",au:[["F","這款電動機車補助完還要多少錢？"],["M","原價六萬五，政府補助七千，我們店再折三千。"]],q:"補助和折扣後要多少錢？",o:["五萬五千元","五萬八千元","六萬二千元","六萬五千元"],ans:0,e:"65.000 − 7.000 − 3.000 = 55.000. 「再折」 = giảm thêm."},
+{lv:3,sk:"L_announce",au:[["F","提醒您，本校即日起實施新版請假系統，學生請假一律透過校務系統線上申請，紙本假單將不再受理。如有問題，請洽教務處。"]],q:"下列何者正確？",o:["學生可以繼續用紙本請假","請假要在網路上申請","請假要到教務處辦理","新系統下學期才開始"],ans:1,e:"即日起 = từ hôm nay; 一律…線上申請; 紙本…不再受理. 教務處 chỉ để hỏi khi có vấn đề."},
+{lv:4,sk:"L_infer",au:[["M","你覺得生成式AI會取代翻譯這個行業嗎？"],["F","取代倒不至於，但工作型態一定會變。以後譯者恐怕更像是編輯，負責把關機器譯文的品質與文化上的細節。"]],q:"女的認為翻譯人員未來會怎樣？",o:["完全被取代","角色轉變為把關品質","工作完全不受影響","收入會增加"],ans:1,e:"「取代倒不至於」 = chưa đến mức thay thế; 「更像是編輯，負責把關」 → vai trò chuyển sang kiểm soát chất lượng."},
+{lv:4,sk:"L_main",au:[["M","所謂「漂綠」，指的是企業花在宣傳環保形象上的資源，遠超過實際投入減碳的努力。消費者若只看廣告標語，而不查證具體數據，就容易被誤導。"]],q:"說話者提醒消費者什麼？",o:["不要購買環保產品","要查證企業的實際數據","所有企業都在說謊","廣告最值得相信"],ans:1,e:"Câu điều kiện 「若只看…而不查證…就容易被誤導」 → lời khuyên ngược lại: hãy kiểm chứng số liệu."}
+],
+R:[
+{lv:1,sk:"R_scan",p:"【LINE】\n媽媽：今天晚上我要加班，冰箱裡有水餃，你自己煮來吃喔！",q:"媽媽希望孩子晚上做什麼？",o:["去餐廳吃飯","自己煮水餃","等媽媽回家一起吃","叫外送"],ans:1,e:"「冰箱裡有水餃，你自己煮來吃」."},
+{lv:1,sk:"R_vocab",p:"天氣越來越冷了，出門別忘了＿＿外套。",q:FILL,o:["穿","戴","打","開"],ans:0,e:"穿外套 (mặc áo khoác); 戴 dùng cho mũ, kính, đồng hồ."},
+{lv:2,sk:"R_conn",p:"我們＿＿提早出發，就不會遲到了。",q:FILL,o:["只要","只有","不管","雖然"],ans:0,e:"Vế sau có 「就」 → 只要…就 (chỉ cần… thì…). 只有 đi với 才."},
+{lv:2,sk:"R_vocab",p:"這個App可以＿＿你每天的運動時間和心跳。",q:FILL,o:["記錄","記得","紀念","記住"],ans:0,e:"記錄 = ghi lại (dữ liệu). 記得/記住 = nhớ (trong đầu)."},
+{lv:2,sk:"R_scan",p:"【停水通知】\n因管線維修，本社區將於10月28日（三）上午9時至下午4時停水，請住戶提前儲水。",q:"停水時間大約是幾個小時？",o:["4個小時","6個小時","7個小時","9個小時"],ans:2,e:"9:00 → 16:00 = 7 tiếng. Bẫy: 4 (下午4時) và 9 (上午9時)."},
+{lv:3,sk:"R_infer",p:"隨著外送平台普及，許多餐廳的營業模式也跟著改變。有些店家甚至取消內用座位，成為只做外送的「雲端廚房」，以降低租金與人事成本。",q:"「雲端廚房」最可能指的是？",o:["在網路上教做菜的課程","只做外送、沒有內用座位的餐廳","用雲端軟體管理的廚房","開在高樓上的餐廳"],ans:1,e:"Từ mới được giải thích ngay trước: 取消內用座位，成為只做外送的…"},
+{lv:3,sk:"R_conn",p:"這項政策＿＿立意良好，但執行上仍有許多問題。",q:FILL,o:["固然","既然","居然","果然"],ans:0,e:"固然…但 = tuy rằng (thừa nhận)… nhưng. Văn viết B2 rất hay gặp."},
+{lv:3,sk:"R_vocab",p:"由於原物料價格上漲，許多商品都不得不＿＿。",q:FILL,o:["漲價","降價","打折","免費"],ans:0,e:"Nguyên liệu tăng giá → hàng hóa buộc phải tăng giá."},
+{lv:4,sk:"R_infer",p:P.t4,q:"支持「教導學生使用AI」的教育者，理由是什麼？",o:["AI寫的文章比較好","未來的工作環境必然會用到AI","禁止AI太花錢","學生的寫作能力已經很好"],ans:1,e:"Lý do sau 「畢竟」: 未來職場不可能沒有AI."},
+{lv:4,sk:"R_grammar",p:P.t4,q:"文中「與其……不如……」表達什麼？",o:["兩種做法都不好","比較之後選擇後者","前者比較好","兩者同時進行"],ans:1,e:"與其A不如B = thay vì A thì nên B → chọn vế sau."}
+]},
+{name:"Đề 5",sub:"Định hướng 2027 · Tổng hợp nâng cao",
+L:[
+{lv:1,sk:"L_detail",au:[["M","我們去看電影吧，七點那場。"],["F","七點來不及，我六點半才下課，看九點的好嗎？"],["M","好。"]],q:"他們要看幾點的電影？",o:["六點半","七點","八點","九點"],ans:3,e:"7 giờ không kịp → đổi 9 giờ, nam đồng ý 「好」."},
+{lv:1,sk:"L_detail",au:[["F","你哥哥做什麼工作？"],["M","他以前是老師，現在在銀行上班。"]],q:"男的的哥哥現在做什麼？",o:["老師","在銀行工作","學生","醫生"],ans:1,e:"以前 (trước đây) ≠ 現在 (hiện tại)."},
+{lv:2,sk:"L_turn",au:[["M","這家店的拉麵好吃嗎？"],["F","好吃是好吃，就是要排一個小時。"]],q:"女的覺得這家店怎麼樣？",o:["不好吃","好吃，但要等很久","不用排隊","很便宜"],ans:1,e:"Mẫu A是A，就是… = A thì đúng là A, có điều…"},
+{lv:2,sk:"L_detail",au:[["F","我下禮拜要去臺南出差三天，你可以幫我餵貓嗎？"],["M","沒問題，鑰匙放在哪裡？"],["F","我明天拿給你。"]],q:"女的請男的幫什麼忙？",o:["陪她去臺南","照顧她的貓","把鑰匙拿給她","幫她搬家"],ans:1,e:"幫我餵貓 = cho mèo ăn → chăm mèo. Chìa khóa là cô ấy đưa cho anh."},
+{lv:2,sk:"L_infer",au:[["M","你不是說要減肥嗎？怎麼又點了炸雞？"],["F","今天是我生日嘛，明天再開始。"]],q:"從對話可以知道什麼？",o:["女的已經減肥成功","女的今天不打算減肥","今天是男的生日","女的不喜歡炸雞"],ans:1,e:"「明天再開始」 → hôm nay chưa ăn kiêng. Câu hỏi phản vấn 「你不是說…嗎？」 = trách nhẹ."},
+{lv:3,sk:"L_turn",au:[["F","老闆說我這次的企劃書很有創意。"],["M","那不是很好嗎？你怎麼看起來不太高興？"],["F","他接著又說：「可惜預算超出太多，不可能執行。」"]],q:"女的為什麼不高興？",o:["老闆不喜歡她的創意","企劃書因預算問題無法執行","她被減薪了","企劃書沒寫完"],ans:1,e:"「可惜」 là từ chuyển ý: 預算超出太多，不可能執行."},
+{lv:3,sk:"L_tone",au:[["M","這次的里長選舉，你會去投票嗎？"],["F","本來不想去，可是聽說要在我們家附近蓋焚化爐，這件事跟我切身相關，我非去不可。"]],q:"女的會去投票嗎？為什麼？",o:["不會，因為沒興趣","會，因為議題跟她切身相關","不會，因為要工作","還沒決定"],ans:1,e:"非…不可 = nhất định phải. 切身相關 = liên quan trực tiếp đến bản thân."},
+{lv:3,sk:"L_announce",au:[["M","中央氣象署已於今天上午八點三十分發布海上颱風警報，預計明天清晨可能發布陸上颱風警報。民眾若無必要，請避免前往海邊或山區。"]],q:"目前已經發布的是什麼警報？",o:["陸上颱風警報","海上颱風警報","豪雨特報","地震警報"],ans:1,e:"已於…發布海上颱風警報 (đã phát). 陸上 chỉ là 預計…可能 (dự kiến)."},
+{lv:4,sk:"L_tone",au:[["F","他這個人說話一向直來直往，你別放在心上。"],["M","直來直往跟沒禮貌是兩回事吧？在那麼多人面前批評我的方案，我實在嚥不下這口氣。"]],q:"男的意思是什麼？",o:["他接受對方的直率","他認為對方不是直率而是沒禮貌，很生氣","他覺得自己的方案有問題","他想跟對方道歉"],ans:1,e:"「…是兩回事吧？」 = phân biệt thẳng thắn với vô lễ; 「嚥不下這口氣」 = không nuốt trôi cục tức."},
+{lv:4,sk:"L_main",au:[["F","「破窗效應」認為，如果一棟建築有一扇破窗沒有及時修理，人們便會認為這裡無人管理，進而做出更多破壞行為。因此，管理者應重視小問題，防止其擴大為大問題。"]],q:"這段話的結論是什麼？",o:["應該把窗戶都換掉","要及早處理小問題","建築物不需要管理","破窗會讓人生氣"],ans:1,e:"Kết luận nằm sau 「因此」: 重視小問題，防止其擴大."}
+],
+R:[
+{lv:1,sk:"R_scan",p:"【飲料價目表】\n紅茶　中杯25元　大杯35元\n綠茶　中杯25元　大杯35元\n＊加珍珠 +10元",q:"買一杯大杯紅茶加珍珠要多少錢？",o:["35元","45元","25元","55元"],ans:1,e:"大杯紅茶 35 + 珍珠 10 = 45 元."},
+{lv:1,sk:"R_grammar",p:"你看，外面下雨＿＿！",q:FILL,o:["了","過","著","得"],ans:0,e:"了 cuối câu = tình huống mới xuất hiện (trời bắt đầu mưa rồi)."},
+{lv:2,sk:"R_conn",p:"這道菜＿＿看起來不怎麼樣，吃起來卻很好吃。",q:FILL,o:["雖然","因為","只要","如果"],ans:0,e:"卻 ở vế sau → 雖然…卻."},
+{lv:2,sk:"R_grammar",p:"他把我的雨傘＿＿走了。",q:FILL,o:["拿","拿到","拿給","拿著"],ans:0,e:"把 + O + V + 補語(走) + 了: 拿走了 = cầm đi mất."},
+{lv:2,sk:"R_scan",p:"小張：這週六的讀書會改線上喔，連結我等一下傳到群組。\n小王：太好了！我週六要回老家，本來還擔心不能參加。",q:"小王為什麼說「太好了」？",o:["讀書會取消了","改成線上，他在老家也能參加","他不用回老家了","小張要去他老家"],ans:1,e:"Kết hợp 2 dữ kiện: 改線上 + 要回老家、擔心不能參加 → giờ tham gia được."},
+{lv:3,sk:"R_main",p:"許多人認為，獨居老人最需要的是金錢上的協助。然而，社工人員發現，比起經濟問題，孤獨感與缺乏社交往往對他們的身心健康影響更大。",q:"社工人員的發現是什麼？",o:["老人最需要錢","孤獨感對老人的影響可能更大","老人不需要幫助","老人喜歡獨居"],ans:1,e:"Ý chính sau 「然而」; 「比起A，B…更大」 → B quan trọng hơn."},
+{lv:3,sk:"R_vocab",p:"他一聽到這個消息，＿＿哭了起來。",q:FILL,o:["頓時","時時","同時","按時"],ans:0,e:"頓時 = ngay lập tức, bỗng chốc – hay đi với 一…就/起來."},
+{lv:3,sk:"R_vocab",p:"這次比賽我們雖然輸了，但大家都盡了＿＿。",q:FILL,o:["全力","全部","全面","全體"],ans:0,e:"盡了全力 = đã dốc hết sức – cụm cố định."},
+{lv:4,sk:"R_ref",p:P.t5,q:"文中「一舉兩得」指的是什麼？",o:["年輕人能付較低租金，長者也能得到陪伴","政府可以收兩次錢","年輕人可以住兩間房子","長者可以得到兩份補助"],ans:0,e:"「此舉」 = kế hoạch ở câu trước; lợi ích kép: 低於市價的租金 cho người trẻ + 陪伴服務 cho người già."},
+{lv:4,sk:"R_infer",p:P.t5,q:"持保留態度的人主要擔心什麼？",o:["租金太低","世代間的差異可能造成糾紛","長者不需要陪伴","政府沒有預算"],ans:1,e:"「但也有人擔心，世代間生活習慣差異甚大…恐怕衍生糾紛」."}
+]},
+/* ================= BỘ 2: THEO CẤP ĐỘ & TẦN SUẤT CAO ================= */
+{name:"Đề 6",sub:"Band A · 入門 A1 – 基礎 A2",band:"A",
+L:[
+{lv:0,sk:"L_number",au:[["F","這個蘋果一個多少錢？"],["M","一個三十塊，三個八十塊。"]],q:"買三個蘋果要多少錢？",o:["三十塊","八十塊","九十塊","一百塊"],ans:1,e:"「三個八十塊」 là giá mua theo combo. Bẫy: 90 (lấy 3 × 30)."},
+{lv:0,sk:"L_detail",au:[["M","你喜歡喝什麼？"],["F","我不喜歡喝咖啡，我喜歡喝茶。"]],q:"女的喜歡喝什麼？",o:["咖啡","茶","水","牛奶"],ans:1,e:"不喜歡 咖啡, 喜歡 茶. Bẫy: từ xuất hiện trước (咖啡) đi kèm phủ định."},
+{lv:0,sk:"L_number",au:[["F","現在幾點？"],["M","差五分十點。"]],q:"現在幾點？",o:["九點五十五分","十點五分","十點","五點十分"],ans:0,e:"差五分十點 = còn 5 phút nữa là 10 giờ → 9:55. Dạng giờ 差… gặp rất thường xuyên ở Band A."},
+{lv:0,sk:"L_place",au:[["M","請問，洗手間在哪裡？"],["F","在二樓，電梯的旁邊。"]],q:"洗手間在哪裡？",o:["一樓","二樓電梯旁邊","三樓","電梯裡面"],ans:1,e:"在二樓 + 電梯的旁邊 (bên cạnh thang máy)."},
+{lv:0,sk:"L_detail",au:[["F","你今天怎麼來學校的？"],["M","平常騎機車，今天下雨，所以坐公車。"]],q:"男的今天怎麼來學校？",o:["騎機車","坐公車","走路","坐捷運"],ans:1,e:"平常 (thường ngày) ≠ 今天. Hôm nay mưa → 坐公車."},
+{lv:1,sk:"L_number",au:[["M","我們班有多少學生？"],["F","二十五個，可是今天有三個人請假。"]],q:"今天有幾個學生來上課？",o:["二十二個","二十五個","二十八個","三個"],ans:0,e:"25 − 3 (請假) = 22."},
+{lv:1,sk:"L_turn",au:[["F","這間餐廳怎麼樣？"],["M","菜很好吃，可是服務不太好。"]],q:"男的覺得這間餐廳的服務怎麼樣？",o:["很好","不太好","很快","很便宜"],ans:1,e:"Câu hỏi hỏi về 服務 → nghe phần sau 可是: 服務不太好."},
+{lv:1,sk:"L_detail",au:[["M","星期六我們一起去看電影，好不好？"],["F","星期六我要打工，星期天可以嗎？"],["M","可以。"]],q:"他們哪天去看電影？",o:["星期五","星期六","星期天","還不知道"],ans:2,e:"Đề xuất thứ Bảy bị từ chối, chốt Chủ nhật bằng 「可以」."},
+{lv:1,sk:"L_announce",au:[["F","各位同學，明天的考試改到下午兩點，地點不變，還是在三零一教室。"]],q:"什麼改變了？",o:["考試地點","考試時間","考試科目","老師"],ans:1,e:"改到下午兩點 = đổi giờ; 地點不變 = địa điểm giữ nguyên."},
+{lv:1,sk:"L_infer",au:[["M","你怎麼不吃了？"],["F","太辣了，我的嘴好像著火了。"]],q:"女的為什麼不吃了？",o:["吃飽了","菜太辣","菜太鹹","不好吃"],ans:1,e:"太辣了 + 嘴好像著火了 (miệng như bốc lửa) → quá cay."}
+],
+R:[
+{lv:0,sk:"R_scan",p:"【營業時間】\n早上10:00－晚上9:00\n星期一休息",q:"星期一可以去嗎？",o:["可以，早上去","可以，晚上去","不可以","只有下午可以"],ans:2,e:"星期一休息 = thứ Hai nghỉ."},
+{lv:0,sk:"R_grammar",p:"我＿＿是學生，我是老師。",q:FILL,o:["不","沒","很","也"],ans:0,e:"Phủ định 是 luôn dùng 不 (不是), không dùng 沒."},
+{lv:0,sk:"R_vocab",p:"這件衣服太大了，有沒有＿＿一點的？",q:FILL,o:["小","少","短","低"],ans:0,e:"大 ↔ 小 (kích cỡ). 少 là số lượng."},
+{lv:0,sk:"R_grammar",p:"你昨天＿＿去上課？老師在找你。",q:FILL,o:["怎麼沒","怎麼不是","為什麼不是","不要"],ans:0,e:"Việc đã xảy ra (昨天) → phủ định bằng 沒: 怎麼沒去."},
+{lv:0,sk:"R_scan",p:"小明：我在捷運站一號出口等你。\n小華：好，我十分鐘後到。",q:"小明在哪裡？",o:["捷運站一號出口","捷運站十號出口","公車站","家裡"],ans:0,e:"一號出口 = cửa số 1. Bẫy: 十 trong 十分鐘."},
+{lv:1,sk:"R_conn",p:"我＿＿有空，＿＿會去看你。",q:FILL,o:["一…就","因為…所以","雖然…但是","不但…而且"],ans:0,e:"一…就 = hễ… là. Cặp 就 đi với 一/只要/如果."},
+{lv:1,sk:"R_vocab",p:"你說得太快了，我聽不＿＿。",q:FILL,o:["懂","會","好","對"],ans:0,e:"Nói quá nhanh → không hiểu: 聽不懂 (bổ ngữ khả năng)."},
+{lv:1,sk:"R_grammar",p:"他跑得＿＿我快。",q:FILL,o:["比","跟","和","對"],ans:0,e:"So sánh hơn: A + V得 + 比B + Adj."},
+{lv:1,sk:"R_scan",p:"【電影票價】\n全票 300元\n學生票 250元（請出示學生證）\n週二全天 200元",q:"小美是學生，星期二去看電影，最少要付多少錢？",o:["200元","250元","300元","450元"],ans:0,e:"Thứ Ba đồng giá 200 < giá học sinh 250 → tối thiểu 200. Chú ý chữ 最少."},
+{lv:1,sk:"R_main",p:"我的室友很愛乾淨，每天都打掃房間。可是她晚上常常很晚才睡，打電話的聲音也很大，所以我常常睡不好。",q:"作者覺得室友怎麼樣？",o:["很好，沒有問題","愛乾淨，但影響他睡覺","不愛乾淨","常常不在家"],ans:1,e:"Ưu điểm (愛乾淨) + 可是 + vấn đề (睡不好)."}
+]},
+{name:"Đề 7",sub:"Band B · 進階級 B1 trọng tâm",band:"B",
+L:[
+{lv:1,sk:"L_number",au:[["M","電影幾點開始？"],["F","七點半，我們早十五分鐘到吧。"]],q:"他們打算幾點到？",o:["七點十五分","七點半","七點四十五分","七點"],ans:0,e:"7:30 − 15 phút = 7:15."},
+{lv:1,sk:"L_detail",au:[["F","你要坐靠窗還是靠走道的位子？"],["M","我常常要起來上廁所，靠走道比較方便。"]],q:"男的要坐哪裡？",o:["靠窗","靠走道","中間","都可以"],ans:1,e:"Lý do (hay đi vệ sinh) dẫn tới lựa chọn 靠走道."},
+{lv:2,sk:"L_turn",au:[["M","你覺得新來的經理怎麼樣？"],["F","人是很嚴格，不過講道理，跟著他能學到不少。"]],q:"女的對新經理的看法是？",o:["太嚴格，不喜歡他","雖然嚴格，但評價正面","不講道理","還不認識他"],ans:1,e:"「是很嚴格，不過講道理…學到不少」 → nhìn chung tích cực."},
+{lv:2,sk:"L_number",au:[["F","這台筆電現在買送滑鼠，原價三萬，現金付款再便宜一千五。"],["M","我用信用卡。"]],q:"男的要付多少錢？",o:["兩萬八千五","三萬","三萬一千五","兩萬九千"],ans:1,e:"Chỉ trả tiền mặt mới giảm 1.500; anh ấy dùng thẻ → 30.000. Dạng điều kiện + tính tiền rất hay ra."},
+{lv:2,sk:"L_infer",au:[["M","這次的旅行我來規劃吧！"],["F","上次你規劃的時候，我們在車站等了兩個小時呢。"]],q:"女的意思是？",o:["希望男的來規劃","不太相信男的能規劃好","想去車站","上次的旅行很好玩"],ans:1,e:"Nhắc lại sự cố lần trước = từ chối khéo, không tin tưởng."},
+{lv:2,sk:"L_detail",au:[["F","你的宿舍申請好了嗎？"],["M","學校的沒抽到，我在外面租了一間套房，離學校騎車十分鐘。"]],q:"男的現在住在哪裡？",o:["學校宿舍","校外的套房","朋友家","家裡"],ans:1,e:"沒抽到 = bốc thăm trượt KTX → 在外面租了套房."},
+{lv:2,sk:"L_announce",au:[["M","各位乘客，本列車即將抵達台北車站，要轉乘板南線的旅客，請在本站下車。下車時請注意月台間隙。"]],q:"要轉乘板南線的人應該怎麼做？",o:["在下一站下車","在台北車站下車","坐到終點站","不用下車"],ans:1,e:"即將抵達台北車站 + 請在本站下車 → xuống ở 台北車站."},
+{lv:2,sk:"L_tone",au:[["F","你這次的報告寫得真不錯，老師一定會給你高分。"],["M","哪裡哪裡，還差得遠呢。"]],q:"男的回答表示什麼？",o:["他認為報告很差","他很謙虛","他不同意老師的看法","他不想交報告"],ans:1,e:"哪裡哪裡 = câu đáp khiêm tốn khi được khen, không phải chê thật."},
+{lv:3,sk:"L_turn",au:[["M","我們公司要不要也導入AI客服？"],["F","成本是能省下來，只是客人遇到複雜的問題，還是希望跟真人說話。不如先在簡單的問題上試試。"]],q:"女的建議怎麼做？",o:["全面使用AI客服","完全不用AI客服","先在簡單問題上試用AI客服","增加真人客服"],ans:2,e:"不如 + đề xuất = lời khuyên cuối cùng: 先在簡單的問題上試試."},
+{lv:3,sk:"L_main",au:[["F","很多人以為吃早餐一定會讓人變胖。其實，研究發現，問題不在於吃不吃早餐，而在於吃了什麼。高糖分的早餐才容易讓血糖快速上升。"]],q:"說話者的重點是什麼？",o:["不吃早餐比較健康","早餐的內容比吃不吃更重要","早餐一定要吃很多","吃早餐會變胖"],ans:1,e:"Mẫu 不在於A，而在於B → trọng tâm là B (ăn gì)."}
+],
+R:[
+{lv:1,sk:"R_scan",p:"【公告】\n本週五（11/6）電梯保養，上午9點到12點暫停使用，請住戶多利用樓梯。",q:"什麼時候不能用電梯？",o:["週五整天","週五上午","週五下午","每天上午"],ans:1,e:"9:00–12:00 thứ Sáu = buổi sáng thứ Sáu."},
+{lv:1,sk:"R_conn",p:"＿＿你明天有空，我們＿＿一起去吃飯吧。",q:FILL,o:["如果…就","雖然…但是","因為…所以","不管…都"],ans:0,e:"Giả định + đề nghị → 如果…就."},
+{lv:2,sk:"R_conn",p:"他＿＿會說中文，＿＿會說日文和韓文。",q:FILL,o:["不但…還","雖然…但是","因為…所以","只要…就"],ans:0,e:"Cộng thêm khả năng → 不但…還/而且."},
+{lv:2,sk:"R_vocab",p:"他的建議對我很有＿＿。",q:FILL,o:["幫助","幫忙","幫","協助"],ans:0,e:"很有 + danh từ: 很有幫助. 幫忙 là động từ ly hợp, không nói 很有幫忙."},
+{lv:2,sk:"R_grammar",p:"我已經把作業寫＿＿了，可以出去玩了嗎？",q:FILL,o:["完","過","著","在"],ans:0,e:"把 + O + V + 結果補語(完) + 了."},
+{lv:2,sk:"R_conn",p:"我們走路去吧，又不遠，＿＿坐公車還要等很久。",q:FILL,o:["何況","否則","於是","可是"],ans:0,e:"Đã đưa một lý do (又不遠), thêm lý do mạnh hơn → 何況 (huống hồ)."},
+{lv:2,sk:"R_scan",p:"【LINE群組】\n班代：下週二的期中考範圍是第一課到第五課，第三課不考喔！",q:"下面哪一課「不」在考試範圍？",o:["第一課","第三課","第五課","第四課"],ans:1,e:"第三課不考. Câu hỏi phủ định 「不」."},
+{lv:2,sk:"R_vocab",p:"下個月我要搬家，所以得先＿＿房東。",q:FILL,o:["通知","通過","通常","通訊"],ans:0,e:"通知 = báo cho. Bẫy hình thức: cùng chữ 通."},
+{lv:3,sk:"R_main",p:"不少父母擔心孩子玩電動會影響功課。不過，研究也發現，適度玩某些需要策略的遊戲，能訓練孩子的反應能力和解決問題的能力。關鍵在於父母是否和孩子一起訂出合理的時間。",q:"作者認為最重要的是什麼？",o:["禁止孩子玩電動","讓孩子想玩就玩","和孩子一起訂出合理的遊戲時間","只能玩策略遊戲"],ans:2,e:"Từ khóa 「關鍵在於」 = điều mấu chốt là…"},
+{lv:3,sk:"R_infer",p:"不少父母擔心孩子玩電動會影響功課。不過，研究也發現，適度玩某些需要策略的遊戲，能訓練孩子的反應能力和解決問題的能力。關鍵在於父母是否和孩子一起訂出合理的時間。",q:"根據本文，下列何者正確？",o:["玩電動一定會影響功課","某些遊戲可以訓練解決問題的能力","父母都不擔心孩子玩電動","研究反對孩子玩遊戲"],ans:1,e:"Bài nói 「能訓練…解決問題的能力」. Loại các đáp án tuyệt đối (一定、都)."}
+]},
+{name:"Đề 8",sub:"Band B · 高階級 B2 trọng tâm",band:"B",
+L:[
+{lv:2,sk:"L_number",au:[["M","這個月的房租加管理費一共多少？"],["F","房租一萬二，管理費一千，水電另外算，上個月大概八百。"]],q:"不算水電，男的每個月要付多少錢？",o:["一萬二","一萬三","一萬三千八","一萬二千八"],ans:1,e:"12.000 + 1.000 = 13.000; 水電另外算 nên không cộng 800."},
+{lv:2,sk:"L_detail",au:[["F","你論文的口試訂在哪天？"],["M","本來是下個月五號，可是有一位口試委員出國，延到十二號了。"]],q:"口試在哪天？",o:["下個月五號","下個月十二號","這個月十二號","還沒決定"],ans:1,e:"本來…可是…延到十二號 → ngày 12 tháng sau."},
+{lv:3,sk:"L_infer",au:[["M","這家公司的福利很好，可是我聽說他們的員工流動率很高。"],["F","福利好的公司，人卻留不住，你不覺得這說明了什麼嗎？"]],q:"女的暗示什麼？",o:["這家公司很值得去","這家公司可能有其他問題","員工流動率高是正常的","福利不重要"],ans:1,e:"Câu hỏi tu từ 「你不覺得這說明了什麼嗎？」 = ngầm nói công ty có vấn đề khác."},
+{lv:3,sk:"L_turn",au:[["F","你們上次的產品發表會辦得如何？"],["M","現場來的人倒是不少，只是實際下訂單的寥寥無幾。"]],q:"發表會的結果是什麼？",o:["人很少，訂單很多","人很多，但訂單很少","人和訂單都很多","活動取消了"],ans:1,e:"倒是…只是… ; 寥寥無幾 = lèo tèo vài người."},
+{lv:3,sk:"L_number",au:[["M","我們部門十二個人，聚餐每人預算八百，公司補助一半，剩下的自付。"],["F","那每人要自己出多少？"]],q:"每個人要自己付多少錢？",o:["四百元","八百元","四千八百元","九千六百元"],ans:0,e:"800 ÷ 2 = 400/người. Số người (12) là thông tin gây nhiễu."},
+{lv:3,sk:"L_announce",au:[["F","為配合捷運工程，自十一月十日起，本路段實施交通管制，每日晚上十點至隔天清晨五點禁止車輛通行，預計為期兩個月。"]],q:"交通管制的時間是？",o:["全天","每天晚上十點到隔天清晨五點","只有週末","每天早上五點到晚上十點"],ans:1,e:"每日晚上十點至隔天清晨五點. Đáp án cuối là bẫy đảo ngược khung giờ."},
+{lv:3,sk:"L_tone",au:[["M","你又要熬夜趕報告啊？上禮拜不是說再也不拖了嗎？"],["F","唉，說是一回事，做又是另一回事。"]],q:"女的話是什麼意思？",o:["她已經改掉拖延的習慣","說到做到很難，她又拖延了","她不需要趕報告","她覺得熬夜很好"],ans:1,e:"說是一回事，做又是另一回事 = nói một đằng, làm được lại là chuyện khác."},
+{lv:3,sk:"L_infer",au:[["F","公司這次調薪，大家都加了百分之三，只有小王加了百分之十。"],["M","也難怪，去年那個大客戶要不是他，早就跑了。"]],q:"小王為什麼加薪比較多？",o:["他是經理的朋友","他留住了重要的客戶","他工作最久","他要求加薪"],ans:1,e:"要不是他，早就跑了 = nếu không có anh ấy thì khách đã đi mất → anh giữ được khách lớn."},
+{lv:4,sk:"L_infer",au:[["M","這個都市更新案，居民的反對聲浪很大，你怎麼看？"],["F","更新本身無可厚非，但若補償方案不透明，居民有疑慮也是情理之中。政府應該先把資訊攤開來談。"]],q:"女的認為政府應該怎麼做？",o:["停止都市更新","先公開透明地說明補償方案","強制執行","不理會居民"],ans:1,e:"把資訊攤開來談 = công khai thông tin để bàn. 無可厚非 = không có gì đáng trách."},
+{lv:4,sk:"L_main",au:[["M","「沉沒成本」指的是已經付出、無法收回的成本。許多人因為不甘心之前的投入，明知繼續下去不划算，仍然堅持，結果損失更大。理性的決策應該只看未來的成本與收益。"]],q:"說話者建議怎麼做決定？",o:["考慮已經花掉的錢","只考慮未來的成本與收益","一定要堅持到底","不要做任何投資"],ans:1,e:"Kết luận ở câu cuối: 理性的決策應該只看未來…"}
+],
+R:[
+{lv:2,sk:"R_scan",p:"【圖書館規定】\n逾期還書，每本每天罰款5元；遺失書籍，需照原價賠償。",q:"小李借了兩本書，晚了三天才還，要罰多少錢？",o:["5元","15元","30元","10元"],ans:2,e:"2 cuốn × 3 ngày × 5 元 = 30 元."},
+{lv:2,sk:"R_conn",p:"這件事＿＿你不說，大家也都知道了。",q:FILL,o:["即使","只要","因為","既然"],ans:0,e:"Vế sau có 也 → 即使…也 (cho dù… cũng)."},
+{lv:3,sk:"R_conn",p:"＿＿你已經決定了，我＿＿不再勸你了。",q:FILL,o:["既然…就","雖然…但","即使…也","只有…才"],ans:0,e:"Tiền đề đã thành sự thật (已經決定了) → 既然…就."},
+{lv:3,sk:"R_vocab",p:"這家公司的產品品質穩定，深受消費者＿＿。",q:FILL,o:["信賴","依賴","賴皮","仰賴"],ans:0,e:"深受…信賴 = được… tin cậy sâu sắc. 依賴/仰賴 = phụ thuộc."},
+{lv:3,sk:"R_vocab",p:"經過多次協商，雙方終於＿＿協議。",q:FILL,o:["達成","完成","造成","成立"],ans:0,e:"達成協議/達成共識 – cụm cố định."},
+{lv:3,sk:"R_conn",p:"他每天練習三個小時，＿＿在比賽中拿下了冠軍。",q:FILL,o:["終於","竟然","何況","反而"],ans:0,e:"Nỗ lực lâu dài → kết quả như mong đợi: 終於. 竟然 dùng cho điều bất ngờ."},
+{lv:3,sk:"R_grammar",p:"那本書我＿＿找＿＿找不到，原來是被弟弟借走了。",q:FILL,o:["怎麼…也","越…越","又…又","一…就"],ans:0,e:"怎麼V也V不… = làm thế nào cũng không…"},
+{lv:3,sk:"R_scan",p:"【徵才】國際物流公司誠徵業務專員\n條件：大學以上學歷，TOCFL B2以上，具日語能力者尤佳\n待遇：月薪3萬8起，享勞健保、年終獎金",q:"下列何者是這份工作的「必要」條件？",o:["會說日語","有TOCFL B2以上的證書","有工作經驗","住在台北"],ans:1,e:"尤佳 = càng tốt (không bắt buộc). Bắt buộc: đại học + TOCFL B2."},
+{lv:4,sk:"R_main",p:"都市中的「街角咖啡館」，常被視為只是喝咖啡的地方。然而，社會學家認為，它們其實扮演著「第三空間」的角色：介於家庭與工作場所之間，讓人們在沒有壓力的狀況下與陌生人互動，進而凝聚社區意識。",q:"本文主要說明什麼？",o:["咖啡館的咖啡很好喝","咖啡館具有促進社區互動的社會功能","人們應該在咖啡館工作","家庭與工作場所沒有差別"],ans:1,e:"Sau 然而: 扮演「第三空間」… 凝聚社區意識."},
+{lv:4,sk:"R_infer",p:"都市中的「街角咖啡館」，常被視為只是喝咖啡的地方。然而，社會學家認為，它們其實扮演著「第三空間」的角色：介於家庭與工作場所之間，讓人們在沒有壓力的狀況下與陌生人互動，進而凝聚社區意識。",q:"「第三空間」最可能是指？",o:["咖啡館的三樓","家和工作場所以外，讓人輕鬆互動的地方","第三家分店","工作的地方"],ans:1,e:"Định nghĩa nằm ngay sau dấu hai chấm: 介於家庭與工作場所之間…"}
+]},
+{name:"Đề 9",sub:"Band C · 流利級 C1 trọng tâm",band:"C",
+L:[
+{lv:3,sk:"L_number",au:[["F","這個專案原本預計三個月完成，現在進度落後了兩週，老闆又要求提前一週交。"],["M","那等於比原本的時程整整少了三週。"]],q:"根據對話，實際能用的時間比原計畫少了多少？",o:["一週","兩週","三週","三個月"],ans:2,e:"Trễ 2 tuần + nộp sớm 1 tuần = mất 3 tuần."},
+{lv:3,sk:"L_turn",au:[["M","聽說你們的新產品在網路上評價很兩極？"],["F","喜歡的人愛不釋手，不喜歡的覺得操作太複雜。不過退貨率倒是不高。"]],q:"關於新產品，下列何者正確？",o:["大家都很喜歡","評價差異大，但退貨率不高","退貨率很高","操作很簡單"],ans:1,e:"兩極 = phân cực. 不過…倒是不高 → tỉ lệ trả hàng thấp."},
+{lv:3,sk:"L_announce",au:[["F","本院自明年一月起實施門診預約制，初診病患須事先上網或電話預約，複診病患則維持現場掛號。"]],q:"誰需要事先預約？",o:["所有病患","初診病患","複診病患","住院病患"],ans:1,e:"初診 (khám lần đầu) phải đặt trước; 複診 vẫn đăng ký tại chỗ."},
+{lv:4,sk:"L_infer",au:[["M","這次的合併案，對方開出的條件你覺得怎麼樣？"],["F","表面上是對等合併，可是董事會席次對方佔了七席，我們只有四席，說穿了就是收購。"]],q:"女的認為這次合併的本質是什麼？",o:["真正的對等合併","實際上是被對方收購","我們收購對方","還沒有談條件"],ans:1,e:"表面上…說穿了… = bề ngoài… nói trắng ra là… → bị thâu tóm."},
+{lv:4,sk:"L_tone",au:[["F","你對新主管的那份改革計畫有什麼看法？"],["M","想法是很遠大，但以我們現有的人力，要在半年內做到，恐怕是天方夜譚。"]],q:"男的對改革計畫的態度是？",o:["非常有信心","認為目標不切實際","完全贊成","認為人力很充足"],ans:1,e:"天方夜譚 = chuyện hoang đường, viển vông."},
+{lv:4,sk:"L_turn",au:[["M","你覺得該不該對含糖飲料課稅？"],["F","出發點我能理解，但光靠課稅，恐怕治標不治本，關鍵還是在於從小建立健康的飲食觀念。"]],q:"女的認為什麼最重要？",o:["提高稅率","從小建立健康的飲食觀念","禁止販賣含糖飲料","降低飲料價格"],ans:1,e:"關鍵在於… = mấu chốt. 治標不治本 = chữa ngọn không chữa gốc."},
+{lv:4,sk:"L_infer",au:[["F","王教授的研究結果被另一個團隊驗證失敗了。"],["M","單一研究無法重現，倒也不能直接說它是錯的。但至少說明，在更多證據出來之前，媒體那樣大肆報導，確實有些操之過急。"]],q:"男的對媒體報導的看法是？",o:["媒體報導得很恰當","媒體報導太過急躁","王教授的研究一定是錯的","應該停止這類研究"],ans:1,e:"操之過急 = quá vội vàng. 「不能直接說它是錯的」 loại đáp án 「一定是錯的」."},
+{lv:4,sk:"L_announce",au:[["M","本次招生考試，因受颱風影響，原定十一月十五日舉行之筆試，順延至十一月二十二日；口試日期則不受影響，仍於十一月二十九日舉行。"]],q:"下列何者正確？",o:["筆試與口試都延期","只有筆試延後一週","口試提前了","考試取消"],ans:1,e:"Thi viết 15 → 22 (lùi 1 tuần); 口試不受影響."},
+{lv:4,sk:"L_main",au:[["F","「確認偏誤」是指人們傾向尋找、解讀支持自己既有觀點的資訊，而忽略相反的證據。在演算法推薦的環境下，這種傾向更容易被放大，形成所謂的「同溫層」。"]],q:"這段話主要在說明什麼？",o:["演算法能幫人做出客觀判斷","人傾向接受支持自己觀點的資訊，且演算法會加劇此現象","同溫層讓人更理性","人們喜歡尋找相反的證據"],ans:1,e:"Định nghĩa (確認偏誤) + tác động của thuật toán (更容易被放大)."},
+{lv:4,sk:"L_main",au:[["M","談到城市的永續發展，很多人第一個想到的是種樹、蓋綠建築。但其實，大眾運輸系統的規劃往往才是決定性的因素，因為它直接影響居民的通勤方式與城市的碳排放總量。"]],q:"說話者認為城市永續發展的關鍵是什麼？",o:["多種樹","蓋綠建築","規劃大眾運輸系統","減少居民人數"],ans:2,e:"很多人想到…但其實…才是決定性的因素 → ý chính sau 但其實."}
+],
+R:[
+{lv:3,sk:"R_conn",p:"＿＿遭到多數人反對，他＿＿堅持自己的看法。",q:FILL,o:["儘管…仍","只要…就","既然…就","與其…不如"],ans:0,e:"Nhượng bộ (bị phản đối) + vẫn giữ → 儘管…仍."},
+{lv:3,sk:"R_vocab",p:"這位導演的作品風格獨特，在國際影展上屢獲＿＿。",q:FILL,o:["殊榮","榮幸","光榮","虛榮"],ans:0,e:"屢獲殊榮 = nhiều lần đạt vinh dự đặc biệt – cụm cố định."},
+{lv:3,sk:"R_ref",p:"研究團隊花了五年追蹤三千名受試者，結果發現，每天步行超過七千步的人，罹患心血管疾病的風險明顯較低。該研究已刊登於國際期刊。",q:"「該研究」指的是？",o:["國際期刊","追蹤受試者步行與疾病關係的研究","心血管疾病","每天走七千步"],ans:1,e:"該 = cái (đã nhắc ở trên) → chính nghiên cứu theo dõi 3.000 người."},
+{lv:4,sk:"R_vocab",p:"面對突如其來的危機，他依然＿＿，冷靜地處理每一個細節。",q:FILL,o:["從容不迫","手忙腳亂","半途而廢","不知所措"],ans:0,e:"Khớp với 冷靜 → 從容不迫 (ung dung, không vội). Các thành ngữ còn lại trái nghĩa."},
+{lv:4,sk:"R_conn",p:"這項技術一旦普及，＿＿會改變產業結構，＿＿可能衝擊數以萬計的工作機會。",q:FILL,o:["不僅…更","與其…不如","雖然…但是","寧可…也不"],ans:0,e:"Hai hệ quả tăng tiến → 不僅…更."},
+{lv:4,sk:"R_vocab",p:"政府的政策應以民眾福祉為＿＿。",q:FILL,o:["依歸","歸宿","回歸","歸還"],ans:0,e:"以…為依歸 = lấy… làm chuẩn mực/mục tiêu – văn viết C1."},
+{lv:4,sk:"R_main",p:"長期以來，「多工處理」被視為高效率的象徵。然而，認知科學的研究顯示，大腦其實無法真正同時處理多項需要專注的任務。所謂的多工，不過是在任務間快速切換，而每次切換都會造成注意力的損耗。",q:"作者的主要觀點是什麼？",o:["多工處理能提高效率","大腦能同時處理很多事","多工其實是快速切換，會損耗注意力","應該多訓練多工能力"],ans:2,e:"Sau 然而; 「不過是…」 = chẳng qua chỉ là…"},
+{lv:4,sk:"R_infer",p:"長期以來，「多工處理」被視為高效率的象徵。然而，認知科學的研究顯示，大腦其實無法真正同時處理多項需要專注的任務。所謂的多工，不過是在任務間快速切換，而每次切換都會造成注意力的損耗。",q:"根據本文，下列推論何者最合理？",o:["專心處理一件事可能比多工更有效率","人應該一次做很多事","認知科學支持多工處理","切換任務不會影響注意力"],ans:0,e:"Chuyển việc làm hao chú ý → tập trung một việc hiệu quả hơn (suy luận hợp lý, không nói thẳng)."},
+{lv:4,sk:"R_ref",p:"隨著人口高齡化，長照需求與日俱增。然而，照護人力的培育速度遠遠趕不上需求，加上工作辛苦、薪資偏低，使得此一缺口持續擴大。",q:"「此一缺口」指的是？",o:["薪資的差距","照護人力的供給不足以滿足需求","高齡人口的增加","長照的經費"],ans:1,e:"缺口 = khoảng trống: nhân lực đào tạo 趕不上需求."},
+{lv:4,sk:"R_infer",p:"隨著人口高齡化，長照需求與日俱增。然而，照護人力的培育速度遠遠趕不上需求，加上工作辛苦、薪資偏低，使得此一缺口持續擴大。",q:"根據上文，造成照護人力不足的原因「不包括」哪一項？",o:["培育速度太慢","工作辛苦","薪資偏低","政府禁止外籍看護"],ans:3,e:"Bài nêu 3 nguyên nhân; 「政府禁止外籍看護」 không được nhắc. Câu hỏi 不包括 – gạch chân!"}
+]},
+{name:"Đề 10",sub:"Tổng hợp · chỉ dạng ★★★ tần suất cao",band:"HF",
+L:[
+{lv:1,sk:"L_number",au:[["F","我們約幾點？"],["M","三點半在門口見，不過我可能會晚到十分鐘。"]],q:"男的大概幾點到？",o:["三點二十","三點半","三點四十","四點"],ans:2,e:"3:30 + 晚到10分鐘 = 3:40."},
+{lv:1,sk:"L_detail",au:[["M","你這次放假要回越南嗎？"],["F","本來想回去，可是機票太貴了，我留在台灣打工。"]],q:"女的放假要做什麼？",o:["回越南","在台灣打工","去旅行","買機票"],ans:1,e:"本來…可是… → kế hoạch đổi: ở lại Đài Loan làm thêm."},
+{lv:2,sk:"L_turn",au:[["F","你的新手機用起來怎麼樣？"],["M","拍照功能沒話說，就是電池不太耐用，一天得充兩次電。"]],q:"男的對新手機哪方面不滿意？",o:["拍照","電池","價格","大小"],ans:1,e:"沒話說 = không chê được; 就是… = có điều… → pin."},
+{lv:2,sk:"L_number",au:[["M","我想寄這個包裹到高雄，多少錢？"],["F","一公斤以內八十元，超過的部分每公斤加二十元。您的包裹三公斤。"]],q:"寄這個包裹要多少錢？",o:["八十元","一百元","一百二十元","一百四十元"],ans:2,e:"80 + (3−1) × 20 = 120. Bẫy: 140 (tính cả 3kg × 20 + 80)."},
+{lv:2,sk:"L_infer",au:[["F","這家健身房一個月只要九百九，好便宜啊！"],["M","你先看看合約吧，要綁約兩年，中途解約要付違約金。"]],q:"男的提醒女的什麼？",o:["健身房太貴","注意合約的限制","馬上報名","健身房很遠"],ans:1,e:"綁約 = ràng buộc hợp đồng; 違約金 = tiền phạt."},
+{lv:3,sk:"L_detail",au:[["M","下週的部門會議要改成線上嗎？"],["F","原本是這麼打算，但總經理說要親自出席，所以還是在十樓會議室，時間提前到九點半。"]],q:"下週的會議怎麼開？",o:["線上，九點半","十樓會議室，九點半","線上，原來的時間","十樓會議室，原來的時間"],ans:1,e:"Hai thông tin cùng lúc: địa điểm (vẫn phòng tầng 10) + giờ (提前到九點半). Dạng ghép 2 chi tiết rất hay ra ở B2."},
+{lv:3,sk:"L_turn",au:[["F","你覺得遠距教學效果如何？"],["M","對自律的學生來說沒什麼問題，甚至更有效率；不過，對需要老師盯的學生，成效就大打折扣了。"]],q:"男的認為遠距教學怎麼樣？",o:["對所有學生都很好","效果因學生的自律程度而異","完全沒有效果","一定比面對面教學好"],ans:1,e:"對A…；不過，對B… → kết quả tùy đối tượng. 大打折扣 = giảm mạnh."},
+{lv:3,sk:"L_number",au:[["M","這間房子總價一千兩百萬，頭期款要兩成，你準備好了嗎？"],["F","我存了兩百萬，還差一點。"]],q:"女的頭期款還差多少？",o:["二十萬","四十萬","兩百萬","兩百四十萬"],ans:1,e:"1.200萬 × 20% = 240萬; 240 − 200 = 40萬. 兩成 = 20%."},
+{lv:4,sk:"L_infer",au:[["F","公司這次裁員，說是組織調整，但被裁的幾乎都是四十五歲以上的員工。"],["M","嘴上說得冠冕堂皇，骨子裡還不是為了省人事成本。"]],q:"男的認為裁員的真正原因是？",o:["組織調整","節省人事成本","員工能力不足","員工主動離職"],ans:1,e:"冠冕堂皇 = nghe thì hay; 骨子裡 = thực chất; 還不是… = chẳng phải là… sao."},
+{lv:4,sk:"L_turn",au:[["M","你贊成延長退休年齡嗎？"],["F","從財政面看，確實有必要。可是如果沒有同步改善中高齡的就業環境，等於讓他們領不到退休金，又找不到工作，兩頭落空。"]],q:"女的認為延長退休年齡的前提是什麼？",o:["提高退休金","同步改善中高齡的就業環境","降低稅收","讓年輕人先就業"],ans:1,e:"如果沒有A，等於… → A là điều kiện tiên quyết. 兩頭落空 = mất cả đôi đường."}
+],
+R:[
+{lv:1,sk:"R_scan",p:"【外送訂單】\n牛肉麵×1　150元\n燙青菜×1　40元\n外送費　30元\n＊滿200元免外送費",q:"這張訂單一共要付多少錢？",o:["190元","220元","200元","230元"],ans:1,e:"150 + 40 = 190 < 200 → không được miễn phí giao: 190 + 30 = 220."},
+{lv:1,sk:"R_conn",p:"＿＿下雨，比賽＿＿照常舉行。",q:FILL,o:["即使…也","因為…所以","如果…就","只有…才"],ans:0,e:"Điều kiện bất lợi nhưng kết quả không đổi → 即使…也."},
+{lv:2,sk:"R_vocab",p:"為了＿＿環境，我們應該少用塑膠袋。",q:FILL,o:["保護","保持","保留","保證"],ans:0,e:"保護環境 = bảo vệ môi trường. Bẫy cùng chữ 保."},
+{lv:2,sk:"R_conn",p:"他最近每天都運動，＿＿身體越來越好。",q:FILL,o:["所以","但是","而且","或者"],ans:0,e:"Nguyên nhân → kết quả."},
+{lv:2,sk:"R_scan",p:"【課程異動】\n「華語會話（二）」原週三下午2:00–4:00，因教師請假，本週改至週五上午10:00–12:00，教室不變。",q:"本週的華語會話課什麼時候上？",o:["週三下午","週五上午","週五下午","取消"],ans:1,e:"原… (giờ cũ) → 改至週五上午."},
+{lv:3,sk:"R_vocab",p:"這家餐廳的服務態度令人＿＿，我再也不來了。",q:FILL,o:["失望","希望","盼望","渴望"],ans:0,e:"令人失望 = khiến người ta thất vọng; khớp với 再也不來了."},
+{lv:3,sk:"R_conn",p:"他寧可自己多做一點，＿＿麻煩別人。",q:FILL,o:["也不願","也要","才能","就會"],ans:0,e:"寧可A，也不(願)B = thà A chứ không B."},
+{lv:3,sk:"R_scan",p:"【優惠活動】\n即日起至12/31，持本校學生證購買任何飲品享九折優惠，週三再加贈點心一份（每人每日限用一次）。",q:"下列何者正確？",o:["每天都送點心","學生買飲品打九折","優惠到明年","每人每天可以用很多次"],ans:1,e:"Tặng bánh chỉ thứ Tư; 限用一次; hạn đến 31/12."},
+{lv:4,sk:"R_vocab",p:"由於樣本數不足，這項研究的結論受到學界＿＿。",q:FILL,o:["質疑","質問","疑惑","懷念"],ans:0,e:"受到質疑 = bị nghi vấn. 質問 = chất vấn (hỏi trực tiếp một người)."},
+{lv:4,sk:"R_conn",p:"與其抱怨環境不好，＿＿想想自己能改變什麼。",q:FILL,o:["不如","不但","何況","甚至"],ans:0,e:"與其…不如 – cặp cố định."}
+]}
+];
+/* ===== STATE ===== */
+let testIdx=0,sec="L",S=null,timerId=null;
+const $=s=>document.querySelector(s);
+const tp=$("#testPick");
+const grpHead=t=>`<div style="grid-column:1/-1;font-weight:600;font-size:14px;margin-top:6px">${t}</div>`;
+function levelMix(t){const c={};[...t.L,...t.R].forEach(x=>c[x.lv]=(c[x.lv]||0)+1);return Object.keys(c).sort().map(k=>LV[k].split(" ")[1]+"×"+c[k]).join(" · ")}
+TESTS.forEach((t,i)=>{if(i==0)tp.insertAdjacentHTML("beforeend",grpHead("Bộ 1 · Tổng hợp 2026 & định hướng 2027"));if(i==5)tp.insertAdjacentHTML("beforeend",grpHead("Bộ 2 · Theo cấp độ chi tiết & dạng câu tần suất cao"));
+ tp.insertAdjacentHTML("beforeend",`<button class="pick${i==0?" on":""}" data-t="${i}"><b>${t.name}</b><small>${t.sub}<br>${levelMix(t)}</small></button>`)});
+tp.insertAdjacentHTML("beforeend",grpHead("Chế độ đặc biệt (lấy từ cả 200 câu)"));
+tp.insertAdjacentHTML("beforeend",`<button class="pick" data-t="cat"><b>CAT mô phỏng</b><small>Thích ứng: 15 câu, A1→C1, độ khó đổi theo câu trả lời, không quay lại</small></button>`);
+tp.insertAdjacentHTML("beforeend",`<button class="pick" data-t="hf"><b>Luyện ★★★</b><small>15 câu ngẫu nhiên chỉ thuộc dạng tần suất cao, trong khoảng cấp bạn chọn</small></button>`);
+tp.insertAdjacentHTML("afterend",`<div class="row hide" id="hfOpts"><label>Cấp độ cho Luyện ★★★: <select id="hfLv"><option value="0-1">Band A (A1–A2)</option><option value="2-3" selected>Band B (B1–B2)</option><option value="3-4">B2–C1</option><option value="0-4">Tất cả</option></select></label></div>`);
+tp.onclick=e=>{const b=e.target.closest(".pick");if(!b)return;tp.querySelectorAll(".pick").forEach(x=>x.classList.remove("on"));b.classList.add("on");const d=b.dataset.t;testIdx=d=="cat"||d=="hf"?d:+d;$("#hfOpts").classList.toggle("hide",d!="hf")};
+function shuffleOpts(it){const idx=[0,1,2,3].slice(0,it.o.length);for(let i=idx.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[idx[i],idx[j]]=[idx[j],idx[i]]}return{...it,o:idx.map(k=>it.o[k]),ans:idx.indexOf(it.ans)}}
+document.querySelectorAll("[data-sec]").forEach(b=>b.onclick=()=>{document.querySelectorAll("[data-sec]").forEach(x=>x.classList.remove("on"));b.classList.add("on");sec=b.dataset.sec;$("#audioOpts").style.display=sec=="L"?"flex":"none"});
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll("nav button").forEach(x=>x.classList.remove("on"));b.classList.add("on");["home","skills","trend"].forEach(id=>$("#"+id).classList.toggle("hide",id!=b.dataset.tab));stopAudio();window.scrollTo(0,0)});
+/* ===== TTS ===== */
+let voices=[];
+function loadVoices(){try{voices=speechSynthesis.getVoices().filter(v=>/^zh/i.test(v.lang));const tw=voices.filter(v=>/TW|Hant/i.test(v.lang+v.name));$("#voiceNote").textContent=!("speechSynthesis" in window)?"⚠ Trình duyệt không hỗ trợ đọc giọng nói – hãy dùng Chrome/Edge/Safari bản mới.":voices.length?`Giọng tiếng Trung tìm thấy: ${voices.length} (${tw.length} giọng Đài Loan). Nên dùng Chrome/Edge để có giọng zh-TW rõ nhất.`:"⚠ Chưa tìm thấy giọng tiếng Trung trên máy. Hãy cài gói giọng nói tiếng Trung (Đài Loan) trong cài đặt hệ thống.";}catch(e){}}
+if("speechSynthesis" in window){loadVoices();speechSynthesis.onvoiceschanged=loadVoices}
+function voiceFor(g){const tw=voices.filter(v=>/TW|Hant/i.test(v.lang+v.name));const pool=tw.length?tw:voices;if(!pool.length)return null;const fem=pool.find(v=>/female|女|Mei|Hanhan|Yating|HsiaoChen|HsiaoYu/i.test(v.name));const mal=pool.find(v=>/male|男|Zhiwei|YunJhe|Kangkang/i.test(v.name)&&!/female/i.test(v.name));if(g=="F")return fem||pool[0];if(g=="M")return mal||pool[1]||pool[0];return pool[0]}
+function speak(lines,done){stopAudio();if(!("speechSynthesis" in window)){done&&done();return}const rate=+$("#rate").value;lines.forEach((l,i)=>{const u=new SpeechSynthesisUtterance(l[1]);u.lang="zh-TW";const v=voiceFor(l[0]);if(v)u.voice=v;u.rate=rate;u.pitch=l[0]=="M"?0.8:l[0]=="F"?1.2:1;if(i==lines.length-1)u.onend=()=>done&&done();speechSynthesis.speak(u)})}
+function stopAudio(){try{speechSynthesis.cancel()}catch(e){}}
+$("#testVoice").onclick=()=>speak([["F","你好，歡迎參加華語文能力測驗。"],["M","請注意聽，每段錄音只播放一次。"]]);
+/* ===== START ===== */
+$("#startBtn").onclick=()=>{
+ const cat=testIdx=="cat",hf=testIdx=="hf";
+ S={cat,hf,sec,idx:0,ans:[],plays:[],items:[],theta:2,step:0.9,hist:[]};
+ const all=[];TESTS.forEach(t=>t[sec].forEach((it,qi)=>all.push(shuffleOpts({...it,src:t.name+" #"+(qi+1)}))));
+ if(cat){S.pool=all;S.used=new Set();S.total=15;S.items.push(pickCAT(2))}
+ else if(hf){const [a,b]=$("#hfLv").value.split("-").map(Number);S.lvRange=[a,b];const p=all.filter(x=>FQ[x.sk][0]==3&&x.lv>=a&&x.lv<=b).sort(()=>Math.random()-.5).slice(0,15);S.items=p.sort((x,y)=>x.lv-y.lv);S.total=S.items.length}
+ else{S.items=TESTS[testIdx][sec].map((it,qi)=>shuffleOpts({...it,src:TESTS[testIdx].name+" #"+(qi+1)}));S.total=S.items.length}
+ const mins=cat||hf?(sec=="L"?20:25):(sec=="L"?15:20);S.end=Date.now()+mins*60000;
+ $("#setup").classList.add("hide");$("#result").classList.add("hide");$("#quiz").classList.remove("hide");
+ clearInterval(timerId);timerId=setInterval(tick,1000);render();
+};
+function pickCAT(lv){const avail=S.pool.map((x,i)=>i).filter(i=>!S.used.has(i));avail.sort((a,b)=>Math.abs(S.pool[a].lv-lv)-Math.abs(S.pool[b].lv-lv)||Math.random()-.5);const i=avail[0];S.used.add(i);return S.pool[i]}
+function tick(){const left=Math.max(0,S.end-Date.now());const el=$("#timer");if(el)el.textContent=fmt(left);if(left<=0){clearInterval(timerId);finish(true)}}
+function fmt(ms){const s=Math.ceil(ms/1000);return String(Math.floor(s/60)).padStart(2,"0")+":"+String(s%60).padStart(2,"0")}
+/* ===== RENDER QUESTION ===== */
+function render(){
+ const it=S.items[S.idx],n=S.idx+1,L=S.sec=="L";
+ const once=$("#once").checked,pl=S.plays[S.idx]||0;
+ let h=`<div class="top"><span>${S.cat?"CAT mô phỏng":S.hf?"Luyện ★★★":TESTS[testIdx].name} · ${L?"聽力 Nghe":"閱讀 Đọc"} · Câu ${n}/${S.total}</span><span>⏱ <span class="timer" id="timer">${fmt(S.end-Date.now())}</span></span></div><div class="bar"><i style="width:${(S.idx)/S.total*100}%"></i></div>`;
+ h+=`<span class="tag">${LV[it.lv]}</span>`;
+ if(L){h+=`<div class="play"><button class="btn" id="playBtn" ${once&&pl>=1?"disabled":""}>${pl?"▶ Nghe lại":"▶ Phát âm thanh"}</button><span class="note" id="playNote">${once?(pl>=1?"Đã phát 1 lần (chế độ thi thật).":"Chế độ thi thật: chỉ được nghe 1 lần, câu hỏi được đọc ở cuối."):"Chế độ luyện tập: nghe không giới hạn."}</span></div>`;
+  h+=`<div class="q">${it.q}</div>`}
+ else{h+=`<div class="passage">${it.p}</div><div class="q">${it.q}</div>`}
+ it.o.forEach((o,i)=>h+=`<button class="opt${S.ans[S.idx]===i?" on":""}" data-i="${i}">(${"ABCD"[i]}) ${o}</button>`);
+ h+=`<div class="row">`;
+ if(!S.cat&&S.idx>0)h+=`<button class="btn sec" id="prev">← Câu trước</button>`;
+ if(S.cat)h+=`<button class="btn" id="next" ${S.ans[S.idx]==null?"disabled":""}>${n==S.total?"Xác nhận & nộp bài":"Xác nhận →"}</button>`;
+ else h+=n<S.total?`<button class="btn" id="next">Câu sau →</button>`:"";
+ if(!S.cat)h+=`<button class="btn sec" id="submit">Nộp bài</button>`;
+ h+=`</div>`;
+ if(!S.cat){h+=`<div class="dots">`;S.items.forEach((_,i)=>h+=`<button data-j="${i}" class="${S.ans[i]!=null?"done":""} ${i==S.idx?"cur":""}">${i+1}</button>`);h+=`</div>`}
+ $("#quiz").innerHTML=h;
+ $("#quiz").querySelectorAll(".opt").forEach(b=>b.onclick=()=>{S.ans[S.idx]=+b.dataset.i;$("#quiz").querySelectorAll(".opt").forEach(x=>x.classList.toggle("on",x==b));const nx=$("#next");if(nx)nx.disabled=false;const d=$(`.dots [data-j="${S.idx}"]`);if(d)d.classList.add("done")});
+ if(L){$("#playBtn").onclick=playCur;if(!(S.plays[S.idx])){const at=S.idx,ss=S;setTimeout(()=>{if(S===ss&&S.idx===at&&$("#playBtn")&&!$("#quiz").classList.contains("hide"))playCur()},400)}}
+ const pv=$("#prev");if(pv)pv.onclick=()=>{stopAudio();S.idx--;render()};
+ const nx=$("#next");if(nx)nx.onclick=next;
+ const sb=$("#submit");if(sb)sb.onclick=()=>{const miss=S.items.filter((_,i)=>S.ans[i]==null).length;if(!miss||confirm(`Còn ${miss} câu chưa trả lời. Vẫn nộp bài?`))finish()};
+ $("#quiz").querySelectorAll(".dots button").forEach(b=>b.onclick=()=>{stopAudio();S.idx=+b.dataset.j;render()});
+}
+function playCur(){const it=S.items[S.idx];const once=$("#once").checked;if(once&&(S.plays[S.idx]||0)>=1)return;S.plays[S.idx]=(S.plays[S.idx]||0)+1;const b=$("#playBtn");if(!b)return;b.disabled=true;b.textContent="🔊 Đang phát…";speak([...it.au,["N","問題："+it.q]],()=>{const bb=$("#playBtn");if(!bb)return;if(once){bb.textContent="Đã phát";$("#playNote").textContent="Đã phát 1 lần (chế độ thi thật).";}else{bb.disabled=false;bb.textContent="▶ Nghe lại"}})}
+function next(){stopAudio();
+ if(S.cat){const it=S.items[S.idx];const ok=S.ans[S.idx]===it.ans;S.hist.push({lv:it.lv,ok});
+  S.theta+=(ok?1:-1)*S.step*(ok?(it.lv>=S.theta-0.5?1:0.5):(it.lv<=S.theta+0.5?1:0.5));S.theta=Math.min(4.6,Math.max(-0.6,S.theta));S.step=Math.max(0.3,S.step*0.85);
+  if(S.idx+1>=S.total){finish();return}
+  S.items.push(pickCAT(Math.min(4,Math.max(0,Math.round(S.theta)))))}
+ S.idx++;render();window.scrollTo(0,0)}
+/* ===== RESULT ===== */
+function finish(timeout){clearInterval(timerId);stopAudio();
+ const items=S.items.slice(0,S.cat?S.hist.length||S.items.length:S.items.length);
+ const correct=items.filter((it,i)=>S.ans[i]===it.ans).length;
+ let lvl;
+ const present=[...new Set(items.map(x=>x.lv))].sort();
+ if(S.cat){const t=S.theta;lvl=t<-0.2?"準備級 / dưới A1":LV[Math.min(4,Math.max(0,Math.round(t)))];}
+ else{const acc={};present.forEach(k=>{const g=items.map((it,i)=>[it,i]).filter(([it])=>it.lv==k);acc[k]=g.filter(([it,i])=>S.ans[i]===it.ans).length/g.length});let best=-1;for(const k of present){if(acc[k]>=0.6)best=k;else break}
+  lvl=best>=0?LV[best]:(present[0]>0?"Chưa đạt "+LV[present[0]]:"準備級 / dưới A1");
+  if(best>=0&&best==present[present.length-1]&&best<4)lvl+=" (đạt cấp cao nhất của đề – thử đề cấp trên)";S.acc=acc}
+ const skStat={};items.forEach((it,i)=>{skStat[it.sk]=skStat[it.sk]||[0,0];skStat[it.sk][1]++;if(S.ans[i]===it.ans)skStat[it.sk][0]++});
+ let h=`<div class="card"><h2>Kết quả ${timeout?"(hết giờ – tự nộp)":""}</h2><div class="score">${correct}/${items.length}</div><p>Cấp độ ước tính: <span class="lvl">${lvl}</span></p>`;
+ if(S.cat)h+=`<p class="note">Năng lực θ ≈ ${S.theta.toFixed(2)} (0 = A1, 1 = A2, 2 = B1, 3 = B2, 4 = C1). Lộ trình độ khó: ${S.hist.map(x=>(x.ok?"✔":"✘")+x.lv).join(" → ")}</p>`;
+ else h+=`<table><tr><th>Cấp độ câu</th><th>Tỉ lệ đúng</th></tr>${present.map(k=>`<tr><td>${LV[k]} · ${BAND[k]}</td><td>${Math.round(S.acc[k]*100)}%</td></tr>`).join("")}</table><p class="note">Đạt một cấp khi đúng ≥ 60% ở cấp đó và mọi cấp thấp hơn. Đây là ước tính luyện tập, không quy đổi chính thức.</p>`;
+ h+=`<h3>Kỹ năng cần ôn</h3><table><tr><th>Kỹ năng</th><th>Tần suất ra đề</th><th>Đúng</th></tr>${Object.entries(skStat).sort((a,b)=>(a[1][0]/a[1][1]-b[1][0]/b[1][1])||(FQ[b[0]][0]-FQ[a[0]][0])).map(([k,v])=>`<tr><td>${SK[k].n}</td><td>${stars(k)} ~${FQ[k][1]}%</td><td>${v[0]}/${v[1]}${v[0]<v[1]?(FQ[k][0]==3?" ⚠ ưu tiên ôn":" ⚠"):""}</td></tr>`).join("")}</table>
+ <div class="row"><button class="btn" id="again">Làm đề khác</button><button class="btn sec" id="redo">Làm lại đề này</button></div></div>`;
+ items.forEach((it,i)=>{const a=S.ans[i],ok=a===it.ans;
+  h+=`<div class="res ${ok?"ok":"bad"}"><div><span class="tag">Câu ${i+1}</span><span class="tag">${LV[it.lv]}</span><span class="tag">${stars(it.sk)}</span>${S.cat||S.hf?`<span class="tag">${it.src}</span>`:""}<b>${ok?"✔ Đúng":a==null?"— Bỏ trống":"✘ Sai"}</b></div>`;
+  if(it.au)h+=`<div class="script">${it.au.map(l=>(l[0]=="M"?"男：":l[0]=="F"?(it.au.length>1?"女：":"🔊 "):"")+l[1]).join("\n")}</div><button class="btn sec" style="margin-top:6px;padding:4px 10px;font-size:13px" data-replay="${i}">▶ Nghe lại</button>`;
+  else h+=`<div class="passage" style="font-size:16px">${it.p}</div>`;
+  h+=`<div class="q" style="font-size:16px">${it.q}</div>`;
+  it.o.forEach((o,j)=>h+=`<div class="opt ${j===it.ans?"ok":j===a?"bad":""}" style="cursor:default">(${"ABCD"[j]}) ${o}${j===it.ans?" ✔":j===a?" ✘ (bạn chọn)":""}</div>`);
+  h+=`<div class="exp"><b>Đáp án ${"ABCD"[it.ans]}.</b> ${it.e}</div><div class="tip"><b>Nhận dạng: ${SK[it.sk].n} · tần suất ${stars(it.sk)} (~${FQ[it.sk][1]}% phần thi).</b> ${SK[it.sk].t}</div></div>`});
+ $("#quiz").classList.add("hide");const r=$("#result");r.innerHTML=h;r.classList.remove("hide");window.scrollTo(0,0);
+ r.querySelectorAll("[data-replay]").forEach(b=>b.onclick=()=>speak(items[+b.dataset.replay].au));
+ $("#again").onclick=()=>{r.classList.add("hide");$("#setup").classList.remove("hide");stopAudio()};
+ $("#redo").onclick=()=>{r.classList.add("hide");$("#startBtn").click()};
+}
+/* ===== TAB: KỸ NĂNG ===== */
+(function(){const cnt={};TESTS.forEach(t=>[...t.L,...t.R].forEach(x=>{cnt[x.sk]=(cnt[x.sk]||0)+1}));
+const ftab=pre=>Object.keys(FQ).filter(k=>k[0]==pre).sort((a,b)=>FQ[b][1]-FQ[a][1]).map(k=>`<tr><td>${SK[k].n}</td><td>${stars(k)}</td><td>~${FQ[k][1]}%</td><td>${cnt[k]||0}</td></tr>`).join("");
+let h=`<div class="card"><h2>Tỉ lệ ra câu theo dạng (ưu tiên ôn ★★★ trước)</h2><p class="note">Tỉ lệ là ước tính tổng hợp từ đề mẫu và tài liệu luyện thi, dùng để sắp xếp thứ tự ôn tập; TOCFL không công bố tỉ lệ chính thức, và đề CAT thay đổi theo từng thí sinh.</p>
+<h3>聽力 Nghe hiểu</h3><table><tr><th>Dạng câu</th><th>Tần suất</th><th>Tỉ lệ ~</th><th>Số câu trong file</th></tr>${ftab("L")}</table>
+<h3>閱讀 Đọc hiểu</h3><table><tr><th>Dạng câu</th><th>Tần suất</th><th>Tỉ lệ ~</th><th>Số câu trong file</th></tr>${ftab("R")}</table>
+<h3>Lộ trình gợi ý theo cấp</h3><table><tr><th>Mục tiêu</th><th>Làm đề</th><th>Trọng tâm</th></tr>
+<tr><td>入門 A1 / 基礎 A2 (Band A)</td><td>Đề 6 → Luyện ★★★ Band A</td><td>Giờ (差…), giá tiền, 不/沒, 比, 一…就</td></tr>
+<tr><td>進階 B1 (Band B)</td><td>Đề 7 → Đề 1–3</td><td>Liên từ cặp, thông báo, bẫy 本來…可是, 把 + bổ ngữ</td></tr>
+<tr><td>高階 B2 (Band B)</td><td>Đề 8 → Đề 4–5 → CAT</td><td>Câu hỏi tu từ, collocation (達成協議), điều kiện 尤佳/優先</td></tr>
+<tr><td>流利 C1 (Band C)</td><td>Đề 9 → Đề 10 → CAT</td><td>Thành ngữ (天方夜譚, 治標不治本), tham chiếu 該/此, câu 不包括</td></tr></table></div>
+<div class="card"><h2>Kỹ năng nhận dạng câu – Nghe hiểu (聽力)</h2><ul><li><b>Đọc lựa chọn trước khi âm thanh phát.</b> 4 đáp án cho biết câu hỏi thuộc loại gì: toàn số → tính toán; toàn địa điểm → nơi chốn; toàn câu nhận xét → thái độ/ý ngầm.</li><li><b>Nghe đến hết.</b> Bài thi thật thường cài phương án sai xuất hiện trước, đáp án đúng được chốt ở lượt nói cuối.</li><li><b>Đáp án đúng ít khi lặp nguyên văn</b>; đáp án lặp y nguyên từ trong băng thường là bẫy.</li></ul>`;
+Object.entries(SK).filter(([k])=>k[0]=="L").forEach(([k,v])=>h+=`<h3>${v.n} <span class="tag">${stars(k)} ~${FQ[k][1]}%</span></h3><p>${v.t}</p>`);
+h+=`</div><div class="card"><h2>Kỹ năng nhận dạng câu – Đọc hiểu (閱讀)</h2><ul><li><b>Câu điền từ:</b> tìm “từ khóa hô ứng” ở vế còn lại trước khi đọc các đáp án.</li><li><b>Câu thông báo/tin nhắn:</b> đọc câu hỏi trước rồi quét, không đọc từng chữ.</li><li><b>Đoạn văn dài (B2–C1):</b> đọc câu đầu + câu sau 然而/但/事實上/因此; ý chính gần như luôn nằm ở đó.</li><li><b>Câu hỏi phủ định</b> (不是、錯誤、不正確) – gạch chân để khỏi chọn nhầm.</li></ul>`;
+Object.entries(SK).filter(([k])=>k[0]=="R").forEach(([k,v])=>h+=`<h3>${v.n} <span class="tag">${stars(k)} ~${FQ[k][1]}%</span></h3><p>${v.t}</p>`);
+h+=`<h3>Bảng liên từ hay thi</h3><table><tr><th>Cặp</th><th>Nghĩa</th><th>Dấu hiệu</th></tr>
+<tr><td>雖然/固然/儘管 … 但是/卻</td><td>tuy… nhưng</td><td>vế sau có 卻/但</td></tr>
+<tr><td>不管/無論 … 都/也</td><td>bất kể… đều</td><td>vế trước có A不A / 什麼 / 多</td></tr>
+<tr><td>只要 … 就 / 只有 … 才</td><td>chỉ cần… là / chỉ có… mới</td><td>就 hay 才</td></tr>
+<tr><td>不但 … 而且/還</td><td>không những… mà còn</td><td>hai ý cùng chiều</td></tr>
+<tr><td>與其 … 不如</td><td>thay vì… thà</td><td>chọn vế sau</td></tr>
+<tr><td>既然 … 就</td><td>đã… thì</td><td>tiền đề đã xảy ra</td></tr>
+<tr><td>寧可 … 也不</td><td>thà… chứ không</td><td>lựa chọn có hy sinh</td></tr>
+<tr><td>因此 / 於是 / 難怪</td><td>vì vậy / thế là / thảo nào</td><td>nguyên nhân ở trước</td></tr></table></div>`;
+$("#skills").innerHTML=h})();
+/* ===== TAB: ĐỊNH HƯỚNG 2027 ===== */
+$("#trend").innerHTML=`<div class="card"><h2>Bối cảnh TOCFL năm 2026</h2><ul>
+<li>Kỳ thi Nghe–Đọc chính thức tại Đài Loan năm 2026 tổ chức theo hình thức <b>電腦化適性測驗 (CAT)</b>: máy tính chọn câu tiếp theo dựa trên câu trả lời trước, nên mỗi thí sinh nhận đề khác nhau và không quay lại câu cũ.</li>
+<li>Từ 1/1/2026, TOCFL chỉ cấp <b>bảng điểm và chứng chỉ điện tử</b>, không phát bản giấy.</li>
+<li>Khung năng lực hiện nay là <b>四等八級</b> (thêm 準備級 dưới 入門/基礎); tháng 10/2026 TOCFL kỷ niệm 25 năm với tổng hơn 1,3 triệu lượt dự thi.</li>
+<li>Số câu, thời gian và lịch thi cụ thể: luôn đối chiếu trang chính thức <b>tocfl.edu.tw</b> trước khi đăng ký.</li></ul></div>
+<div class="card"><h2>Định hướng dạng câu 2027 (dự đoán, dùng để ôn)</h2>
+<p class="note">Phần này là nhận định xu hướng dựa trên đề mẫu và chủ đề thi gần đây, không phải thông báo chính thức.</p>
+<ul>
+<li><b>Ngữ liệu “thật” nhiều hơn:</b> tin nhắn LINE, thông báo app/trường học, bảng giá, thông báo cúp nước, loa ga tàu → luyện kỹ năng <i>quét thông tin</i> và <i>tính toán thời gian/tiền</i>.</li>
+<li><b>Chủ đề thời sự:</b> AI tạo sinh, làm việc kết hợp (混合辦公), thanh toán di động, ESG/漂綠/giảm carbon, xe điện, chính sách xã hội (青銀共居, già hóa dân số), tâm lý học ứng dụng.</li>
+<li><b>B2–C1 tăng câu suy luận:</b> hỏi “ý ngầm”, thái độ, nghĩa của từ tham chiếu (此、該、這一說法) và thành ngữ (並無二致, 一舉兩得, 深諳此道).</li>
+<li><b>Bẫy “thông tin đã thay đổi”:</b> 原定→延後, 本來→可是, 以前→現在, 預計→已經 – xuất hiện ở hầu hết câu nghe.</li>
+<li><b>CAT đẩy độ khó nhanh:</b> trả lời đúng liên tiếp sẽ gặp câu C1 sớm, nên ôn đều cả 4 mức, đừng chỉ luyện mức mục tiêu.</li></ul>
+<h3>Chiến lược làm bài CAT</h3><ul>
+<li>Không thể quay lại → mỗi câu phải chốt dứt khoát; phân bổ khoảng 1 phút/câu đọc ngắn, 2 phút/câu đọc dài.</li>
+<li>Những câu đầu ảnh hưởng mạnh đến lộ trình độ khó → làm thật cẩn thận 5 câu đầu.</li>
+<li>Gặp câu khó bất thường thường là dấu hiệu bạn đang làm tốt – bình tĩnh.</li>
+<li>Nghe chỉ phát 1 lần: đọc 4 lựa chọn trong lúc chờ âm thanh, xác định loại câu hỏi trước.</li></ul>
+<p>Đề 4, Đề 5 và Đề 10 được soạn theo định hướng trên; Đề 6–9 chia theo từng cấp A1/A2 → C1. Chế độ <b>CAT mô phỏng</b> trộn toàn bộ 200 câu và chọn câu theo năng lực của bạn; <b>Luyện ★★★</b> chỉ lấy dạng câu tần suất cao.</p></div>`;
+</script>
+</body>
+</html>
