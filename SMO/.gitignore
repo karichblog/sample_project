@@ -1,19 +1,5 @@
-# Dữ liệu chạy thực tế - KHÔNG đẩy lên GitHub
-instance/
-database.db
-uploads/*
-!uploads/.gitkeep
-
-# Python
-__pycache__/
-*.pyc
-venv/
-.venv/
-.env
-.pytest_cache/
-
-# Hệ điều hành / IDE
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
+node_modules/
