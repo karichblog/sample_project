@@ -1,1 +1,386 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Hệ Cơ Số & Kiến Trúc Máy Tính</title>
+    <style>
+        :root {
+            --bg-body: #f0f2f5;
+            --bg-card: #ffffff;
+            --bg-sub: #f8f9fa;
+            --bg-input: #ffffff;
+            --bg-disabled: #e9ecef;
+            --text-main: #202124;
+            --text-muted: #5f6368;
+            --border-color: #dadce0;
+            --primary: #1a73e8;
+            --primary-hover: #1557b0;
+            --accent-green: #0d652d;
+            --accent-purple: #8430ce;
+            --shadow: 0 4px 12px rgba(0,0,0,0.06);
+        }
 
+        body.dark-mode {
+            --bg-body: #121212;
+            --bg-card: #1e1e1e;
+            --bg-sub: #252526;
+            --bg-input: #2d2d30;
+            --bg-disabled: #3c3c3c;
+            --text-main: #e8eaed;
+            --text-muted: #9aa0a6;
+            --border-color: #3c4043;
+            --primary: #8ab4f8;
+            --primary-hover: #aecbfa;
+            --accent-green: #81c995;
+            --accent-purple: #c58af9;
+            --shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+
+        body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; transition: background 0.2s, color 0.2s; }
+        .top-bar { max-width: 1120px; margin: 0 auto 15px auto; display: flex; justify-content: space-between; align-items: center; }
+        .top-bar h1 { font-size: 20px; margin: 0; color: var(--primary); }
+        .theme-btn { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--border-color); padding: 7px 14px; border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 13px; width: auto; margin: 0; }
+        .theme-btn:hover { opacity: 0.85; }
+
+        .layout { display: flex; gap: 20px; max-width: 1120px; margin: 0 auto; align-items: flex-start; flex-wrap: wrap; }
+        .main-col { flex: 2; min-width: 350px; }
+        .side-col { flex: 1; min-width: 290px; background: var(--bg-card); padding: 20px; border-radius: 12px; box-shadow: var(--shadow); }
+        .card { background: var(--bg-card); padding: 22px 25px; border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 20px; }
+        
+        h2 { color: var(--primary); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; margin-top: 0; font-size: 17px; display: flex; justify-content: space-between; align-items: center; }
+        label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13px; color: var(--text-muted); }
+        input, select { width: 100%; padding: 9px 11px; border: 1px solid var(--border-color); background: var(--bg-input); color: var(--text-main); border-radius: 6px; font-size: 14px; box-sizing: border-box; }
+        input:disabled { background: var(--bg-disabled); cursor: not-allowed; }
+        
+        .btn-primary { width: 100%; padding: 10px; background: var(--primary); color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; margin-top: 12px; font-size: 14px; transition: 0.2s; }
+        body.dark-mode .btn-primary { color: #202124; }
+        .btn-primary:hover { background: var(--primary-hover); }
+
+        .row { display: flex; gap: 10px; }
+        .row > div { flex: 1; }
+
+        .result-box { background: var(--bg-sub); padding: 15px; border-radius: 8px; margin-top: 15px; border-left: 4px solid var(--primary); }
+        .res-line { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin: 7px 0; font-family: 'Courier New', monospace; font-size: 14px; word-break: break-all; }
+        .res-text { flex: 1; }
+        
+        .btn-copy { background: transparent; color: var(--primary); border: 1px solid var(--primary); border-radius: 4px; padding: 2px 8px; font-size: 11px; cursor: pointer; font-family: system-ui, sans-serif; font-weight: 600; flex-shrink: 0; }
+        .btn-copy:hover { background: var(--primary); color: #fff; }
+        body.dark-mode .btn-copy:hover { color: #202124; }
+
+        .export-bar { display: flex; gap: 8px; margin-top: 12px; padding-top: 10px; border-top: 1px solid var(--border-color); }
+        .btn-export { flex: 1; padding: 7px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-main); font-size: 12px; font-weight: 600; cursor: pointer; }
+        .btn-export:hover { border-color: var(--primary); color: var(--primary); }
+
+        .sub-box { margin-top: 12px; padding-top: 10px; border-top: 1px dashed var(--border-color); }
+        .sub-title { font-weight: 700; color: var(--accent-green); font-size: 13px; margin-bottom: 6px; }
+        .ieee-title { color: var(--accent-purple); }
+        .error { color: #ea4335; font-weight: 600; margin-top: 10px; font-size: 13px; }
+        
+        details { margin-top: 12px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px; }
+        summary { font-weight: 600; cursor: pointer; color: var(--primary); font-size: 13px; }
+        pre { background: #1e1e1e; color: #d4d4d4; padding: 10px; border-radius: 6px; font-size: 12px; overflow-x: auto; white-space: pre-wrap; margin: 8px 0 0 0; border: 1px solid #333; }
+        
+        .btn-clear { background: #ea4335; color: white; border: none; border-radius: 4px; padding: 4px 10px; font-size: 12px; cursor: pointer; font-weight: 600; }
+        .btn-clear:hover { background: #c5221f; }
+        .history-item { padding: 10px 0; border-bottom: 1px solid var(--border-color); font-size: 13px; }
+        .history-item:last-child { border-bottom: none; }
+        .history-query { font-weight: bold; color: var(--primary); }
+        .history-res { font-family: monospace; color: var(--text-main); margin-top: 4px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+<div class="top-bar">
+    <h1>Hệ Cơ Số & Kiến Trúc Máy Tính</h1>
+    <button class="theme-btn" id="theme-toggle" onclick="toggleTheme()">🌙 Chế độ tối</button>
+</div>
+
+<div class="layout">
+    <!-- CỘT CHÍNH -->
+    <div class="main-col">
+        <!-- PHẦN 1: QUY ĐỔI -->
+        <div class="card">
+            <h2>1. Quy đổi hệ cơ số</h2>
+            <div class="row">
+                <div style="flex: 2;">
+                    <label>Nhập số (Hỗ trợ số âm & dấu phẩy động):</label>
+                    <input type="text" id="conv-val" placeholder="VD: 10.5, -25, 1A.8">
+                </div>
+                <div>
+                    <label>Hệ đầu vào:</label>
+                    <select id="conv-base">
+                        <option value="2">Hệ 2 (BIN)</option>
+                        <option value="8">Hệ 8 (OCT)</option>
+                        <option value="10" selected>Hệ 10 (DEC)</option>
+                        <option value="16">Hệ 16 (HEX)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="processRequest('convert')">Quy đổi ngay</button>
+            <div id="conv-error" class="error"></div>
+            <div id="conv-output"></div>
+        </div>
+
+        <!-- PHẦN 2: TÍNH TOÁN -->
+        <div class="card">
+            <h2>2. Tính toán Số học & Logic Bitwise</h2>
+            <div style="margin-bottom: 10px;">
+                <label>Hệ cơ số tính toán:</label>
+                <select id="calc-base">
+                    <option value="2">Hệ 2 (BIN)</option>
+                    <option value="8">Hệ 8 (OCT)</option>
+                    <option value="10" selected>Hệ 10 (DEC)</option>
+                    <option value="16">Hệ 16 (HEX)</option>
+                </select>
+            </div>
+            <div class="row">
+                <div style="flex: 2;">
+                    <label>Số A:</label>
+                    <input type="text" id="calc-val1" placeholder="Nhập số A">
+                </div>
+                <div>
+                    <label>Phép toán:</label>
+                    <select id="calc-op" onchange="toggleVal2()">
+                        <optgroup label="Số học">
+                            <option value="+">+ (Cộng)</option>
+                            <option value="-">- (Trừ)</option>
+                            <option value="*">* (Nhân)</option>
+                            <option value="/">/ (Chia)</option>
+                        </optgroup>
+                        <optgroup label="Logic (Số nguyên)">
+                            <option value="AND">AND (&)</option>
+                            <option value="OR">OR (|)</option>
+                            <option value="XOR">XOR (^)</option>
+                            <option value="NOT">NOT (~A)</option>
+                        </optgroup>
+                    </select>
+                </div>
+                <div style="flex: 2;">
+                    <label>Số B:</label>
+                    <input type="text" id="calc-val2" placeholder="Nhập số B">
+                </div>
+            </div>
+            <button class="btn-primary" onclick="processRequest('calculate')">Tính kết quả</button>
+            <div id="calc-error" class="error"></div>
+            <div id="calc-output"></div>
+        </div>
+    </div>
+
+    <!-- CỘT PHỤ: LỊCH SỬ -->
+    <div class="side-col">
+        <h2>
+            Lịch sử gần đây
+            <button class="btn-clear" onclick="clearHistory()">Xóa</button>
+        </h2>
+        <div id="history-list">
+            <p style="color: var(--text-muted); font-size: 13px;">Chưa có dữ liệu lịch sử.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    const latestResults = { convert: null, calculate: null };
+
+    function toggleTheme() {
+        const isDark = document.body.classList.toggle('dark-mode');
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        document.getElementById('theme-toggle').textContent = isDark ? '☀️ Chế độ sáng' : '🌙 Chế độ tối';
+    }
+
+    if (localStorage.getItem('theme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-toggle').textContent = '☀️ Chế độ sáng';
+    }
+
+    function toggleVal2() {
+        const op = document.getElementById('calc-op').value;
+        const val2Input = document.getElementById('calc-val2');
+        val2Input.disabled = (op === 'NOT');
+        val2Input.value = op === 'NOT' ? '' : val2Input.value;
+        val2Input.placeholder = op === 'NOT' ? 'Không cần nhập' : 'Nhập số B';
+    }
+
+    function copyText(text, btn) {
+        navigator.clipboard.writeText(text).then(() => {
+            const orig = btn.textContent;
+            btn.textContent = 'Đã chép!';
+            setTimeout(() => btn.textContent = orig, 1200);
+        });
+    }
+
+    function makeLine(label, value, copyValue = null) {
+        const safeCopy = (copyValue || value).replace(/'/g, "\'");
+        return `
+        <div class="res-line">
+            <div class="res-text"><strong>${label}:</strong> ${value}</div>
+            <button class="btn-copy" onclick="copyText('${safeCopy}', this)">Copy</button>
+        </div>`;
+    }
+
+    function renderResultHTML(data, type) {
+        return `
+        <div class="result-box">
+            ${makeLine('Hệ 2 (BIN)', data.bin)}
+            ${makeLine('Hệ 8 (OCT)', data.oct)}
+            ${makeLine('Hệ 10 (DEC)', data.dec)}
+            ${makeLine('Hệ 16 (HEX)', data.hex)}
+            
+            <div class="sub-box">
+                <div class="sub-title">Biểu diễn Bù 2 (Two's Complement - Số nguyên):</div>
+                ${makeLine('8-bit', data.twos['8bit'])}
+                ${makeLine('16-bit', data.twos['16bit'])}
+                ${makeLine('32-bit', data.twos['32bit'])}
+            </div>
+
+            <div class="sub-box">
+                <div class="sub-title ieee-title">Chuẩn dấu phẩy động IEEE 754 (Sign | Exponent | Mantissa):</div>
+                ${makeLine(`32-bit (HEX: ${data.ieee.hex32})`, `<br>${data.ieee.bin32}`, data.ieee.bin32)}
+                ${makeLine(`64-bit (HEX: ${data.ieee.hex64})`, `<br>${data.ieee.bin64}`, data.ieee.bin64)}
+            </div>
+
+            <details>
+                <summary>Xem các bước giải chi tiết</summary>
+                <pre>${data.steps.input}\n\n--- SANG HỆ 2 ---\n${data.steps.bin}\n\n--- SANG HỆ 8 ---\n${data.steps.oct}\n\n--- SANG HỆ 16 ---\n${data.steps.hex}</pre>
+            </details>
+
+            <div class="export-bar">
+                <button class="btn-export" onclick="exportFile('${type}', 'txt')">📄 Xuất báo cáo (.TXT)</button>
+                <button class="btn-export" onclick="exportFile('${type}', 'csv')">📊 Xuất bảng dữ liệu (.CSV)</button>
+            </div>
+        </div>`;
+    }
+
+    function exportFile(type, format) {
+        const record = latestResults[type];
+        if (!record) return;
+        const { title, data } = record;
+        let content = '', mime = '', ext = format;
+
+        if (format === 'txt') {
+            mime = 'text/plain;charset=utf-8';
+            content = `BÁO CÁO KẾT QUẢ QUY ĐỔI & TÍNH TOÁN HỆ CƠ SỐ\n` +
+                      `Thời gian: ${new Date().toLocaleString()}\n` +
+                      `Yêu cầu: ${title}\n` +
+                      `====================================================\n` +
+                      `1. KẾT QUẢ CÁC HỆ CƠ SỐ:\n` +
+                      `- Hệ 2 (BIN) : ${data.bin}\n` +
+                      `- Hệ 8 (OCT) : ${data.oct}\n` +
+                      `- Hệ 10 (DEC): ${data.dec}\n` +
+                      `- Hệ 16 (HEX): ${data.hex}\n\n` +
+                      `2. BIỂU DIỄN SỐ NGUYÊN BÙ 2 (TWO'S COMPLEMENT):\n` +
+                      `- 8-bit : ${data.twos['8bit']}\n` +
+                      `- 16-bit: ${data.twos['16bit']}\n` +
+                      `- 32-bit: ${data.twos['32bit']}\n\n` +
+                      `3. CHUẨN DẤU PHẨY ĐỘNG IEEE 754:\n` +
+                      `- 32-bit (HEX: ${data.ieee.hex32}): ${data.ieee.bin32}\n` +
+                      `- 64-bit (HEX: ${data.ieee.hex64}): ${data.ieee.bin64}\n\n` +
+                      `4. CÁC BƯỚC GIẢI CHI TIẾT:\n` +
+                      `${data.steps.input}\n\n` +
+                      `[SANG HỆ 2]\n${data.steps.bin}\n\n` +
+                      `[SANG HỆ 8]\n${data.steps.oct}\n\n` +
+                      `[SANG HỆ 16]\n${data.steps.hex}\n`;
+        } else {
+            mime = 'text/csv;charset=utf-8';
+            const rows = [
+                ['Hạng mục', 'Giá trị'],
+                ['Yêu cầu', title],
+                ['Hệ 2 (BIN)', data.bin],
+                ['Hệ 8 (OCT)', data.oct],
+                ['Hệ 10 (DEC)', data.dec],
+                ['Hệ 16 (HEX)', data.hex],
+                ['Bù 2 (8-bit)', data.twos['8bit']],
+                ['Bù 2 (16-bit)', data.twos['16bit']],
+                ['Bù 2 (32-bit)', data.twos['32bit']],
+                ['IEEE 754 32-bit (BIN)', data.ieee.bin32],
+                ['IEEE 754 32-bit (HEX)', data.ieee.hex32],
+                ['IEEE 754 64-bit (BIN)', data.ieee.bin64],
+                ['IEEE 754 64-bit (HEX)', data.ieee.hex64]
+            ];
+            content = '\uFEFF' + rows.map(r => r.map(c => `"${String(c).replace(/"/g, '""')}"`).join(',')).join('\n');
+        }
+
+        const blob = new Blob([content], { type: mime });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `KetQua_HeCoSo_${Date.now()}.${ext}`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    async function processRequest(type) {
+        let url, payload, errDiv, outDiv, historyTitle;
+
+        if (type === 'convert') {
+            const value = document.getElementById('conv-val').value;
+            const base = document.getElementById('conv-base').value;
+            url = '/api/convert';
+            payload = { value, base };
+            errDiv = document.getElementById('conv-error');
+            outDiv = document.getElementById('conv-output');
+            historyTitle = `Quy đổi: ${value} (Hệ ${base})`;
+        } else {
+            const val1 = document.getElementById('calc-val1').value;
+            const val2 = document.getElementById('calc-val2').value;
+            const base = document.getElementById('calc-base').value;
+            const op = document.getElementById('calc-op').value;
+            url = '/api/calculate';
+            payload = { val1, val2, base, op };
+            errDiv = document.getElementById('calc-error');
+            outDiv = document.getElementById('calc-output');
+            historyTitle = op === 'NOT' ? `Tính: NOT ${val1} (Hệ ${base})` : `Tính: ${val1} ${op} ${val2} (Hệ ${base})`;
+        }
+
+        errDiv.textContent = '';
+        outDiv.innerHTML = '';
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            errDiv.textContent = data.error;
+        } else {
+            latestResults[type] = { title: historyTitle, data };
+            outDiv.innerHTML = renderResultHTML(data, type);
+            saveHistory(historyTitle, `DEC: ${data.dec} | BIN: ${data.bin} | HEX: ${data.hex}`);
+        }
+    }
+
+    function saveHistory(query, summary) {
+        let history = JSON.parse(localStorage.getItem('baseCalcHistory') || '[]');
+        history.unshift({ query, summary, time: new Date().toLocaleTimeString() });
+        if (history.length > 15) history.pop();
+        localStorage.setItem('baseCalcHistory', JSON.stringify(history));
+        renderHistory();
+    }
+
+    function renderHistory() {
+        const listDiv = document.getElementById('history-list');
+        const history = JSON.parse(localStorage.getItem('baseCalcHistory') || '[]');
+        if (history.length === 0) {
+            listDiv.innerHTML = '<p style="color: var(--text-muted); font-size: 13px;">Chưa có dữ liệu lịch sử.</p>';
+            return;
+        }
+        listDiv.innerHTML = history.map(item => `
+            <div class="history-item">
+                <div class="history-query">${item.query} <span style="font-weight:normal; color:var(--text-muted); font-size:11px;">(${item.time})</span></div>
+                <div class="history-res">${item.summary}</div>
+            </div>
+        `).join('');
+    }
+
+    function clearHistory() {
+        localStorage.removeItem('baseCalcHistory');
+        renderHistory();
+    }
+
+    renderHistory();
+</script>
+
+</body>
+</html>
