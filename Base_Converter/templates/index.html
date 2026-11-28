@@ -197,8 +197,170 @@
         const op = document.getElementById('calc-op').value;
         const val2Input = document.getElementById('calc-val2');
         val2Input.disabled = (op === 'NOT');
-        val2Input.value = op === 'NOT' ? '' : val2Input.value;
-        val2Input.placeholder = op === 'NOT' ? 'Không cần nhập' : 'Nhập số B';
+        if (op === 'NOT') {
+            val2Input.value = '';
+            val2Input.placeholder = 'Không cần nhập';
+        } else {
+            val2Input.placeholder = 'Nhập số B';
+        }
+    }
+
+    function parseFloatBase(valStr, base) {
+        valStr = valStr.trim().toUpperCase();
+        if (!valStr) throw new Error("Vui lòng nhập giá trị!");
+
+        const isNeg = valStr.startsWith('-');
+        if (isNeg) valStr = valStr.slice(1);
+        if (!valStr) throw new Error("Giá trị không hợp lệ!");
+
+        const validChars = "0123456789ABCDEF".slice(0, base);
+        const parts = valStr.split('.');
+        if (parts.length > 2 || parts[0] === "" || (parts.length === 2 && parts[1] === "")) {
+            throw new Error(`Giá trị không hợp lệ cho hệ cơ số ${base}!`);
+        }
+
+        for (let part of parts) {
+            for (let ch of part) {
+                if (!validChars.includes(ch)) {
+                    throw new Error(`Ký tự '${ch}' không thuộc hệ cơ số ${base}!`);
+                }
+            }
+        }
+
+        let intPart = parseInt(parts[0], base);
+        let fracPart = 0;
+        if (parts.length === 2) {
+            for (let i = 0; i < parts[1].length; i++) {
+                fracPart += parseInt(parts[1][i], base) * Math.pow(base, -(i + 1));
+            }
+        }
+
+        const num = intPart + fracPart;
+        return isNeg ? -num : num;
+    }
+
+    function formatFloatWithSteps(num, base, precision = 10) {
+        const chars = "0123456789ABCDEF";
+        const isNeg = num < 0;
+        const absNum = Math.abs(num);
+
+        let intPart = Math.floor(absNum);
+        let fracPart = Number((absNum - intPart).toFixed(12));
+        let steps = [];
+        let intStr = "";
+
+        if (intPart === 0) {
+            intStr = "0";
+            steps.push(`• Phần nguyên là 0 => 0 (hệ ${base})`);
+        } else {
+            let intDigits = [];
+            let tempInt = intPart;
+            steps.push(`• Chia phần nguyên (${intPart}) liên tiếp cho ${base}:`);
+            while (tempInt > 0) {
+                let q = Math.floor(tempInt / base);
+                let r = tempInt % base;
+                steps.push(`   ${tempInt} : ${base} = ${q} dư ${r} (${chars[r]})`);
+                intDigits.push(chars[r]);
+                tempInt = q;
+            }
+            intStr = intDigits.reverse().join('');
+            steps.push(`   => Đọc ngược phần dư: ${intStr}`);
+        }
+
+        let finalRes = intStr;
+        if (fracPart > 0) {
+            let fracDigits = [];
+            let tempFrac = fracPart;
+            let count = 0;
+            steps.push(`• Nhân phần lẻ (${fracPart}) liên tiếp với ${base}:`);
+            while (tempFrac > 1e-11 && count < precision) {
+                let prod = Number((tempFrac * base).toFixed(11));
+                let digit = Math.floor(prod);
+                let rem = Number((prod - digit).toFixed(11));
+                steps.push(`   ${tempFrac} × ${base} = ${prod} => lấy ${digit} (${chars[digit]})`);
+                fracDigits.push(chars[digit]);
+                tempFrac = rem;
+                count++;
+            }
+            finalRes = `${intStr}.${fracDigits.join('')}`;
+            steps.push(`   => Đọc xuôi phần nguyên: .${fracDigits.join('')}`);
+        }
+
+        return {
+            value: isNeg && finalRes !== "0" ? `-${finalRes}` : finalRes,
+            steps: steps.join('\n')
+        };
+    }
+
+    function getTwosComplement(num) {
+        if (!Number.isInteger(num)) {
+            const msg = "Chỉ áp dụng cho số nguyên";
+            return { "8bit": msg, "16bit": msg, "32bit": msg };
+        }
+        const res = {};
+        for (const bits of [8, 16, 32]) {
+            const minVal = -Math.pow(2, bits - 1);
+            const maxVal = Math.pow(2, bits - 1) - 1;
+            if (num >= minVal && num <= maxVal) {
+                let val = BigInt(num) & ((1n << BigInt(bits)) - 1n);
+                let binStr = val.toString(2).padStart(bits, '0');
+                res[`${bits}bit`] = binStr.match(/.{1,4}/g).join(' ');
+            } else {
+                res[`${bits}bit`] = `Tràn số (${minVal} đến ${maxVal})`;
+            }
+        }
+        return res;
+    }
+
+    function getIEEE754(num) {
+        const buf32 = new ArrayBuffer(4);
+        const view32 = new DataView(buf32);
+        view32.setFloat32(0, num, false);
+        let bin32 = "", hex32 = "";
+        for (let i = 0; i < 4; i++) {
+            const byte = view32.getUint8(i);
+            bin32 += byte.toString(2).padStart(8, '0');
+            hex32 += byte.toString(16).padStart(2, '0').toUpperCase();
+        }
+
+        const buf64 = new ArrayBuffer(8);
+        const view64 = new DataView(buf64);
+        view64.setFloat64(0, num, false);
+        let bin64 = "", hex64 = "";
+        for (let i = 0; i < 8; i++) {
+            const byte = view64.getUint8(i);
+            bin64 += byte.toString(2).padStart(8, '0');
+            hex64 += byte.toString(16).padStart(2, '0').toUpperCase();
+        }
+
+        return {
+            bin32: `${bin32[0]} | ${bin32.slice(1, 9)} | ${bin32.slice(9)}`,
+            hex32,
+            bin64: `${bin64[0]} | ${bin64.slice(1, 12)} | ${bin64.slice(12)}`,
+            hex64
+        };
+    }
+
+    function buildFullData(num, inputExplain) {
+        const b2 = formatFloatWithSteps(num, 2);
+        const b8 = formatFloatWithSteps(num, 8);
+        const b16 = formatFloatWithSteps(num, 16);
+        const decStr = Number.isInteger(num) ? num.toString() : Number(num.toFixed(12)).toString();
+
+        return {
+            bin: b2.value,
+            oct: b8.value,
+            dec: decStr,
+            hex: b16.value,
+            twos: getTwosComplement(num),
+            ieee: getIEEE754(num),
+            steps: {
+                input: inputExplain,
+                bin: b2.steps,
+                oct: b8.steps,
+                hex: b16.steps
+            }
+        };
     }
 
     function copyText(text, btn) {
@@ -210,7 +372,7 @@
     }
 
     function makeLine(label, value, copyValue = null) {
-        const safeCopy = (copyValue || value).replace(/'/g, "\'");
+        const safeCopy = (copyValue || value).replace(/'/g, "\\'");
         return `
         <div class="res-line">
             <div class="res-text"><strong>${label}:</strong> ${value}</div>
@@ -309,45 +471,74 @@
         URL.revokeObjectURL(url);
     }
 
-    async function processRequest(type) {
-        let url, payload, errDiv, outDiv, historyTitle;
+    function processRequest(type) {
+        let errDiv, outDiv, historyTitle;
 
-        if (type === 'convert') {
-            const value = document.getElementById('conv-val').value;
-            const base = document.getElementById('conv-base').value;
-            url = '/api/convert';
-            payload = { value, base };
-            errDiv = document.getElementById('conv-error');
-            outDiv = document.getElementById('conv-output');
-            historyTitle = `Quy đổi: ${value} (Hệ ${base})`;
-        } else {
-            const val1 = document.getElementById('calc-val1').value;
-            const val2 = document.getElementById('calc-val2').value;
-            const base = document.getElementById('calc-base').value;
-            const op = document.getElementById('calc-op').value;
-            url = '/api/calculate';
-            payload = { val1, val2, base, op };
-            errDiv = document.getElementById('calc-error');
-            outDiv = document.getElementById('calc-output');
-            historyTitle = op === 'NOT' ? `Tính: NOT ${val1} (Hệ ${base})` : `Tính: ${val1} ${op} ${val2} (Hệ ${base})`;
-        }
+        try {
+            if (type === 'convert') {
+                errDiv = document.getElementById('conv-error');
+                outDiv = document.getElementById('conv-output');
+                errDiv.textContent = '';
+                outDiv.innerHTML = '';
 
-        errDiv.textContent = '';
-        outDiv.innerHTML = '';
+                const value = document.getElementById('conv-val').value.trim();
+                const base = parseInt(document.getElementById('conv-base').value);
+                const num = parseFloatBase(value, base);
+                const decStr = Number.isInteger(num) ? num.toString() : Number(num.toFixed(12)).toString();
+                const explain = `Giá trị trung gian hệ 10: ${value.toUpperCase()} (hệ ${base}) = ${decStr} (hệ 10)`;
+                
+                historyTitle = `Quy đổi: ${value.toUpperCase()} (Hệ ${base})`;
+                const data = buildFullData(num, explain);
+                latestResults[type] = { title: historyTitle, data };
+                outDiv.innerHTML = renderResultHTML(data, type);
+                saveHistory(historyTitle, `DEC: ${data.dec} | BIN: ${data.bin} | HEX: ${data.hex}`);
+            } else {
+                errDiv = document.getElementById('calc-error');
+                outDiv = document.getElementById('calc-output');
+                errDiv.textContent = '';
+                outDiv.innerHTML = '';
 
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
+                const val1 = document.getElementById('calc-val1').value.trim();
+                const val2 = document.getElementById('calc-val2').value.trim();
+                const base = parseInt(document.getElementById('calc-base').value);
+                const op = document.getElementById('calc-op').value;
 
-        const data = await response.json();
-        if (!response.ok) {
-            errDiv.textContent = data.error;
-        } else {
-            latestResults[type] = { title: historyTitle, data };
-            outDiv.innerHTML = renderResultHTML(data, type);
-            saveHistory(historyTitle, `DEC: ${data.dec} | BIN: ${data.bin} | HEX: ${data.hex}`);
+                if (!val1 || (op !== 'NOT' && !val2)) {
+                    throw new Error("Vui lòng nhập đủ dữ liệu!");
+                }
+
+                const n1 = parseFloatBase(val1, base);
+                const n2 = op !== 'NOT' ? parseFloatBase(val2, base) : 0;
+                let res, explain;
+
+                if (['+', '-', '*', '/'].includes(op)) {
+                    if (op === '+') res = n1 + n2;
+                    else if (op === '-') res = n1 - n2;
+                    else if (op === '*') res = n1 * n2;
+                    else if (op === '/') {
+                        if (n2 === 0) throw new Error("Không thể chia cho 0!");
+                        res = n1 / n2;
+                    }
+                    explain = `Quy về hệ 10 để tính: ${n1} ${op} ${n2} = ${res}`;
+                } else {
+                    if (!Number.isInteger(n1) || (op !== 'NOT' && !Number.isInteger(n2))) {
+                        throw new Error("Phép toán logic (AND, OR, XOR, NOT) chỉ áp dụng cho số nguyên!");
+                    }
+                    if (op === 'AND') res = n1 & n2;
+                    else if (op === 'OR') res = n1 | n2;
+                    else if (op === 'XOR') res = n1 ^ n2;
+                    else if (op === 'NOT') res = ~n1;
+                    explain = `Phép toán logic trên hệ 10: ${n1} ${op} ${op !== 'NOT' ? n2 : ''} = ${res}`;
+                }
+
+                historyTitle = op === 'NOT' ? `Tính: NOT ${val1.toUpperCase()} (Hệ ${base})` : `Tính: ${val1.toUpperCase()} ${op} ${val2.toUpperCase()} (Hệ ${base})`;
+                const data = buildFullData(res, explain);
+                latestResults[type] = { title: historyTitle, data };
+                outDiv.innerHTML = renderResultHTML(data, type);
+                saveHistory(historyTitle, `DEC: ${data.dec} | BIN: ${data.bin} | HEX: ${data.hex}`);
+            }
+        } catch (err) {
+            errDiv.textContent = err.message;
         }
     }
 
