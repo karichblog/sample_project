@@ -1,24 +1,16 @@
 # Công Cụ Quy Đổi & Tính Toán Hệ Cơ Số
 
-Ứng dụng web sử dụng Python (Flask) và HTML/JS hỗ trợ quy đổi và tính toán giữa các hệ cơ số (2, 8, 10, 16), biểu diễn số âm bù 2, chuẩn dấu phẩy động IEEE 754, phép toán logic bitwise và xuất báo cáo.
+Ứng dụng web hỗ trợ quy đổi và tính toán giữa các hệ cơ số **Nhị phân (2), Bát phân (8), Thập phân (10), Thập lục phân (16)**, tích hợp biểu diễn số nguyên âm **Bù 2 (Two's Complement)** và chuẩn dấu phẩy động **IEEE 754 (32-bit & 64-bit)**.
 
-## Cấu trúc thư mục
-```text
-base_converter/
-├── app.py
-├── requirements.txt
-├── README.md
-└── templates/
-    └── index.html
+## 1. Chạy trực tiếp trên GitHub Pages (Không cần cài đặt)
+1. Upload toàn bộ file trong thư mục này lên Repository GitHub của bạn (đảm bảo `index.html` nằm ở thư mục gốc).
+2. Vào **Settings -> Pages** trên GitHub.
+3. Ở mục **Branch**, chọn `main` và thư mục `/ (root)`, sau đó nhấn **Save**.
+4. Truy cập đường link GitHub Pages được cấp để sử dụng ngay.
+
+## 2. Chạy trên máy tính cá nhân với Python (Flask)
+```bash
+pip install -r requirements.txt
+python app.py
 ```
-
-## Hướng dẫn cài đặt và chạy
-1. Cài đặt thư viện cần thiết:
-   ```bash
-   pip install -r requirements.txt
-   ```
-2. Chạy ứng dụng:
-   ```bash
-   python app.py
-   ```
-3. Truy cập trên trình duyệt tại địa chỉ: `http://127.0.0.1:5000`
+Sau đó mở trình duyệt tại địa chỉ `http://127.0.0.1:5000`.
