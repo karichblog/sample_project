@@ -5,7 +5,8 @@
 
 const app = document.getElementById('app');
 let flashes = [];
-let pageCleanup = null;  // Hàm dọn dẹp (timer, listener) khi rời trang thi
+let pageCleanup = null;
+const ROLE_LABELS = { admin: 'Quản trị', teacher: 'Giáo viên', student: 'Học sinh' };  // Hàm dọn dẹp (timer, listener) khi rời trang thi
 
 /* ---------- Tiện ích ---------- */
 function esc(v) {
@@ -41,21 +42,30 @@ function exportExcel(rows, sheet, filename) {
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheet);
     XLSX.writeFile(wb, filename);
 }
+function scoreHtml(v) { return `<span class="score">${esc(v)}<small>/10</small></span>`; }
+function pageTitle(title, sub) {
+    return `<div class="page-title"><h3>${esc(title)}</h3>${sub ? `<div class="sub">${esc(sub)}</div>` : ''}</div>`;
+}
+function todayLong() {
+    const d = new Date();
+    const days = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
+    return `${days[d.getDay()]}, ngày ${d.getDate()} tháng ${d.getMonth() + 1} năm ${d.getFullYear()}`;
+}
 const emptyRow = (cols, text) => `<tr><td colspan="${cols}" class="text-muted">${text}</td></tr>`;
 
 /* ---------- Khung trang ---------- */
 function layout(user, content) {
     const nav = user ? `
-        <div class="text-white">
-            Xin chào, <b>${esc(user.full_name)}</b>
-            <span class="badge bg-light text-primary ms-1">${esc(user.role.toUpperCase())}</span>
-            <button class="btn btn-sm btn-warning ms-3" data-act="logout">Đăng xuất</button>
+        <div class="nav-user">
+            <span><b>${esc(user.full_name)}</b></span>
+            <span class="role-chip">${ROLE_LABELS[user.role] || esc(user.role)}</span>
+            <button class="btn-logout" data-act="logout">Đăng xuất</button>
         </div>` : '';
     const msgs = flashes.map(f => `<div class="alert alert-${esc(f.type)} py-2">${esc(f.msg)}</div>`).join('');
     flashes = [];
     return `
     <nav class="navbar navbar-dark bg-primary px-4">
-        <a class="navbar-brand fw-bold" href="#/dashboard">📚 LMS & Thi Offline</a>${nav}
+        <a class="navbar-brand" href="#/dashboard">Sổ Lớp Offline</a>${nav}
     </nav>
     <div class="container mt-4 mb-5">${msgs}${content}</div>`;
 }
@@ -93,7 +103,7 @@ function render() {
 
 function viewError(msg) {
     return `<div class="row justify-content-center mt-5"><div class="col-md-6 card p-4 shadow text-center">
-        <p class="lead">${esc(msg)}</p><a href="#/dashboard" class="btn btn-primary">← Về trang chính</a></div></div>`;
+        <p class="lead">${esc(msg)}</p><a href="#/dashboard" class="btn btn-primary">‹ Về trang chính</a></div></div>`;
 }
 
 /* =====================================================================
@@ -101,21 +111,31 @@ function viewError(msg) {
  * ===================================================================== */
 function viewLogin() {
     return `
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-5 card p-4 shadow">
-            <h4 class="text-center mb-3 text-primary fw-bold">Đăng Nhập Hệ Thống Offline</h4>
-            <form data-form="login">
-                <div class="mb-3"><label class="form-label">Tên đăng nhập</label>
-                    <input type="text" name="username" class="form-control" placeholder="admin / gv1 / hs1" required autofocus></div>
-                <div class="mb-3"><label class="form-label">Mật khẩu</label>
-                    <input type="password" name="password" class="form-control" placeholder="123" required></div>
-                <button type="submit" class="btn btn-primary w-100 fw-bold">Đăng nhập</button>
-            </form>
-            <div class="mt-3 text-muted small">
-                <b>Tài khoản mẫu</b> (mật khẩu đều là <code>123</code>):<br>
-                - Quản trị: <code>admin</code> · Giáo viên: <code>gv1</code> · Học sinh: <code>hs1</code>, <code>hs2</code><br>
-                <span class="d-block mt-2">💡 Mỗi tab trình duyệt là một phiên riêng: mở tab giáo viên và tab học sinh song song để thử điểm danh, chat.</span>
-                <span class="d-block mt-1">Dữ liệu chỉ lưu trong trình duyệt này.</span>
+    <div class="login-wrap">
+        <div class="row g-0">
+            <div class="col-md-6 login-board">
+                <div class="chalk-date">${todayLong()}</div>
+                <div class="chalk-line"></div>
+                <h1>Sổ lớp, điểm danh và kiểm tra trong một trang</h1>
+                <p class="mt-3">Chạy ngay trên trình duyệt, không cần máy chủ hay Internet. Dữ liệu lưu trên chính máy này.</p>
+                <div class="chalk-piece" aria-hidden="true"></div>
+            </div>
+            <div class="col-md-6 login-form">
+                <h2>Đăng nhập</h2>
+                <form data-form="login">
+                    <div class="mb-3"><label class="form-label" for="login-user">Tên đăng nhập</label>
+                        <input type="text" id="login-user" name="username" class="form-control" required autofocus autocomplete="username"></div>
+                    <div class="mb-4"><label class="form-label" for="login-pass">Mật khẩu</label>
+                        <input type="password" id="login-pass" name="password" class="form-control" required autocomplete="current-password"></div>
+                    <button type="submit" class="btn btn-primary w-100 py-2">Đăng nhập</button>
+                </form>
+                <div class="demo-accounts small">
+                    <div class="mb-2 text-muted">Dùng thử bằng tài khoản mẫu (mật khẩu <code>123</code>):</div>
+                    <button type="button" data-demo="admin">Quản trị</button>
+                    <button type="button" data-demo="gv1">Giáo viên</button>
+                    <button type="button" data-demo="hs1">Học sinh</button>
+                    <div class="text-muted mt-2">Mỗi tab là một phiên riêng: mở tab giáo viên và tab học sinh cạnh nhau để thử điểm danh và chat.</div>
+                </div>
             </div>
         </div>
     </div>`;
@@ -129,10 +149,10 @@ function viewAdmin(user) {
     const users = [...DB.users].sort((a, b) => a.role.localeCompare(b.role) || a.username.localeCompare(b.username));
     const logs = [...DB.logs].reverse().slice(0, 30);
     return `
-    <h3 class="mb-4 fw-bold">🛠️ Bảng Điều Khiển Quản Trị Viên (Admin)</h3>
+    ${pageTitle('Quản trị hệ thống', `${DB.users.length} tài khoản, ${DB.courses.length} lớp học`)}
     <div class="row g-4">
         <div class="col-md-6"><div class="card p-3 shadow-sm h-100">
-            <h5 class="fw-bold text-primary">1. Tạo Tài Khoản & Nhập Hàng Loạt</h5>
+            <h5>Tạo tài khoản</h5>
             <form data-form="addUser" class="row g-2 mb-3 border-bottom pb-3">
                 <div class="col-md-4"><input name="username" class="form-control form-control-sm" placeholder="Username" required></div>
                 <div class="col-md-4"><input name="password" class="form-control form-control-sm" placeholder="Mật khẩu" required></div>
@@ -152,7 +172,7 @@ function viewAdmin(user) {
         </div></div>
 
         <div class="col-md-6"><div class="card p-3 shadow-sm h-100">
-            <h5 class="fw-bold text-primary">2. Tạo Lớp / Môn Học & Lịch Nhắc</h5>
+            <h5>Lớp học và lịch nhắc</h5>
             ${teachers.length ? `
             <form data-form="createCourse" class="row g-2 mb-3 border-bottom pb-3">
                 <div class="col-md-6"><input name="name" class="form-control form-control-sm" placeholder="Tên môn học / Lớp" required></div>
@@ -170,13 +190,13 @@ function viewAdmin(user) {
         </div></div>
 
         <div class="col-md-7"><div class="card p-3 shadow-sm">
-            <h5 class="fw-bold">Danh Sách Người Dùng (${users.length})</h5>
+            <h5>Người dùng (${users.length})</h5>
             <div class="table-responsive" style="max-height:360px">
             <table class="table table-sm table-hover align-middle">
                 <thead><tr><th>Username</th><th>Họ tên</th><th>Vai trò</th><th>Trạng thái</th><th>Hành động</th></tr></thead>
                 <tbody>${users.map(u => `<tr>
                     <td>${esc(u.username)}</td><td>${esc(u.full_name)}</td>
-                    <td><span class="badge bg-secondary">${esc(u.role)}</span></td>
+                    <td><span class="badge bg-secondary">${ROLE_LABELS[u.role] || esc(u.role)}</span></td>
                     <td>${u.is_active ? '<span class="text-success">Hoạt động</span>' : '<span class="text-danger">Đã khóa</span>'}</td>
                     <td class="text-nowrap">
                         ${u.username !== 'admin' && u.id !== user.id ? `<button class="btn btn-sm btn-outline-danger py-0 px-2" data-act="toggleUser" data-id="${u.id}">${u.is_active ? 'Khóa' : 'Mở'}</button>` : ''}
@@ -186,7 +206,7 @@ function viewAdmin(user) {
         </div></div>
 
         <div class="col-md-5"><div class="card p-3 shadow-sm">
-            <h5 class="fw-bold">Nhật Ký Hệ Thống (Audit Log)</h5>
+            <h5>Nhật ký hoạt động</h5>
             <ul class="list-group list-group-flush small" style="max-height:360px;overflow-y:auto">
                 ${logs.map(l => `<li class="list-group-item"><b>${esc(l.user_name)}</b>: ${esc(l.action)}
                     <br><span class="text-muted">${esc(fmtDateTime(l.timestamp))}</span></li>`).join('')}
@@ -194,16 +214,16 @@ function viewAdmin(user) {
         </div></div>
 
         <div class="col-12"><div class="card p-3 shadow-sm border border-warning">
-            <h5 class="fw-bold">💾 Sao Lưu & Khôi Phục Dữ Liệu</h5>
+            <h5>Sao lưu và khôi phục dữ liệu</h5>
             <p class="small text-muted mb-2">Dữ liệu chỉ nằm trong trình duyệt này. Hãy sao lưu thường xuyên; xóa lịch sử/dữ liệu trình duyệt sẽ làm mất dữ liệu.
             File sao lưu cũng dùng để chuyển dữ liệu sang máy khác.</p>
             <div class="d-flex flex-wrap gap-2 align-items-center">
-                <button class="btn btn-sm btn-primary" data-act="backup">⬇️ Tải file sao lưu (.json)</button>
+                <button class="btn btn-sm btn-primary" data-act="backup">Tải file sao lưu (.json)</button>
                 <form data-form="restore" class="d-flex gap-2">
                     <input type="file" name="file" accept=".json" class="form-control form-control-sm" required>
-                    <button class="btn btn-sm btn-outline-primary text-nowrap">⬆️ Khôi phục</button>
+                    <button class="btn btn-sm btn-outline-primary text-nowrap">Khôi phục</button>
                 </form>
-                <button class="btn btn-sm btn-outline-danger ms-auto" data-act="resetAll">🗑️ Xóa hết & tạo lại dữ liệu mẫu</button>
+                <button class="btn btn-sm btn-outline-danger ms-auto" data-act="resetAll">Xóa hết và tạo lại dữ liệu mẫu</button>
             </div>
         </div></div>
     </div>`;
@@ -243,17 +263,17 @@ function viewTeacher(user) {
   {"id": 2, "level": "Khó", "type": "essay", "question": "Nêu cảm nghĩ của em về quê hương."}
 ]`;
     return `
-    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-        <h3 class="fw-bold mb-0">👨‍🏫 Bảng Điều Khiển Giáo Viên</h3>
+    <div class="d-flex justify-content-between align-items-start mb-2 flex-wrap gap-2">
+        ${pageTitle(`Chào ${user.full_name}`, todayLong())}
         <div>
-            <button class="btn btn-outline-success" data-act="exportAttendance">📋 Xuất Điểm Danh Excel</button>
-            <button class="btn btn-success" data-act="exportGrades">📊 Xuất Bảng Điểm Excel</button>
+            <button class="btn btn-outline-success" data-act="exportAttendance">Xuất điểm danh (Excel)</button>
+            <button class="btn btn-success" data-act="exportGrades">Xuất bảng điểm (Excel)</button>
         </div>
     </div>
     <div class="row g-4">
         <div class="col-md-6">
             <div class="card p-3 shadow-sm mb-4">
-                <h5 class="fw-bold text-primary">📚 Lớp Học & Điểm Danh PIN</h5>
+                <h5>Lớp học và mã PIN điểm danh</h5>
                 <form data-form="createCourse" class="input-group input-group-sm mb-3">
                     <input name="name" class="form-control" placeholder="Tên lớp / môn học mới..." required>
                     <button class="btn btn-primary">Tạo lớp</button>
@@ -261,32 +281,33 @@ function viewTeacher(user) {
                 <ul class="list-group">
                 ${courses.map(c => {
                     const active = pinActive(c);
-                    return `<li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div><b>${esc(c.name)}</b><br>
-                            <small class="text-success">Mã PIN: <span id="pin-${c.id}" class="fw-bold fs-6">${active ? esc(c.pin) : 'Chưa mở'}</span></small>
-                            ${active ? `<small class="text-muted">(hết hạn ${fmtTime(c.pin_created_at + PIN_VALID_MINUTES * 60000)})</small>` : ''}
+                    return `<li class="list-group-item course-item">
+                        <div><b>${esc(c.name)}</b>
+                            <div class="pin-row">${active ? `<span id="pin-${c.id}" class="pin-board">${esc(c.pin)}</span>
+                                <small class="text-muted text-nowrap">hết hạn lúc ${fmtTime(c.pin_created_at + PIN_VALID_MINUTES * 60000)}</small>`
+                              : `<span id="pin-${c.id}" class="pin-off">Chưa mở điểm danh</span>`}</div>
                         </div>
                         <div class="text-nowrap">
                             <button class="btn btn-sm btn-outline-primary" data-act="genPin" data-id="${c.id}">Tạo PIN</button>
                             <button class="btn btn-sm btn-outline-secondary" data-act="closePin" data-id="${c.id}">Đóng</button>
-                            <a href="#/course/${c.id}" class="btn btn-sm btn-info text-white">Tài liệu & Chat</a>
+                            <a href="#/course/${c.id}" class="btn btn-sm btn-info text-white">Tài liệu & chat</a>
                         </div></li>`;
                 }).join('') || '<li class="list-group-item text-muted">Bạn chưa phụ trách lớp nào. Hãy tạo lớp mới ở trên.</li>'}
                 </ul>
             </div>
 
             <div class="card p-3 shadow-sm mb-4">
-                <h5 class="fw-bold text-success">✍️ Điểm Danh Thủ Công</h5>
+                <h5>Điểm danh thủ công</h5>
                 ${courses.length && students.length ? `
                 <form data-form="manualAttendance" class="row g-2">
-                    <div class="col-md-4"><select name="course_id" class="form-select form-select-sm">${courseOpts}</select></div>
-                    <div class="col-md-4"><select name="student_id" class="form-select form-select-sm">
+                    <div class="col-md-6"><select name="course_id" class="form-select form-select-sm" aria-label="Lớp">${courseOpts}</select></div>
+                    <div class="col-md-6"><select name="student_id" aria-label="Học sinh" class="form-select form-select-sm">
                         ${students.map(s => `<option value="${s.id}">${esc(s.full_name)} (${esc(s.username)})</option>`).join('')}</select></div>
-                    <div class="col-md-2"><select name="status" class="form-select form-select-sm">
+                    <div class="col-8"><select name="status" class="form-select form-select-sm" aria-label="Trạng thái">
                         ${ATTENDANCE_STATUSES.map(s => `<option>${esc(s)}</option>`).join('')}</select></div>
-                    <div class="col-md-2"><button class="btn btn-success btn-sm w-100">Lưu</button></div>
+                    <div class="col-4"><button class="btn btn-success btn-sm w-100">Ghi nhận</button></div>
                 </form>` : '<p class="text-muted small mb-0">Cần có ít nhất một lớp và một học sinh.</p>'}
-                <h6 class="fw-bold mt-3">Lịch sử điểm danh gần đây</h6>
+                <h6 class="fw-bold mt-3">Điểm danh gần đây</h6>
                 <div class="table-responsive" style="max-height:240px">
                 <table class="table table-sm small">
                     <thead><tr><th>Thời gian</th><th>Lớp</th><th>Học sinh</th><th>Trạng thái</th></tr></thead>
@@ -296,14 +317,14 @@ function viewTeacher(user) {
             </div>
 
             <div class="card p-3 shadow-sm">
-                <h5 class="fw-bold text-warning">📅 Lịch Nhắc Sự Kiện</h5>
+                <h5>Lịch nhắc</h5>
                 ${eventForm()}${eventList()}
             </div>
         </div>
 
         <div class="col-md-6">
             <div class="card p-3 shadow-sm mb-4">
-                <h5 class="fw-bold text-danger">📝 Tạo Đề Kiểm Tra Mới</h5>
+                <h5>Tạo đề kiểm tra</h5>
                 ${courses.length ? `
                 <form data-form="createExam">
                     <div class="row g-2 mb-2">
@@ -315,28 +336,28 @@ function viewTeacher(user) {
                     <label class="small fw-bold">Danh sách câu hỏi (Định dạng JSON):</label>
                     <textarea name="questions_json" class="form-control form-control-sm font-monospace mb-1" rows="6" required>${esc(sampleQs)}</textarea>
                     <small class="text-muted d-block mb-2"><code>type</code>: <code>mc</code> (trắc nghiệm, cần <code>options</code> + <code>answer</code>) hoặc <code>essay</code> (tự luận). Điểm tự động chỉ tính phần trắc nghiệm.</small>
-                    <button class="btn btn-danger btn-sm w-100">Phát Hành Đề Thi</button>
+                    <button class="btn btn-danger btn-sm w-100">Phát hành đề</button>
                 </form>` : '<p class="text-muted small mb-0">Hãy tạo lớp trước khi tạo đề thi.</p>'}
             </div>
 
             <div class="card p-3 shadow-sm mb-4">
-                <h5 class="fw-bold">🗂️ Đề Thi Đã Phát Hành</h5>
+                <h5>Đề đã phát hành</h5>
                 <ul class="list-group list-group-flush small">
                 ${exams.map(ex => `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span><b>${esc(ex.title)}</b> — ${esc(courseName(ex.course_id))} · ${ex.duration} phút${ex.password ? ' · 🔒' : ''}</span>
+                    <span><b>${esc(ex.title)}</b> — ${esc(courseName(ex.course_id))} · ${ex.duration} phút${ex.password ? ' · có mật khẩu' : ''}</span>
                     <button class="btn btn-sm btn-outline-danger py-0" data-act="deleteExam" data-id="${ex.id}">Xóa</button></li>`).join('')
                     || '<li class="list-group-item text-muted">Chưa có đề thi.</li>'}
                 </ul>
             </div>
 
             <div class="card p-3 shadow-sm">
-                <h5 class="fw-bold">📈 Kết Quả Thi Gần Đây</h5>
+                <h5>Bài đã nộp</h5>
                 <div class="table-responsive" style="max-height:360px">
                 <table class="table table-sm small align-middle">
                     <thead><tr><th>Học sinh</th><th>Bài thi</th><th>Điểm TN</th><th>Cảnh báo</th><th></th></tr></thead>
                     <tbody>${results.map(r => `<tr>
                         <td>${esc(userName(r.student_id))}</td><td>${esc(examTitle(r.exam_id))}</td>
-                        <td class="fw-bold text-primary">${r.score}/10</td>
+                        <td>${scoreHtml(r.score)}</td>
                         <td><span class="badge bg-${r.warnings > 0 ? 'danger' : 'success'}">${r.warnings} lần</span>${r.late ? ' <span class="badge bg-warning text-dark">Trễ</span>' : ''}</td>
                         <td><a href="#/result/${r.id}">Xem bài</a></td></tr>`).join('') || emptyRow(5, 'Chưa có bài nộp.')}</tbody>
                 </table></div>
@@ -353,11 +374,11 @@ function viewStudent(user) {
     const done = new Set(results.map(r => r.exam_id));
     const atts = DB.attendance.filter(a => a.student_id === user.id).reverse();
     return `
-    <h3 class="mb-4 fw-bold">🎓 Góc Học Tập Sinh Viên / Học Sinh</h3>
+    ${pageTitle(`Chào ${user.full_name}`, todayLong())}
     <div class="row g-4">
         <div class="col-md-6">
             <div class="card p-3 shadow-sm mb-4">
-                <h5 class="fw-bold text-success">✅ Điểm Danh Nhanh Bằng Mã PIN</h5>
+                <h5>Điểm danh bằng mã PIN</h5>
                 ${DB.courses.length ? `
                 <form data-form="checkin" class="row g-2">
                     <div class="col-md-6"><select name="course_id" class="form-select">
@@ -368,32 +389,32 @@ function viewStudent(user) {
                 </form>` : '<p class="text-muted small mb-0">Chưa có lớp học nào.</p>'}
             </div>
             <div class="card p-3 shadow-sm mb-4">
-                <h5 class="fw-bold text-primary">📚 Danh Sách Môn Học & Tài Liệu</h5>
+                <h5>Lớp học của em</h5>
                 <ul class="list-group">${DB.courses.map(c => `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>${esc(c.name)}</span><a href="#/course/${c.id}" class="btn btn-sm btn-primary">Vào lớp & Học bài</a></li>`).join('')}</ul>
+                    <span>${esc(c.name)}</span><a href="#/course/${c.id}" class="btn btn-sm btn-primary">Vào lớp</a></li>`).join('')}</ul>
             </div>
             <div class="card p-3 shadow-sm mb-4">
-                <h5 class="fw-bold">🕒 Lịch Sử Chuyên Cần</h5>
+                <h5>Chuyên cần</h5>
                 <div class="table-responsive" style="max-height:240px">
                 <table class="table table-sm small"><thead><tr><th>Thời gian</th><th>Lớp</th><th>Trạng thái</th></tr></thead>
                 <tbody>${atts.map(a => `<tr><td>${esc(a.date)}</td><td>${esc(courseName(a.course_id))}</td><td>${statusBadge(a.status)}</td></tr>`).join('')
                     || emptyRow(3, 'Chưa có dữ liệu điểm danh.')}</tbody></table></div>
             </div>
-            <div class="card p-3 shadow-sm"><h5 class="fw-bold text-warning">📅 Lịch Nhắc Sự Kiện</h5>${eventList()}</div>
+            <div class="card p-3 shadow-sm"><h5>Lịch nhắc</h5>${eventList()}</div>
         </div>
         <div class="col-md-6">
             <div class="card p-3 shadow-sm mb-4">
-                <h5 class="fw-bold text-danger">📝 Bài Kiểm Tra Đang Mở</h5>
+                <h5>Bài kiểm tra</h5>
                 <ul class="list-group">${DB.exams.map(ex => `<li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><b>${esc(ex.title)}</b>${ex.password ? ' 🔒' : ''}<br>
+                    <div><b>${esc(ex.title)}</b>${ex.password ? ' <span class="badge bg-secondary">Có mật khẩu</span>' : ''}<br>
                     <small class="text-muted">${esc(courseName(ex.course_id))} · Thời gian: ${ex.duration} phút</small></div>
-                    ${done.has(ex.id) ? '<span class="badge bg-success">Đã nộp</span>' : `<a href="#/exam/${ex.id}" class="btn btn-sm btn-danger">Vào Thi</a>`}
+                    ${done.has(ex.id) ? '<span class="badge bg-success">Đã nộp</span>' : `<a href="#/exam/${ex.id}" class="btn btn-sm btn-danger">Vào thi</a>`}
                     </li>`).join('') || '<li class="list-group-item text-muted">Không có bài kiểm tra.</li>'}</ul>
             </div>
             <div class="card p-3 shadow-sm">
-                <h5 class="fw-bold">📊 Lịch Sử Điểm Kiểm Tra</h5>
+                <h5>Điểm của em</h5>
                 <table class="table table-sm"><thead><tr><th>Bài kiểm tra</th><th>Điểm trắc nghiệm</th><th>Thời gian nộp</th></tr></thead>
-                <tbody>${results.map(r => `<tr><td>${esc(examTitle(r.exam_id))}</td><td class="fw-bold text-success">${r.score}/10</td>
+                <tbody>${results.map(r => `<tr><td>${esc(examTitle(r.exam_id))}</td><td>${scoreHtml(r.score)}</td>
                     <td>${esc(fmtDateTime(r.submitted_at))}</td></tr>`).join('') || emptyRow(3, 'Chưa có bài làm.')}</tbody></table>
             </div>
         </div>
@@ -411,12 +432,12 @@ function viewCourse(user, cid) {
     const totalStudents = DB.users.filter(u => u.role === 'student' && u.is_active).length;
     return `
     <div class="mb-3">
-        <a href="#/dashboard" class="btn btn-sm btn-outline-secondary">← Quay lại Dashboard</a>
-        <h4 class="d-inline-block ms-2 fw-bold">${esc(course.name)}</h4>
+        <a href="#/dashboard" class="btn btn-sm btn-outline-secondary">‹ Về trang chính</a>
+        <h4 class="d-inline-block ms-2 mb-0 align-middle">${esc(course.name)}</h4>
     </div>
     <div class="row g-4">
         <div class="col-md-6"><div class="card p-3 shadow-sm">
-            <h5 class="fw-bold text-primary">📂 Tài Liệu Tham Khảo & Tiến Độ Học</h5>
+            <h5>Tài liệu và tiến độ học</h5>
             ${manage ? `
             <form data-form="uploadMaterial" data-id="${cid}" class="mb-3 border-bottom pb-3">
                 <input name="title" class="form-control form-control-sm mb-2" placeholder="Tên bài học / tài liệu" required>
@@ -443,7 +464,7 @@ function viewCourse(user, cid) {
             </ul>
         </div></div>
         <div class="col-md-6"><div class="card p-3 shadow-sm">
-            <h5 class="fw-bold text-success">💬 Phòng Trò Chuyện Lớp Học</h5>
+            <h5>Trò chuyện cả lớp</h5>
             <small class="text-muted mb-2">Tin nhắn được đồng bộ giữa các tab trên cùng trình duyệt này.</small>
             <div id="chat-box" class="border rounded p-3 mb-2 bg-light" style="height:320px;overflow-y:scroll"></div>
             <form data-form="chat" data-id="${cid}" class="input-group">
@@ -458,10 +479,11 @@ function renderChat(cid) {
     const box = document.getElementById('chat-box');
     if (!box) return;
     const msgs = DB.chats[cid] || [];
+    const me = currentUser();
     box.replaceChildren(...msgs.map(m => {
         // Dùng textContent để chống chèn mã độc (XSS)
         const line = document.createElement('div');
-        line.className = 'mb-1';
+        line.className = 'mb-1' + (me && m.user === me.full_name ? ' mine' : '');
         const t = document.createElement('small'); t.className = 'text-muted me-1'; t.textContent = `[${fmtTime(m.time)}]`;
         const n = document.createElement('b'); n.textContent = `${m.user}: `;
         line.append(t, n, document.createTextNode(m.msg));
@@ -498,14 +520,14 @@ function viewExam(user, eid) {
     if (!started && exam.password) {
         return `
         <div class="row justify-content-center mt-5"><div class="col-md-4 card p-4 shadow">
-            <h5 class="fw-bold text-center mb-3">🔒 Phòng Thi Có Mật Khẩu</h5>
+            <h5 class="fw-bold text-center mb-3">Phòng thi có mật khẩu</h5>
             <p class="text-center text-muted">${esc(exam.title)}</p>
             <div id="pw-error"></div>
             <form data-form="examPassword" data-id="${eid}">
                 <input type="password" name="exam_password" class="form-control mb-3" placeholder="Nhập mật khẩu phòng thi..." required autofocus>
                 <button class="btn btn-danger w-100">Xác nhận vào thi</button>
             </form>
-            <a href="#/dashboard" class="btn btn-link mt-2">← Quay lại</a>
+            <a href="#/dashboard" class="btn btn-link mt-2">‹ Quay lại</a>
         </div></div>`;
     }
     if (!started) mutate(() => { DB.examStarts[examKey(user.id, eid)] = Date.now(); });
@@ -514,29 +536,29 @@ function viewExam(user, eid) {
     <div class="row">
         <div class="col-md-9"><div class="card p-4 shadow">
             <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-3">
-                <h4 class="fw-bold">Bài thi: ${esc(exam.title)}</h4>
+                <h4 class="mb-0">${esc(exam.title)}</h4>
                 <div>
                     <span id="warning-badge" class="badge bg-danger me-2">Cảnh báo gian lận: 0/3</span>
                     <span id="timer" class="badge bg-dark fs-6">Thời gian: --:--</span>
                 </div>
             </div>
             <button type="button" id="start-proctor" class="btn btn-warning mb-3 fw-bold" data-act="startProctor">
-                ⚠️ Bấm vào đây để kích hoạt Toàn Màn Hình & Webcam Giám Sát</button>
+                Bật toàn màn hình và webcam giám sát trước khi làm bài</button>
             <form id="exam-form" onsubmit="return false;">
                 ${questions.map((q, qi) => `
-                <div class="mb-4 p-3 border rounded bg-white">
-                    <p class="fw-bold">Câu ${qi + 1} ${q.level ? `<span class="badge bg-secondary">${esc(q.level)}</span>` : ''}: ${esc(q.question)}</p>
+                <div class="mb-3 p-3 bg-white exam-question">
+                    <p class="fw-semibold"><span class="q-no">Câu ${qi + 1}.</span> ${esc(q.question)}${q.level ? `<span class="badge bg-secondary q-level">${esc(q.level)}</span>` : ''}</p>
                     ${q.type === 'mc'
                         ? q.options.map((opt, oi) => `<div class="form-check">
                             <input class="form-check-input" type="radio" name="${esc(q.id)}" value="${esc(opt)}" id="q${qi}_${oi}">
                             <label class="form-check-label" for="q${qi}_${oi}">${esc(opt)}</label></div>`).join('')
                         : `<textarea class="form-control" name="${esc(q.id)}" rows="3" placeholder="Nhập câu trả lời tự luận..."></textarea>`}
                 </div>`).join('')}
-                <button type="button" id="submit-btn" class="btn btn-success btn-lg w-100 fw-bold" data-act="submitExam">Nộp Bài Thi</button>
+                <button type="button" id="submit-btn" class="btn btn-success btn-lg w-100 fw-bold" data-act="submitExam">Nộp bài</button>
             </form>
         </div></div>
         <div class="col-md-3"><div class="card p-3 text-center shadow sticky-top" style="top:20px">
-            <h6 class="fw-bold">🎥 Camera Giám Sát</h6>
+            <h6 class="fw-bold">Camera giám sát</h6>
             <video id="proctor-cam" autoplay playsinline muted class="w-100 rounded bg-dark" style="height:180px;object-fit:cover"></video>
             <div id="cam-msg"></div>
             <small class="text-muted mt-2">Bài làm được tự động lưu khi bạn chọn đáp án, tải lại trang không mất bài.</small>
@@ -582,7 +604,7 @@ function afterExamRender(user, eid) {
     const tick = () => {
         const left = Math.max(0, Math.round((deadline - Date.now()) / 1000));
         const el = document.getElementById('timer');
-        if (el) el.innerText = `Thời gian: ${Math.floor(left / 60)}:${pad(left % 60)}`;
+        if (el) { el.innerText = `Thời gian: ${Math.floor(left / 60)}:${pad(left % 60)}`; el.classList.toggle('urgent', left <= 60); }
         if (left <= 0) { clearInterval(timer); submitExam('Đã hết giờ làm bài!'); }
     };
     const timer = setInterval(tick, 1000);
@@ -689,11 +711,11 @@ function viewResult(user, rid) {
     if (!r || !exam) return viewError('Không tìm thấy bài làm.');
     if (!canManageCourse(user, course)) return viewError('Bạn không có quyền xem bài làm này.');
     return `
-    <a href="#/dashboard" class="btn btn-sm btn-outline-secondary mb-3">← Quay lại Dashboard</a>
+    <a href="#/dashboard" class="btn btn-sm btn-outline-secondary mb-3">‹ Về trang chính</a>
     <div class="card p-4 shadow-sm">
         <h4 class="fw-bold">${esc(exam.title)}</h4>
         <p class="mb-1">Học sinh: <b>${esc(userName(r.student_id))}</b></p>
-        <p class="mb-1">Điểm trắc nghiệm: <b class="text-primary">${r.score}/10</b> ·
+        <p class="mb-1">Điểm trắc nghiệm: ${scoreHtml(r.score)} <span class="mx-2"></span>
            Cảnh báo gian lận: <span class="badge bg-${r.warnings > 0 ? 'danger' : 'success'}">${r.warnings} lần</span>
            ${r.late ? '<span class="badge bg-warning text-dark">Nộp trễ</span>' : ''}</p>
         <p class="text-muted small">Nộp lúc ${esc(fmtDateTime(r.submitted_at))}</p><hr>
@@ -1047,6 +1069,13 @@ document.addEventListener('submit', e => {
 });
 
 document.addEventListener('click', e => {
+    const demo = e.target.closest('[data-demo]');
+    if (demo) {  // Điền nhanh tài khoản mẫu ở trang đăng nhập
+        document.getElementById('login-user').value = demo.dataset.demo;
+        document.getElementById('login-pass').value = '123';
+        document.querySelector('form[data-form=login]').requestSubmit();
+        return;
+    }
     const el = e.target.closest('[data-act]');
     if (!el) return;
     if (el.tagName === 'A') e.preventDefault();
