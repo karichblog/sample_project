@@ -1,7 +1,8 @@
 // Service worker: lưu sẵn toàn bộ file để mở lại được khi không có Internet
-const CACHE = 'lms-offline-v1';
+const CACHE = 'lms-offline-v2';
 const ASSETS = ['./', 'index.html', 'manifest.json', 'css/style.css', 'js/store.js', 'js/app.js',
-                'vendor/bootstrap.min.css', 'vendor/xlsx.full.min.js'];
+                'vendor/bootstrap.min.css', 'vendor/xlsx.full.min.js',
+                'vendor/fonts/be-vietnam-pro-latin-400-normal.woff2', 'vendor/fonts/be-vietnam-pro-latin-500-normal.woff2', 'vendor/fonts/be-vietnam-pro-latin-600-normal.woff2', 'vendor/fonts/be-vietnam-pro-latin-700-normal.woff2', 'vendor/fonts/be-vietnam-pro-latin-ext-400-normal.woff2', 'vendor/fonts/be-vietnam-pro-latin-ext-500-normal.woff2', 'vendor/fonts/be-vietnam-pro-latin-ext-600-normal.woff2', 'vendor/fonts/be-vietnam-pro-latin-ext-700-normal.woff2', 'vendor/fonts/be-vietnam-pro-vietnamese-400-normal.woff2', 'vendor/fonts/be-vietnam-pro-vietnamese-500-normal.woff2', 'vendor/fonts/be-vietnam-pro-vietnamese-600-normal.woff2', 'vendor/fonts/be-vietnam-pro-vietnamese-700-normal.woff2', 'vendor/fonts/be-vietnam-pro.css'];
 
 self.addEventListener('install', e => {
     e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));

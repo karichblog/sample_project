@@ -1,9 +1,9 @@
 {
   "name": "Hệ Thống Quản Lý Lớp Học & Thi Offline",
-  "short_name": "LMS Offline",
+  "short_name": "Sổ Lớp",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#f4f6f9",
-  "theme_color": "#0d6efd",
+  "background_color": "#F8F8FC",
+  "theme_color": "#1F4D3F",
   "icons": []
 }

@@ -1,4 +1,4 @@
-# 📚 Hệ Thống Quản Lý Lớp Học, Điểm Danh & Thi Offline
+# Sổ Lớp Offline: quản lý lớp học, điểm danh & thi
 
 Ứng dụng web **chạy hoàn toàn trong trình duyệt**, không cần máy chủ, không cần cài Python, không cần Internet.
 Chỉ cần mở link GitHub Pages (hoặc mở file `index.html`) là dùng được ngay.
@@ -73,8 +73,8 @@ Mật khẩu của các tài khoản mẫu đều là `123`.
 ├── index.html          # Trang chính (mở file này là chạy)
 ├── js/store.js         # Lưu trữ dữ liệu, băm mật khẩu, dữ liệu mẫu
 ├── js/app.js           # Giao diện & toàn bộ chức năng
-├── css/style.css
-├── vendor/             # Bootstrap + SheetJS (Excel), lưu sẵn để chạy offline
+├── css/style.css       # Giao diện "vở ô ly & bảng xanh" (ghi đè Bootstrap 5)
+├── vendor/             # Bootstrap, SheetJS (Excel), font Be Vietnam Pro: lưu sẵn để chạy offline
 ├── sw.js, manifest.json  # Cho phép dùng offline / cài như ứng dụng
 ├── sample_users.csv    # File mẫu nhập tài khoản
 └── .nojekyll           # Để GitHub Pages phục vụ file nguyên trạng
